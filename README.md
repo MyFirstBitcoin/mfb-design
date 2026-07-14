@@ -5,7 +5,7 @@ The My First Bitcoin brand as code: a Tailwind preset, CSS variables, and raw de
 ## Install (git dependency)
 
 ```json
-"dependencies": { "@myfirstbitcoin/design": "github:MyFirstBitcoin/mfb-design#v1.0.0" }
+"dependencies": { "@myfirstbitcoin/design": "github:MyFirstBitcoin/mfb-design#v1.0.1" }
 ```
 
 ## Use - Tailwind 3
