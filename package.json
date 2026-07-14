@@ -1,6 +1,6 @@
 {
   "name": "@myfirstbitcoin/design",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "My First Bitcoin brand design tokens: Tailwind preset (v3 + v4), CSS variables, and raw tokens. Generated from the canonical brand tokens.json.",
   "type": "module",
   "license": "UNLICENSED",
