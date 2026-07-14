@@ -1,0 +1,32 @@
+/* Generated from tokens.json - DO NOT EDIT BY HAND. Tailwind 4 @theme. */
+@theme {
+  --color-purple-300: #422C70;
+  --color-purple-400: #2B1C58;
+  --color-purple-200: #5E378E;
+  --color-orange-300: #F7941F;
+  --color-orange-400: #EF7B00;
+  --color-orange-200: #FBB040;
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+  --color-gray-900: #25252B;
+  --color-gray-800: #4F4F5D;
+  --color-gray-700: #6C6C7D;
+  --color-gray-600: #88889C;
+  --color-gray-500: #ADADBE;
+  --color-gray-400: #C0C0D0;
+  --color-gray-300: #D8D8E7;
+  --color-gray-200: #EAEAF4;
+  --color-gray-100: #F3F3FA;
+  --font-heading: "IBM Plex Sans", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+  --text-h1: 70px;
+  --text-h2: 58px;
+  --text-h3: 48px;
+  --text-h4: 40px;
+  --text-h5: 36px;
+  --text-h6: 32px;
+  --text-body: 18px;
+  --text-label: 22px;
+  --text-quote: 40px;
+}

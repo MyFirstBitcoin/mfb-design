@@ -1,0 +1,26 @@
+{
+  "name": "@myfirstbitcoin/design",
+  "version": "1.0.0",
+  "description": "My First Bitcoin brand design tokens: Tailwind preset (v3 + v4), CSS variables, and raw tokens. Generated from the canonical brand tokens.json.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": "./index.js",
+    "./tailwind": "./tailwind.js",
+    "./theme.css": "./theme.css",
+    "./brand.css": "./brand.css",
+    "./tokens.json": "./tokens.json"
+  },
+  "files": [
+    "index.js",
+    "tailwind.js",
+    "theme.css",
+    "brand.css",
+    "tokens.json",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MyFirstBitcoin/mfb-design.git"
+  }
+}
