@@ -5,7 +5,7 @@ The My First Bitcoin brand as code: a Tailwind preset, CSS variables, and raw de
 ## Install (git dependency)
 
 ```json
-"dependencies": { "@myfirstbitcoin/design": "github:MyFirstBitcoin/mfb-design#v1.1.1" }
+"dependencies": { "@myfirstbitcoin/design": "github:MyFirstBitcoin/mfb-design#v1.2.0" }
 ```
 
 ## Use - Tailwind 3
@@ -28,6 +28,14 @@ export default { presets: [mfb], content: ['./src/**/*.{astro,html,js,ts}'] };
 ```css
 @import '@myfirstbitcoin/design/brand.css';  /* var(--mfb-purple-400), var(--mfb-gradient-brand) ... */
 ```
+
+## Use - supergraphics (brand geometry primitives)
+
+```css
+@import '@myfirstbitcoin/design/supergraphics.css';
+```
+
+The signature MFB shapes as ready-made classes: `sg-para` / `sg-para-frame` (13° parallelograms), `sg-spotlight` / `sg-spotlight-frame` (13°+24° corner cuts), `sg-book` / `sg-book-frame` / `sg-book-stack`, `sg-cover`, `sg-halftone-cutout`, `sg-para-pattern`, `highlighter` band. **Never hand-roll these shapes in a page** — the brand angle is exactly 13° (`--sg-angle-base`) and hand-rolled copies drift. The file is standalone (token prelude included), so it works with theme.css-only Tailwind 4 setups.
 
 Both utility conventions are served: top-level (preferred for new pages) and mfb- prefixed (legacy, e.g. roadmap). Utilities use the brand palette at the top level (e.g. `bg-purple-400`, `text-orange-300`, `text-gray-900`, `text-h1`), overriding Tailwind's default purple/orange/gray with MFB brand values. Other defaults (red, blue, etc.) are untouched. Plain CSS variables are namespaced `--mfb-*` to avoid collisions.
 
