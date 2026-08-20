@@ -31,4 +31,9 @@
   --mfb-size-body: 18px;
   --mfb-size-label: 22px;
   --mfb-size-quote: 40px;
+  --sg-angle-base: 13deg;
+  --sg-angle-alt: 24deg;
+  --sg-aspect: 1.5;
+  --sg-logo-icon-h: 40px;
+  --sg-base-h-ratio: 2;
 }
