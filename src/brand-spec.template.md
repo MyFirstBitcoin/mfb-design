@@ -52,7 +52,7 @@ the Brand Book Figma file {{FIGMA_FILE}}. To regenerate: node scripts/brand-spec
 
 ### CSS Variables
 
-This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font families as `var(--mfb-font-<role>)`, the font sizes as `var(--mfb-size-<level>)`, and the geometry as `var(--sg-angle-base)` and its siblings. `theme.css` (Tailwind 4) and `tailwind.js` (Tailwind 3) carry the same values.
+This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font families as `var(--mfb-font-<role>)`, the font sizes as `var(--mfb-size-<level>)`, and the geometry as `var(--sg-angle-base)` and its siblings. `theme.css` (Tailwind 4) carries the same colors, font families and font sizes, and `tailwind.js` (Tailwind 3) carries those plus the brand gradient; the geometry variables are only in `brand.css` and `supergraphics.css`.
 
 ## 2. Binding Rules (The 12)
 
@@ -246,7 +246,7 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 - **Text on dark backgrounds:** white
 - **Text on light backgrounds:** gray-900 (`{{GRAY900}}`), never pure black
 - **Orange is for accents only** (CTAs, links, highlights, ₿ symbol), never a full background fill beyond explicit orange-300 brand shapes
-- **Gradient direction:** always 135deg (top-left to bottom-right); reserve gradient for hero sections / UI surfaces, not covers
+- **Gradient:** the brand gradient is deprecated (Section 1): do not use it in new designs. Where an existing page still uses it, keep its 135deg direction (top-left to bottom-right), and never use it on covers.
 
 ### Logo files
 

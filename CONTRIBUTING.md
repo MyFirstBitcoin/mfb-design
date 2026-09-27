@@ -14,7 +14,7 @@ contributions, by people and AI assistants alike.
 |------|------------|------------------|
 | `tokens.json` | The design tokens (published as is) | Yes, only to match the Brand Book |
 | `package.json` | Name, version, exports and the `files` list (published) | Yes: the version is how a release happens |
-| `src/supergraphics.canon.css` | The supergraphics canon (see below) | Only together with its original |
+| `src/supergraphics.canon.css` | The supergraphics canon, the origin of the published supergraphics (see below) | Yes, by pull request, with no added comment |
 | `src/brand-spec.template.md` | The prose of the brand specification | Yes |
 | `scripts/` | Build, spec generator and checks | Yes |
 | `README.md`, `brand.css`, `theme.css`, `tailwind.js`, `index.js`, `supergraphics.css` | Generated package files (published) | No: rebuild them |
@@ -55,10 +55,11 @@ a token it needs is missing.
 ## Releases
 
 A release happens only when a merged pull request raises the version in `package.json`. The
-author proposes the version and whoever approves the pull request accepts it. On the push to
-`master`, the `release` job creates the tag `vX.Y.Z` on that commit and a GitHub Release with
-generated notes. If the version is already tagged, it does nothing, so merges without a version
-bump release nothing.
+author proposes the version, and Quentin accepts it when he decides on the pull request. On the
+push to `master`, the `release` job creates the tag `vX.Y.Z` on that commit and a GitHub Release
+with generated notes. It acts only on the push that raised the version, and checks again that
+the version is above the newest `v*` tag. If the version is already tagged, it does nothing, so
+merges without a version bump release nothing.
 
 Tags never move and are never deleted. A wrong release is followed by a new one. Consumers pin a
 tag, for example `"@myfirstbitcoin/design": "github:MyFirstBitcoin/mfb-design#v1.3.0"`, and see a
@@ -89,14 +90,15 @@ check runs it outside GitHub. `--status FILE` writes the full result as JSON for
 
 ## The supergraphics canon
 
-`src/supergraphics.canon.css` is a byte-for-byte copy of `supergraphics.css` in `@mfb/shared`,
-My First Bitcoin's internal shared package, where the supergraphics are maintained against the
-Brand Book. The build appends it unchanged to the published `supergraphics.css`, after a prelude
-generated from `tokens.json`, and refuses to build when the canon's geometry (`--sg-angle-base`
-and the other `--sg-*` values) disagrees with the tokens.
+`src/supergraphics.canon.css` is the origin of the supergraphics primitives. It began as a
+byte-for-byte copy of `supergraphics.css` in `@mfb/shared`, My First Bitcoin's internal shared
+package, which keeps an identical copy. The build appends it unchanged to the published
+`supergraphics.css`, after a prelude generated from `tokens.json`, and refuses to build when the
+canon's geometry (`--sg-angle-base` and the other `--sg-*` values) disagrees with the tokens.
 
-Keep it a pure copy, with no added comment: any byte added here changes the published file. When
-one copy changes, change the other in the same step; a weekly check compares the two.
+Keep it free of added comments: any byte added here changes the published file. Change the canon
+here, by pull request; the internal copy is then brought into line, and a weekly check compares
+the two.
 
 The canon, `tokens.json` and the README template keep the punctuation they were published with,
 em-dashes included, because rewording them changes published files. Such rewording belongs in a
