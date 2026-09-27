@@ -1,0 +1,116 @@
+# Checks and releases for @myfirstbitcoin/design. CONTRIBUTING.md explains the flow.
+#
+#   rebuild-check  every event      the committed outputs equal a fresh build (scripts/check.mjs)
+#   version-check  pull requests    a changed version is above the newest v* tag and not yet tagged
+#   release        push to master   if package.json's version has no tag yet, tag it and publish a release
+#
+# There is deliberately no workflow-level `paths:` filter. A workflow skipped that way leaves its
+# required checks waiting as "Expected", which would block every pull request that touches no
+# brand file.
+#
+# Only GitHub-owned actions are used, each pinned to a full commit SHA (the release tag it came
+# from is in the comment). The token is read-only except in the release job.
+
+name: design
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild-check:
+    name: rebuild-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Rebuild and compare (stale outputs, geometry gate, missing tokens, inert package.json)
+        run: node scripts/check.mjs
+
+  version-check:
+    name: version-check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # A pull request is checked out as its merge commit. Depth 2 brings the merge commit's
+      # first parent, which is exactly the master it was merged onto. Tags are not fetched by
+      # the checkout, so they are read from the remote below.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Check package.json's version against the tags
+        run: |
+          set -euo pipefail
+          base=$(git rev-parse HEAD^1)
+          head_version=$(node -p 'require("./package.json").version')
+          base_version=$(git show "$base:package.json" | node -p 'JSON.parse(require("fs").readFileSync(0, "utf8")).version')
+          tags=$(git ls-remote --tags --refs origin 'refs/tags/v*' | sed 's#.*refs/tags/##')
+          newest=$(printf '%s\n' "$tags" | sed -n 's/^v\([0-9]*\.[0-9]*\.[0-9]*\)$/\1/p' | sort -V | tail -n 1)
+          echo "package.json version: master $base_version, this pull request $head_version. Newest tag: v${newest:-none}."
+
+          if [ "$head_version" != "$base_version" ]; then
+            if ! printf '%s' "$head_version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "::error file=package.json::The version \"$head_version\" is not of the form X.Y.Z."
+              exit 1
+            fi
+            if printf '%s\n' "$tags" | grep -qxF "v$head_version"; then
+              echo "::error file=package.json::The tag v$head_version already exists. Tags never move, so choose a new version."
+              exit 1
+            fi
+            if [ -n "$newest" ] && [ "$(printf '%s\n%s\n' "$newest" "$head_version" | sort -V | tail -n 1)" != "$head_version" ]; then
+              echo "::error file=package.json::The version $head_version is not above the newest tag, v$newest."
+              exit 1
+            fi
+            echo "Version bump to $head_version: merging this pull request releases v$head_version."
+          else
+            changed=$(git diff --name-only "$base" HEAD -- README.md brand.css index.js supergraphics.css tailwind.js theme.css tokens.json | tr '\n' ' ')
+            if [ -n "$changed" ]; then
+              echo "::warning::Published files change without a version bump, so merging releases nothing: $changed"
+            else
+              echo "No version change, and no published file changes."
+            fi
+          fi
+
+  release:
+    name: release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: rebuild-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Tag and release package.json's version if it is new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(node -p 'require("./package.json").version')
+          if ! printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error file=package.json::The version \"$version\" is not of the form X.Y.Z."
+            exit 1
+          fi
+          if git ls-remote --tags --refs origin "refs/tags/v$version" | grep -q .; then
+            echo "v$version is already tagged: nothing to release."
+            exit 0
+          fi
+          # GitHub creates the tag server side, as a lightweight tag on this commit, like v1.0.0 to v1.3.0.
+          gh release create "v$version" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "v$version" --generate-notes
+          echo "Released v$version at $GITHUB_SHA."
