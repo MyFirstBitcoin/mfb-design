@@ -28,6 +28,8 @@ const FORBIDDEN_PKG_FIELDS = [
   'dependencies',
   'devDependencies',
   'optionalDependencies',
+  'peerDependencies', // npm 7 and later installs peer dependencies in the consumer's project
+  'peerDependenciesMeta',
   'bundleDependencies',
   'bundledDependencies',
 ];

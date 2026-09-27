@@ -2,7 +2,8 @@
 #
 #   rebuild-check  every event      the committed outputs equal a fresh build (scripts/check.mjs)
 #   version-check  pull requests    a changed version is above the newest v* tag and not yet tagged
-#   release        push to master   if package.json's version has no tag yet, tag it and publish a release
+#   release        push to master   if this push raised package.json's version to a new one above the
+#                                   newest v* tag, tag this commit and publish a release
 #
 # There is deliberately no workflow-level `paths:` filter. A workflow skipped that way leaves its
 # required checks waiting as "Expected", which would block every pull request that touches no
@@ -94,12 +95,17 @@ jobs:
     permissions:
       contents: write
     steps:
+      # The full history makes the push's previous master head (github.event.before) available,
+      # so the job can tell whether this push is the one that raised the version. The repository
+      # is small. Tags are still read from the remote, which is the authority.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Tag and release package.json's version if it is new
+          fetch-depth: 0
+      - name: Tag and release package.json's version if this push raised it
         env:
           GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
         run: |
           set -euo pipefail
           version=$(node -p 'require("./package.json").version')
@@ -107,10 +113,46 @@ jobs:
             echo "::error file=package.json::The version \"$version\" is not of the form X.Y.Z."
             exit 1
           fi
-          if git ls-remote --tags --refs origin "refs/tags/v$version" | grep -q .; then
-            echo "v$version is already tagged: nothing to release."
+          before_version=$(git show "$BEFORE:package.json" | node -p 'JSON.parse(require("fs").readFileSync(0, "utf8")).version')
+          echo "package.json version: before this push $before_version, now $version."
+
+          # --exit-code gives 2 when the tag is absent. Any other failure stops the job, so an
+          # unreadable remote never leads to a release. The last line is the tagged commit (the
+          # peeled line, for an annotated tag).
+          rc=0
+          tag_lines=$(git ls-remote --exit-code --tags origin "refs/tags/v$version" "refs/tags/v$version^{}") || rc=$?
+          if [ "$rc" -ne 0 ] && [ "$rc" -ne 2 ]; then
+            echo "::error::Could not read the tags from origin (git ls-remote exit $rc), so nothing was released."
+            exit 1
+          fi
+
+          if [ "$rc" -eq 0 ]; then
+            tag_sha=$(printf '%s\n' "$tag_lines" | tail -n 1 | cut -f1)
+            if [ "$tag_sha" = "$GITHUB_SHA" ] || [ "$before_version" = "$version" ]; then
+              echo "v$version is already tagged: nothing to release."
+              changed=$(git diff --name-only "$BEFORE" "$GITHUB_SHA" -- README.md brand.css index.js supergraphics.css tailwind.js theme.css tokens.json | tr '\n' ' ')
+              if [ "$tag_sha" != "$GITHUB_SHA" ] && [ -n "$changed" ]; then
+                echo "::warning::Published files changed without a version bump, so they are in no release until the next one: $changed"
+              fi
+              exit 0
+            fi
+            echo "::error file=package.json::This push changes the version to $version, but v$version already exists. Tags never move, so nothing was released."
+            exit 1
+          fi
+
+          if [ "$before_version" = "$version" ]; then
+            echo "::warning::v$version is not tagged, but this push did not raise the version, so this commit is not tagged. Re-run the release job of the push that raised it."
             exit 0
           fi
+
+          # This push raised the version. Tags cannot be undone, so the rule that version-check
+          # applies to pull requests is applied again here: a direct push to master has no other gate.
+          newest=$(git ls-remote --tags --refs origin 'refs/tags/v*' | sed -n 's#.*refs/tags/v\([0-9]*\.[0-9]*\.[0-9]*\)$#\1#p' | sort -V | tail -n 1)
+          if [ -n "$newest" ] && [ "$(printf '%s\n%s\n' "$newest" "$version" | sort -V | tail -n 1)" != "$version" ]; then
+            echo "::error file=package.json::The version $version is not above the newest tag, v$newest, so nothing was released."
+            exit 1
+          fi
+
           # GitHub creates the tag server side, as a lightweight tag on this commit, like v1.0.0 to v1.3.0.
           gh release create "v$version" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "v$version" --generate-notes
           echo "Released v$version at $GITHUB_SHA."

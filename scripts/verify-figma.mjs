@@ -190,8 +190,8 @@ const result = {
     `coverage: ${census.machineCheckable}/${census.total} tokens are machine-checkable against Figma; ` +
       `${census.unverifiable.length} are prose in the brand book, ${census.declared.length} are declared ` +
       `downstream (what Figma owes), ${census.noProvenance.length} have no established provenance`,
-    'IBM Plex Mono not found in the current brand book type specimen (pending design ruling)',
-    'Brand gradient #2B1C58->#5E378E not found as a fill on primary pages (pending design ruling)',
+    'IBM Plex Mono (fontFamily.mono) is deprecated in tokens.json: absent from the Brand Book, kept for compatibility, phase out',
+    'Brand gradient (gradient.brand) is deprecated in tokens.json: absent from the Brand Book, kept for compatibility, phase out',
   ],
 };
 

@@ -4,8 +4,9 @@
 // Sources (all in this repository):
 //   tokens.json                    the design tokens, the single source of every value
 //   package.json                   hand-maintained; only its version is read here (install pin in README)
-//   src/supergraphics.canon.css    the supergraphics canon, a byte copy of supergraphics.css in
-//                                  @mfb/shared (see CONTRIBUTING.md); appended unchanged
+//   src/supergraphics.canon.css    the supergraphics canon, the origin of the primitives; it began
+//                                  as a byte copy of supergraphics.css in @mfb/shared, which keeps
+//                                  an identical copy (see CONTRIBUTING.md); appended unchanged
 //
 // Usage: node scripts/build-design-package.mjs [OUT_DIR]
 //   OUT_DIR defaults to the repository root. scripts/check.mjs passes a temporary directory.
