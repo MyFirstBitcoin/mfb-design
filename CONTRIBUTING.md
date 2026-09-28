@@ -55,7 +55,7 @@ a token it needs is missing.
 ## Releases
 
 A release happens only when a merged pull request raises the version in `package.json`. The
-author proposes the version, and Quentin accepts it when he decides on the pull request. On the
+author proposes the version, and Quentin or Patrick accepts it when deciding on the pull request. On the
 push to `master`, the `release` job creates the tag `vX.Y.Z` on that commit and a GitHub Release
 with generated notes. It acts only on the push that raised the version, and checks again that
 the version is above the newest `v*` tag. If the version is already tagged, it does nothing, so
@@ -70,7 +70,7 @@ release only when they raise their pin.
 1. Patrick changes the Brand Book in Figma and tells Quentin, or the Monday check flags a
    difference between Figma and `tokens.json`.
 2. The admin session opens a pull request with the change to `tokens.json` and the rebuild.
-3. Quentin decides.
+3. Quentin or Patrick decides.
 4. Merging a pull request that raises the version releases it.
 5. The Monday digest line shows which projects are behind the newest tag.
 
