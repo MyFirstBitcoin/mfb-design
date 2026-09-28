@@ -1,6 +1,6 @@
 # @myfirstbitcoin/design
 
-The My First Bitcoin brand as code: a Tailwind preset, CSS variables, and raw design tokens. Generated from the canonical `tokens.json` (Figma → `sync-brand.js`). Do not edit generated files by hand.
+The My First Bitcoin brand as code: a Tailwind preset, CSS variables, and raw design tokens. Generated from this repo's canonical `tokens.json` by `scripts/build-design-package.mjs`; change `tokens.json` by pull request (see CONTRIBUTING.md). Figma is watched, not a source. Do not edit generated files by hand.
 
 ## Install (git dependency)
 
