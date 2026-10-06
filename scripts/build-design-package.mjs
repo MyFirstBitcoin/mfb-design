@@ -113,6 +113,12 @@ const twFontWeight = {};
 for (const [k, v] of Object.entries(fontWeight)) twFontWeight[k] = String(v);
 if (fontWeight.regular !== undefined && !('normal' in fontWeight)) twFontWeight.normal = String(fontWeight.regular);
 const gradient = tokens.gradient?.brand?.$value;
+// Halftone colours (geometry group, $type color): book-specified values that are deliberately
+// NOT palette tokens, so they get their own --mfb-halftone-* names and stay out of the
+// Tailwind colour utilities. supergraphics.css reads them in .sg-halftone-cutout.
+const halftone = Object.entries(tokens.geometry || {})
+  .filter(([k, tok]) => k.startsWith('halftone-') && tok.$type === 'color')
+  .map(([k, tok]) => [`--mfb-${k}`, tok.$value]);
 const ff = (arr) => arr.map((f) => (/\s/.test(f) ? `"${f}"` : f)).join(', ');
 
 // ---- 1. tailwind.js - Tailwind 3 preset (also usable in TW4 via @config) ----
@@ -151,6 +157,7 @@ if (gradient) css += `  --mfb-gradient-brand: ${gradient};\n`;
 for (const [k, v] of Object.entries(fontFamily)) css += `  --mfb-font-${k}: ${ff(v)};\n`;
 for (const [k, tok] of Object.entries(tokens.fontSize || {})) css += `  --mfb-size-${k}: ${tok.$value};\n`;
 for (const [k, v] of Object.entries(fontWeight)) css += `  --mfb-weight-${k}: ${v};\n`;
+for (const [cssVar, v] of halftone) css += `  ${cssVar}: ${v};\n`;
 for (const [tokenName, cssVar] of Object.entries(GEOM_VARS)) css += `  ${cssVar}: ${tokens.geometry[tokenName].$value};\n`;
 css += '}\n';
 write('brand.css', css);
@@ -175,6 +182,7 @@ let sgPrelude =
 for (const [name, tok] of Object.entries(tokens.color)) sgPrelude += `  --mfb-${name}: ${tok.$value};\n`;
 if (gradient) sgPrelude += `  --mfb-gradient: ${gradient};\n`;
 for (const [k, v] of Object.entries(fontWeight)) sgPrelude += `  --mfb-weight-${k}: ${v};\n`;
+for (const [cssVar, v] of halftone) sgPrelude += `  ${cssVar}: ${v};\n`;
 for (const [tokenName, cssVar] of Object.entries(GEOM_VARS)) {
   sgPrelude += `  ${cssVar}: ${tokens.geometry[tokenName].$value};\n`;
 }

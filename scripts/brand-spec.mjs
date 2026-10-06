@@ -75,6 +75,7 @@ const values = {
   ANGLE: need('geometry', 'angle-base').replace('deg', DEGREE),
   BASE_RATIO: need('geometry', 'base-h-ratio'),
   HALFTONE_HI: need('geometry', 'halftone-highlight'),
+  HALFTONE_HI_FULL: need('geometry', 'halftone-highlight-full'),
   HALFTONE_LO: need('geometry', 'halftone-shadow'),
   ORANGE: need('color', 'orange-300'),
   GRAY900: need('color', 'gray-900'),

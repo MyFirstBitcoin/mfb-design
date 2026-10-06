@@ -23,6 +23,9 @@
   --mfb-weight-regular: 400;
   --mfb-weight-medium: 500;
   --mfb-weight-semibold: 600;
+  --mfb-halftone-highlight: #F7E6FF;
+  --mfb-halftone-highlight-full: #EEEEEE;
+  --mfb-halftone-shadow: #45265B;
   --sg-angle-base: 13deg;
   --sg-angle-alt: 24deg;
   --sg-aspect: 1.5;
@@ -314,7 +317,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: #45265B; /* book-specified shadow value (not a palette token) */
+  background: var(--mfb-halftone-shadow); /* book-specified shadow value (not a palette token) */
   clip-path: var(--sg-wedge);
 }
 
@@ -335,8 +338,8 @@
   inset: 0;
   /* highlight cap + dot texture: whites multiply down to #F7E6FF,
      dot grid adds the newspaper-print texture (Halftone Scale ~2.5) */
-  background-color: #F7E6FF; /* book-specified highlight value */
-  background-image: radial-gradient(circle, #45265B 0.8px, transparent 1px);
+  background-color: var(--mfb-halftone-highlight); /* book-specified highlight value */
+  background-image: radial-gradient(circle, var(--mfb-halftone-shadow) 0.8px, transparent 1px);
   background-size: 5px 5px;
   mix-blend-mode: multiply;
   clip-path: var(--sg-wedge);

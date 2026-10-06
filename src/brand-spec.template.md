@@ -107,7 +107,7 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 **Do:**
 - Apply in Canva Apps → Halftone Scale 2.5 → Duotone Image Edit (the app name says "Duotone" but the output is halftone dots)
 - **Cutout portraits** (subject isolated on colored bg): highlights `{{HALFTONE_HI}}`, shadows `{{HALFTONE_LO}}`, on purple-300 or orange-300 bg
-- **Full portraits** (subject fills frame): highlights `#EEEEEE`, shadows `{{HALFTONE_LO}}`, on purple-300 bg
+- **Full portraits** (subject fills frame): highlights `{{HALFTONE_HI_FULL}}`, shadows `{{HALFTONE_LO}}`, on purple-300 bg
 - Place the halftoned image INSIDE a Spotlight Frame (angular wedge) or Parallelogram Frame, never a rectangular full-bleed
 
 **Don't:**
