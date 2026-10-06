@@ -450,6 +450,15 @@
   color: inherit;
   margin-top: 2px;
 }
+:where(.sg-bg-white, .sg-bg-gray) > .sg-info-bar .sg-info-bar__date {
+  color: var(--mfb-heading-on-light);
+}
+:where(.sg-bg-orange, .sg-cover--orange, .sg-spotlight--orange, .sg-spotlight-frame--orange, .sg-book-frame--orange, .sg-halftone-cutout--orange-bg) > .sg-info-bar .sg-info-bar__date {
+  color: var(--mfb-heading-on-orange);
+}
+.sg-info-bar--on-dark .sg-info-bar__date {
+  color: var(--mfb-orange-300);
+}
 .sg-info-bar--on-dark .sg-info-bar__date small {
   color: var(--mfb-muted-on-dark);
 }
@@ -488,10 +497,13 @@
   line-height: var(--mfb-leading-h1);
   letter-spacing: var(--mfb-tracking-h1); /* book headings: no tracking */
 }
+.sg-headline--h5 { line-height: var(--mfb-leading-h5); }
+.sg-headline--h6 { line-height: var(--mfb-leading-h6); }
 .sg-body {
   font-family: var(--mfb-font-body);
   font-weight: var(--mfb-weight-regular);
   line-height: var(--mfb-leading-body); /* book specimen body LH */
+  letter-spacing: var(--mfb-tracking-body);
 }
 .sg-label {
   font-family: var(--mfb-font-body);

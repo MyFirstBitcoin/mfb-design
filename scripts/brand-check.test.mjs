@@ -8,9 +8,9 @@
 // in the built CSS alike; every line of a clean file must trigger nothing. The clean files include
 // what a correct Tailwind 3 and Tailwind 4 build emits on its own (utility definitions for words
 // the content scanner saw in a comment, the base styles of code elements, theme.css's --font-mono),
-// which must not be reported. A rule that warns by default (raw-spacing, text-color, typed-caps)
-// is reported as a warning on its line. The tree is written to a temporary directory and removed
-// afterwards.
+// which must not be reported. A rule that warns by default (raw-spacing, text-color, typed-caps,
+// translucent-text, letter-spacing) is reported as a warning on its line. The tree is written to a
+// temporary directory and removed afterwards.
 
 import fs from 'fs';
 import os from 'os';
@@ -66,10 +66,23 @@ h2 { color: var(--mfb-purple-300); }                        @text-color
 .tag { background: var(--mfb-purple-300); opacity: .8; }    @translucent-shape
 .chip { background: color-mix(in srgb, var(--mfb-orange-300) 40%, transparent); } @translucent-shape
 .tilt { transform: skewY(-3deg); }                          @angle
+.up2 { text-transform: UPPERCASE; }                         @uppercase
+.fs { font: 500 18px/1.22 "IBM Plex Serif", serif; }        @font-family
+.fs2 { font: italic 20px Georgia, serif; }                  @font-family
+@theme { --font-display: Georgia, serif; }                  @font-family
+.under2 { box-shadow: inset 0 -10px var(--mfb-orange-300); } @hand-rolled-highlighter
+.thick { text-decoration: underline var(--mfb-orange-300); text-decoration-thickness: 0.4em; } @hand-rolled-highlighter
+mark { background: var(--mfb-orange-300); }                 @hand-rolled-highlighter
+.dim { background: var(--mfb-purple-300); filter: opacity(80%); } @translucent-shape
+.edge { border-color: color-mix(in srgb, var(--mfb-orange-300) 50%, transparent); } @translucent-shape
+.body { color: var(--mfb-gray-900); }                       @text-color
+.eyebrow { letter-spacing: 0.12em; }                        @letter-spacing
+.faint { color: color-mix(in srgb, var(--mfb-white) 85%, transparent); } @translucent-text
 `,
   'src/components/Card.tsx': `
 const panel: React.CSSProperties = { background: 'orange', padding: 0 }; @named-color
 const tile = { backgroundColor: 'purple', color: 'rebeccapurple' }; @named-color
+const tone = { textColor: open ? 'var(--mfb-white)' : 'var(--mfb-gray-900)' }; @text-color
 export const Card = ({ open }) => (
   <div className="bg-teal-500 p-6">x</div>                  @off-palette-utility
   <div className="text-purple-500">x</div>                  @off-palette-utility
@@ -110,6 +123,16 @@ export const Card = ({ open }) => (
   <div className="shadow-[0_0_0_3px_#F7931A80]">x</div>     @color-literal
   <div style={{ color: '#F7931ACC' }}>x</div>               @color-literal
   <span className="after:absolute after:h-[0.3em] after:bg-orange-300">x</span> @hand-rolled-highlighter
+  <div style={{ "textTransform": "uppercase" }}>x</div>    @uppercase
+  <div className={clsx('uppercase', open && 'ring')}>x</div> @uppercase
+  <div className={open ? 'uppercase' : ''}>x</div>          @uppercase
+  <svg><text x="0" y="10" rotate="13">A</text></svg>        @angle
+  <svg><defs><linearGradient id="lg" /></defs></svg>        @gradient
+  <svg><clipPath id="c"><polygon points="0,0 10,0 8,10 0,10" /></clipPath></svg> @clip-path
+  <p className="text-gray-900">x</p>                        @text-color
+  <p className="text-white/85">x</p>                        @translucent-text
+  <p className="tracking-wide">x</p>                        @letter-spacing
+  <div style={{ letterSpacing: '0.12em' }}>x</div>          @letter-spacing
 );
 `,
   'src/assets/tilted.svg': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 64">
@@ -121,12 +144,19 @@ export const Card = ({ open }) => (
   <rect fill="var(--mfb-orange-300)" opacity="0.5" width="10" height="10" /> @translucent-shape
 </svg>
 `,
+  'src/components/Caps.astro': `---
+const on = true;
+---
+<p class:list={['uppercase', { on }]}>x</p>                  @uppercase
+`,
   'src/components/Clean.astro': `---
 const href = '#feed';
 const EDGE_MASK =
   'linear-gradient(to right, transparent 0, var(--mfb-black) 56px, var(--mfb-black) calc(100% - 56px), transparent 100%)';
 const block = { backgroundColor: 'purple', surface: 'white', country: 'Georgia' };
 const spin = { rotate: 180, skewX: 0 };
+const id = '#feed';
+function color(name) { return name; }
 ---
 <button class="bg-orange-300 text-black hover:opacity-90 disabled:opacity-50">Join</button>
 <svg><rect fill="var(--mfb-orange-300)" opacity="1" /></svg>
@@ -135,6 +165,8 @@ const spin = { rotate: 180, skewX: 0 };
 <div class="bg-purple-300 text-white p-6 gap-4 rounded-mfb-lg shadow-mfb-media max-w-mfb-page"></div>
 <div class="sg-para-frame" style="--sg-aspect: 0.75"></div>
 <p class="text-link-on-dark">Bitcoin FAQ and API</p>
+<p>Block #840000 was mined during Cohort #100; pick a color (any one) at the lab (in Prague).</p>
+<p class="tracking-normal tracking-h1 text-white/100 text-body-on-light">x</p>
 <svg><sodipodi:namedview pagecolor="#ffffff" bordercolor="#666666" /><g transform="matrix(2.6916761,0,0,1.4510755,-10,20)"><path fill="currentColor" /></g></svg>
 <style>
   .card { padding: var(--mfb-space-6); border-radius: var(--mfb-radius-lg); color: var(--mfb-body-on-light); }
@@ -152,7 +184,20 @@ const spin = { rotate: 180, skewX: 0 };
   #top { color: var(--mfb-black); }
   .nav a.active::after { content: ""; height: 3px; background: var(--mfb-orange-300); }
   .menu { background: var(--mfb-purple-400); opacity: 0; }
+  .btn:disabled { background: var(--mfb-purple-300); opacity: .5; }
+  .split { background: linear-gradient(to bottom, var(--mfb-purple-300) 50%, var(--mfb-white) 50%); }
+  .dash { background: repeating-linear-gradient(90deg, var(--mfb-gray-400) 0 12px, transparent 12px 20px); }
+  .short { font: 500 var(--mfb-size-body)/1.2 var(--mfb-font-body); letter-spacing: 0; }
+  .link { text-decoration-color: var(--mfb-orange-300); text-decoration-thickness: 2px; }
+  .fade-btn { background: var(--mfb-orange-300); transition: opacity var(--mfb-duration-fast); }
+  .track { letter-spacing: var(--mfb-tracking-h1); }
+  :root { --font-sans: var(--mfb-font-sans); --font-weight-medium: 500; }
 </style>
+`,
+  'src/styles/legacy.scss': `.x {
+  // legacy value was #fff
+  color: var(--mfb-black);
+}
 `,
   // Built CSS that drifts: every declaration of either angle is checked, wherever it sits.
   'dist/_astro/drift.css': `
@@ -164,6 +209,7 @@ const spin = { rotate: 180, skewX: 0 };
 .btn { @media (width >= 48rem) { font-variant-caps: all-small-caps; } } @built-uppercase
 .code { font-family: var(--font-mono); }                   @built-font
 .quote { font: italic 1rem/1.2 Georgia, serif; }           @built-font
+.eyebrow.uppercase { text-transform: uppercase; }          @built-uppercase
 `,
   'dist/index.html': `<!doctype html>
 <html><head><style>.z{--sg-angle-alt:30deg}</style></head> @built-angle
@@ -197,6 +243,7 @@ const spin = { rotate: 180, skewX: 0 };
 }
 :root { --mfb-font-mono: "IBM Plex Mono", monospace; --sg-angle-base: 13deg; --sg-angle-alt: 24deg; }
 @property --sg-angle-base { syntax: "<angle>"; inherits: true; initial-value: 13deg; }
+@property --sg-angle-alt { syntax: "<angle>"; inherits: true; initial-value: 24.0deg; }
 `,
   // ... and a minified Tailwind 3 build, where the word "uppercase" in a comment is enough for
   // the scanner to emit .uppercase and its variants, and the preset's mono reaches code elements.
@@ -208,7 +255,7 @@ const spin = { rotate: 180, skewX: 0 };
 };
 
 // Files that must not be reported at all.
-const CLEAN = new Set(['src/components/Clean.astro', 'dist/_astro/tw4.css', 'dist/_astro/tw3.css']);
+const CLEAN = new Set(['src/components/Clean.astro', 'src/styles/legacy.scss', 'dist/_astro/tw4.css', 'dist/_astro/tw3.css']);
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'brand-check-test-'));
 const failures = [];
@@ -272,13 +319,15 @@ try {
   fs.rmSync(path.join(tmp, 'brand-check.allow.json'));
 
   // 5. --warn reports a rule without failing; the default warnings fail only under --error.
-  const w = run(['--src', 'src/components', '--warn', 'off-palette-utility,uppercase,font-family,weight,angle,raw-value,translucent-shape,gradient,named-color,color-filter,color-literal,hand-rolled-highlighter']);
+  const w = run(['--src', 'src/components', '--warn', 'off-palette-utility,uppercase,font-family,weight,angle,raw-value,translucent-shape,gradient,named-color,color-filter,color-literal,hand-rolled-highlighter,clip-path']);
   if (w.status !== 0) failures.push(`--warn: exit ${w.status}, expected 0: ${w.stderr.split('\n').filter((l) => !l.includes('warning')).join(' ')}`);
   fs.mkdirSync(path.join(tmp, 'src2'));
-  fs.writeFileSync(path.join(tmp, 'src2/a.css'), '.x { padding: 24px; }\n');
+  fs.writeFileSync(path.join(tmp, 'src2/a.css'), '.x { padding: 24px; }\n.y { letter-spacing: 0.1em; }\n');
   const dw = run(['--src', 'src2', '--source-only']);
-  if (dw.status !== 0 || !/warning: src2\/a\.css:1: \[raw-spacing\]/.test(dw.stderr)) failures.push(`default warning: exit ${dw.status}, expected 0 with a raw-spacing warning`);
+  if (dw.status !== 0 || !/warning: src2\/a\.css:1: \[raw-spacing\]/.test(dw.stderr) || !/warning: src2\/a\.css:2: \[letter-spacing\]/.test(dw.stderr))
+    failures.push(`default warning: exit ${dw.status}, expected 0 with a raw-spacing and a letter-spacing warning`);
   if (run(['--src', 'src2', '--source-only', '--error', 'raw-spacing']).status !== 1) failures.push('--error raw-spacing did not fail');
+  if (run(['--src', 'src2', '--source-only', '--error', 'letter-spacing']).status !== 1) failures.push('--error letter-spacing did not fail');
 
   // 6. No built CSS, and --source-only.
   fs.rmSync(path.join(tmp, 'dist'), { recursive: true });

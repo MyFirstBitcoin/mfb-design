@@ -10,7 +10,8 @@
 //   --source-only    skip the build output
 //   --allow FILE     allowlist (default: brand-check.allow.json, when it exists)
 //   --warn RULES     report these rules (comma-separated ids) without failing
-//   --error RULES    fail on rules that only warn by default (raw-spacing, text-color, typed-caps)
+//   --error RULES    fail on rules that only warn by default (raw-spacing, text-color, typed-caps,
+//                    translucent-text, letter-spacing)
 //   --root DIR       project root that the paths above are relative to (default: the current directory)
 //   --help           print the rules and exit
 //
@@ -22,7 +23,8 @@
 //
 // It checks how values are written, not how a page looks: it cannot measure contrast, tell which
 // background a text sits on, or read text that a script or a CMS supplies. A few rules that need
-// that context (orange or purple text, typed capitals, raw spacing) only warn unless --error asks.
+// that context (orange, purple or gray-900 text, translucent text, letter spacing, typed capitals,
+// raw spacing) only warn unless --error asks.
 //
 // The allowlist is a JSON array of exceptions, each with its reason:
 //   [{ "file": "src/assets/partner.svg", "reason": "the partner's own logo colors" },
@@ -39,29 +41,31 @@ const tokens = JSON.parse(readFileSync(join(HERE, 'tokens.json'), 'utf8'));
 
 // Rules that warn without failing unless --error names them: they cannot see the background a
 // text sits on, or they flag a value that is right more often than not.
-const DEFAULT_WARN = new Set(['raw-spacing', 'text-color', 'typed-caps']);
+const DEFAULT_WARN = new Set(['raw-spacing', 'text-color', 'typed-caps', 'translucent-text', 'letter-spacing']);
 const RULES = {
   'color-literal': 'a hex color (#RGB to #RRGGBBAA, also inside an arbitrary utility) or a color function (rgb, rgba, hsl, hwb, lab, lch, oklab, oklch, color)',
   'named-color': 'a named CSS color (white, teal...) in a color property, a custom property, a style object, a canvas fillStyle, an SVG color attribute or an arbitrary utility (bg-[teal])',
   'off-palette-utility': 'a Tailwind color utility outside the palette and the color roles (bg-teal-500, text-purple-500)',
-  gradient: 'a gradient (the Brand Book has none; an alpha-only mask is allowed)',
+  gradient: 'a gradient, in CSS or as an SVG linearGradient or radialGradient element (the Brand Book has none; an alpha-only mask and a hard-stop split that blends nothing are allowed)',
   'deprecated-gradient': 'the deprecated brand gradient (--mfb-gradient-brand, --mfb-gradient, .sg-bg-gradient, bg-brand-gradient) or .sg-photo-zone',
   'color-filter': 'a smooth color filter (grayscale, sepia, hue-rotate, saturate) or a blend mode: photos are halftone, never duotone',
-  'font-family': 'a font family other than var(--mfb-font-heading|body|sans) (or var(--font-sans|heading|body) from theme.css), a family name, or the mono or serif family',
-  uppercase: 'text-transform: uppercase (textTransform in a style object), the uppercase class, small caps or small-cap font features',
+  'font-family': 'a font family other than var(--mfb-font-heading|body|sans) (or var(--font-sans|heading|body) from theme.css), in font-family, the font shorthand or a --font-* theme variable, a family name, or the mono or serif family',
+  uppercase: 'text-transform: uppercase (textTransform in a style object, quoted or not, in any case), the uppercase class (in a class attribute or a string such as clsx(\'uppercase\')), small caps or small-cap font features',
   weight: 'a font weight above 600',
-  angle: 'a skew, a rotation or an angle literal that is not a quarter turn (in CSS, a style object, an animation prop such as rotate: -15, a Tailwind class, or an SVG transform, patternTransform or gradientTransform attribute), a rotating transform matrix, or slant geometry computed from --sg-angle-*: the slant comes from the supergraphics classes',
-  'clip-path': 'a hand-rolled clip-path shape (shapes come from the supergraphics classes)',
-  'translucent-shape': 'opacity or a translucent fill on a brand shape (sg-* or the highlighter) or on an orange or purple fill (opacity, fill-opacity, an alpha modifier such as bg-orange-300/50, or color-mix with transparent), or a highlighter color that is not a palette variable',
-  'hand-rolled-highlighter': 'a local highlighter: a gradient band, an orange pseudo-element drawn as a marker (sized in em or %, behind the text, or named like a highlight), an inset orange box-shadow sized in em, or after:/before: orange utilities. The package\'s .highlighter draws the Brand Book line',
+  angle: 'a skew, a rotation or an angle literal that is not a quarter turn (in CSS, a style object, an animation prop such as rotate: -15, a Tailwind class, an SVG transform, patternTransform or gradientTransform attribute, or the rotate attribute of SVG text), a rotating transform matrix, or slant geometry computed from --sg-angle-*: the slant comes from the supergraphics classes',
+  'clip-path': 'a hand-rolled clip-path shape, or an SVG clipPath drawn with a polygon (shapes come from the supergraphics classes)',
+  'translucent-shape': 'opacity or a translucent fill on a brand shape (sg-* or the highlighter) or on an orange or purple fill (opacity, fill-opacity or filter: opacity() beside it outside a disabled state, an alpha modifier such as bg-orange-300/50, or a fill or border that mixes orange or purple with transparent), or a highlighter color that is not a palette variable',
+  'hand-rolled-highlighter': 'a local highlighter: a gradient band, an orange pseudo-element drawn as a marker (sized in em or %, behind the text, or named like a highlight), an orange mark element, an inset orange box-shadow, a thick orange underline (0.2em or 4px and more), or after:/before: orange utilities. The package\'s .highlighter draws the Brand Book line',
   'token-override': 'a redefinition of a variable the package defines (--mfb-*, the --sg-* geometry); pages set only --sg-aspect and --sg-highlighter-color',
   'raw-value': 'a radius, duration, easing, container, font size, font weight, shadow or semantic spacing literal equal to a token value',
   'raw-spacing': 'a px or rem spacing literal on the spacing scale (warns by default)',
-  'text-color': 'orange text, or a purple heading: the background decides (Color Contrast, 918:2588); use a color role (warns by default)',
+  'text-color': 'orange text, a purple heading, or gray-900 text: the background decides (Color Contrast, 918:2588), and text on light backgrounds is black (918:2990); use a color role (warns by default)',
+  'translucent-text': 'translucent text: a text color mixed with transparent, or an alpha modifier such as text-white/85; text takes a solid palette color (warns by default)',
+  'letter-spacing': 'letter spacing other than none: a non-zero letter-spacing or letterSpacing, or a tracking-* utility other than tracking-normal and the type levels; no brand text style has tracking (918:2323) (warns by default)',
   'typed-caps': 'two or more words typed in capitals in markup text (warns by default)',
   'built-angle': 'the built CSS has no --sg-angle-base with the token value, or any declaration of --sg-angle-base or --sg-angle-alt (a rule, an @property initial-value, or a style attribute in built HTML) has another value',
   'built-color': 'the built CSS defines a --color-* that is not a palette color or a color role, or not its value',
-  'built-uppercase': 'the built CSS sets uppercase or small caps outside a utility class definition (a utility such as .uppercase is reported where the source uses it)',
+  'built-uppercase': 'the built CSS sets uppercase or small caps outside a utility class definition (a utility such as .uppercase, alone in its compound selector, is reported where the source uses it)',
   'built-font': 'a font-family declaration in the built CSS uses the mono or serif family, outside a utility class definition and the base styles of code, kbd, samp and pre',
   'built-missing': 'no built CSS was found (build first, or pass --source-only)',
 };
@@ -238,6 +242,7 @@ const COLOR_PROP =
 // ---- files ----
 const SOURCE_EXT = new Set(['.astro', '.css', '.scss', '.sass', '.less', '.pcss', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.html', '.svg', '.vue', '.svelte']);
 const CSS_EXT = new Set(['.css', '.scss', '.sass', '.less', '.pcss']);
+const LINE_COMMENT_CSS = new Set(['.scss', '.sass', '.less']);
 const SKIP_DIRS = new Set(['node_modules', '.git', '.astro', '.svelte-kit', '.next']);
 const distAbs = opt.dist.map((d) => resolve(ROOT, d));
 const rel = (abs) => relative(ROOT, abs).split(sep).join('/');
@@ -271,8 +276,9 @@ const quarterTurn = (value, unit) => Math.abs(({ deg: 1, grad: 0.9, rad: 180 / M
 function stripComments(text, ext) {
   const blank = (m) => m.replace(/[^\n]/g, ' ');
   let out = text.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/<!--[\s\S]*?-->/g, blank);
-  if (!CSS_EXT.has(ext) && ext !== '.html' && ext !== '.svg') {
-    out = out.replace(/(^|[^:"'`\\])(\/\/[^\n]*)/g, (m, pre, c) => pre + blank(c));
+  // Line comments: script code, and SCSS, Sass and Less (plain CSS has none; a "//" there is a URL).
+  if ((!CSS_EXT.has(ext) || LINE_COMMENT_CSS.has(ext)) && ext !== '.html' && ext !== '.svg') {
+    out = out.replace(/(^|[^:"'`\\(])(\/\/[^\n]*)/g, (m, pre, c) => pre + blank(c));
   }
   if (!CSS_EXT.has(ext)) {
     // Editor metadata in SVG files (Inkscape's page color, guides, zoom) is not drawn.
@@ -318,8 +324,44 @@ function parts(v) {
   return out;
 }
 
+/**
+ * Whether a gradient blends nowhere: each color starts where the one before it ends, as in a
+ * two-color split (purple 50%, white 50%) or a dashed line (line 0 12px, transparent 12px 20px).
+ * Such a gradient draws solid areas side by side. A stop placed before the previous one starts
+ * where that one ends (CSS moves it there).
+ */
+function hardStops(body) {
+  let stops = splitTop(body);
+  if (stops.length && /^(?:to\s|from\s|at\s|in\s|circle|ellipse|closest-|farthest-|-?[\d.]+(?:deg|grad|rad|turn)$)/.test(stops[0])) stops = stops.slice(1);
+  if (stops.length < 2) return false;
+  const len = (x) => {
+    const n = String(x).match(/^(-?\d*\.?\d+)(px|%|em|rem)?$/);
+    if (!n || (!n[2] && Number(n[1]) !== 0)) return null;
+    return [Number(n[1]), n[2] ?? '0'];
+  };
+  const parsed = stops.map((s) => { const [color, ...pos] = parts(s); return { color, pos: pos.map(len) }; });
+  if (parsed.some((p) => !p.pos.length || p.pos.length > 2 || p.pos.some((x) => !x))) return false;
+  for (let i = 0; i + 1 < parsed.length; i++) {
+    const a = parsed[i], b = parsed[i + 1];
+    if (a.color === b.color) continue;
+    const [end, endUnit] = a.pos.at(-1);
+    const [start, startUnit] = b.pos[0];
+    if (startUnit === '0') continue; // at 0: before or at the previous stop
+    if (endUnit !== startUnit && endUnit !== '0') return false;
+    if (start > end) return false;
+  }
+  return true;
+}
 const rangesOf = (re, t) => [...t.matchAll(re)].map((m) => [m.index, m.index + m[0].length]);
 const inRanges = (i, ranges) => ranges.some(([a, b]) => i >= a && i < b);
+/** Files that hold script code only: no markup text, no typed capitals. */
+const SCRIPT_ONLY_EXT = new Set(['.js', '.mjs', '.cjs', '.ts']);
+/**
+ * Ranges of the text that follows a markup tag, up to the next tag or {expression}: prose. A "<"
+ * after a name (Array<string>, a<b) does not open a tag, and neither do <script> and <style>.
+ */
+const textNodes = (t) => [...t.matchAll(/(?<![\w$.)\]])<\/?(?!script\b|style\b)[A-Za-z][\w.:-]*(?:\s(?:=>|[^<>])*?)?\/?>([^<>{}]*)/g)]
+  .map((m) => [m.index + m[0].length - m[1].length, m.index + m[0].length]);
 /** Ranges of <style> blocks in markup files, where the text is CSS. */
 const styleBlocks = (t) => rangesOf(/<style\b[^>]*>([\s\S]*?)<\/style>/g, t);
 /** @font-face blocks: their font-family and font-weight describe a face, they do not use one. */
@@ -407,6 +449,7 @@ function rawValues(file, t, ctx) {
 }
 
 /** Class lists: class attributes, @apply, and string literals that read as utility classes. */
+const ONE_WORD_UTILITY = /^(?:uppercase|grayscale|sepia)$/;
 function classLists(t, ext) {
   const out = [];
   each(/@apply\s+([^;}\n]+)/g, t, (m) => out.push([m.index, m[1]]));
@@ -418,7 +461,10 @@ function classLists(t, ext) {
     if (!toks.length) return;
     const attr = /(?<![\w-])(?:class|className|class:list)\s*=\s*\{?\s*$/.test(t.slice(Math.max(0, m.index - 20), m.index));
     const classy = toks.every((x) => /^!?(?:[\w-]+:)*-?[a-z][\w-]*(?:\[[^\]\s]*\])?(?:\/[\w.]+)?$/.test(x));
-    if (attr || (classy && toks.some((x) => x.includes('-') || x.includes('[')))) out.push([m.index, s]);
+    // A one-word utility on its own, as in clsx('uppercase') or class:list={['uppercase', ...]}.
+    const oneWord = toks.length === 1 && ONE_WORD_UTILITY.test(toks[0].replace(/^!|!$/g, '').replace(/^(?:[\w-]+:)+/, '')) &&
+      !/(?:text-?transform|textTransform)["']?\s*:\s*$/i.test(t.slice(Math.max(0, m.index - 20), m.index));
+    if (attr || oneWord || (classy && toks.some((x) => x.includes('-') || x.includes('[')))) out.push([m.index, s]);
   });
   return out;
 }
@@ -439,6 +485,12 @@ function checkClasses(file, t, ext) {
       if (arbColor && NAMED_COLORS.has(arbColor[1])) report(file, index, 'named-color', 'named color in an arbitrary value (use a palette utility or a color role)', c);
       if (/^text-(?:mfb-)?orange-\d+(?:\/[\w.]+)?$/.test(c)) report(file, index, 'text-color', 'orange text: only on purple-300 and purple-400 (text-link-on-dark), never on a light background; on orange, text is black (918:2588)', c);
       if (onHeading && /^text-(?:mfb-)?purple-\d+(?:\/[\w.]+)?$/.test(c)) report(file, index, 'text-color', 'purple heading: headings on light backgrounds are black (text-heading-on-light, 918:2990), on dark ones white', c);
+      if (/^text-(?:mfb-)?gray-900(?:\/[\w.]+)?$/.test(c)) report(file, index, 'text-color', GRAY_900_TEXT, c);
+      if (/^text-(?:mfb-)?(?:white|black|(?:gray|purple|orange)-\d+|[a-z]+-on-(?:light|dark|orange))\/(?:\d+|\[[^\]]+\])$/.test(c) && !/\/(?:100|\[(?:1|100%)\])$/.test(c))
+        report(file, index, 'translucent-text', 'translucent text (an alpha modifier): text takes a solid palette color, for example text-muted-on-dark instead of text-white/70', c);
+      const track = c.match(/^-?tracking-(.+)$/);
+      if (track && !/^(?:normal|\[0(?:\.0+)?(?:em|px|rem)?\])$/.test(track[1]) && !(c[0] !== '-' && tokens.letterSpacing?.[track[1]]))
+        report(file, index, 'letter-spacing', 'letter spacing: no brand text style has tracking (918:2323); use tracking-normal or a type level such as tracking-h1', c);
       if (c === 'uppercase' || c === 'small-caps') report(file, index, 'uppercase', 'uppercase (Brand Book: Title Case, never all caps)', c);
       if (/^font-(?:mono|serif|\[(?!\d).+\])$/.test(c)) report(file, index, 'font-family', 'font family that is not the brand sans', c);
       const arbWeight = c.match(/^font-\[(\d+)\]$/);
@@ -484,6 +536,7 @@ function checkClasses(file, t, ext) {
   }
 }
 
+const GRAY_900_TEXT = 'gray-900 text: text on light backgrounds is black (var(--mfb-body-on-light) or text-body-on-light, 918:2990), headings too (heading-on-light)';
 const SHAPE_CLASS = /(?:^|[\s"'`{])(?:sg-(?:para|spotlight|book|halftone|cover|bg)[\w-]*|highlighter)(?=[\s"'`}$]|$)/;
 const TYPED_CAPS = /\b[A-Z][A-Z'’]{3,}\b[^a-z<>{}\n]*?\b[A-Z][A-Z'’]{3,}\b/;
 
@@ -499,13 +552,16 @@ function checkSource(abs) {
     faces: fontFaces(t),
     styles: inlineStyles(t),
     script: (i) => !CSS_EXT.has(ext) && !(ext === '.html' || ext === '.svg') && !inRanges(i, blocks),
+    // Text between markup tags is prose ("block #840000", "a color (any one)"), not a value.
+    text: CSS_EXT.has(ext) || SCRIPT_ONLY_EXT.has(ext) ? [] : textNodes(t).filter(([a]) => !inRanges(a, blocks)),
   };
 
   // Colors
   // A hex may follow an underscore, as inside an arbitrary utility (shadow-[0_0_0_3px_#f7931a80]).
   each(/(?<![A-Za-z0-9&#/.-])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})(?![A-Za-z0-9-])/g, t, (m) => {
     const before = t.slice(t.lastIndexOf('\n', m.index) + 1, m.index);
-    if (/(?:\b(?:href|to|id|for|xlink:href)=\{?["'`]?[^"'`\s]*|\b(?:href|url|link|anchor|hash|[a-z]+Url|[a-z]+Href)\s*[:=]\s*["'`][^"'`\s]*|url\(\s*["']?|querySelector(?:All)?\(\s*["'`][^"'`]*|getElementById\(\s*["'`])$/i.test(before)) return;
+    if (inRanges(m.index, ctx.text)) return;
+    if (/(?:\b(?:href|to|id|for|xlink:href)=\{?["'`]?[^"'`\s]*|\b(?:href|url|link|anchor|hash|id|selector|target|[a-z]+Url|[a-z]+Href|[a-z]+Id|[a-z]+Selector)\s*[:=]\s*["'`][^"'`\s]*|url\(\s*["']?|querySelector(?:All)?\(\s*["'`][^"'`]*|getElementById\(\s*["'`])$/i.test(before)) return;
     // An id selector is followed by more selector and then "{"; a value, even one continued on
     // the next line (box-shadow: ...\n  0 0 0 3px #f7931a80,), ends at ";" or "}".
     const after = t.slice(m.index + m[0].length);
@@ -513,8 +569,14 @@ function checkSource(abs) {
     if (/^\s*[{,.:[>+~]/.test(after.slice(0, 3)) && stop !== -1 && after[stop] === '{') return;
     report(file, m.index, 'color-literal', 'hex color (use var(--mfb-*) or a palette utility)', m[0]);
   });
-  each(/(?<![\w.-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\s*\(/gi, t, (m) =>
-    report(file, m.index, 'color-literal', 'color function (use var(--mfb-*); a translucent shadow mixes a palette color with color-mix())', t.slice(m.index, m.index + 40)));
+  // A CSS color function takes no space before its parenthesis, and color() names a color space.
+  // A function a script declares (function color(name)) or calls with other arguments is code.
+  each(/(?<![\w.-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/gi, t, (m) => {
+    if (inRanges(m.index, ctx.text)) return;
+    if (/\bfunction\s+$/.test(t.slice(Math.max(0, m.index - 12), m.index))) return;
+    if (/^color\($/i.test(m[0]) && !/^\s*(?:from\b|srgb|srgb-linear|display-p3|a98-rgb|prophoto-rgb|rec2020|xyz|--)/i.test(t.slice(m.index + m[0].length, m.index + m[0].length + 20))) return;
+    report(file, m.index, 'color-literal', 'color function (use var(--mfb-*); a translucent shadow mixes a palette color with color-mix())', t.slice(m.index, m.index + 40));
+  });
   // The value is read ahead without consuming it, so a second property on the same line (in a
   // style object, { background: 'orange', color: 'rebeccapurple' }) is read on its own.
   each(new RegExp(`(?<![\\w-])(${COLOR_PROP})["']?\\s*:\\s*(?=([^;}\\n]*))`, 'gi'), t, (m) => {
@@ -542,6 +604,21 @@ function checkSource(abs) {
     const c = m[2].match(/(?<![\w-])color\s*:\s*var\(--mfb-purple-\d+\)/);
     if (c && /(?:^|[\s,>+~(])h[1-6](?![\w-])/.test(m[1].trim())) report(file, m.index + m[0].indexOf(c[0]), 'text-color', 'purple heading: headings on light backgrounds are black (var(--mfb-heading-on-light), 918:2990), on dark ones white', c[0]);
   });
+  // A text color (color, or a value assigned to a name such as textColor) that is gray-900, or a
+  // color mixed with transparent. Ternaries count: isDark ? 'var(--mfb-white)' : 'var(--mfb-gray-900)'.
+  each(/(?<![\w-])(color|[\w$]*[tT]extColor|--[\w-]*text-color)["']?\s*[:=]\s*(?=([^;}\n]*))/g, t, (m) => {
+    const raw = ctx.script(m.index) ? m[2].split(/,\s*["']?[\w$-]+["']?\s*:/)[0] : m[2];
+    if (/var\(\s*--(?:mfb-|color-(?:mfb-)?)?gray-900\s*\)/.test(raw)) report(file, m.index, 'text-color', GRAY_900_TEXT, m[0] + raw);
+    if (/color-mix\([^;]*\btransparent\b/.test(raw)) report(file, m.index, 'translucent-text', 'translucent text (a color mixed with transparent): text takes a solid palette color, for example var(--mfb-muted-on-dark) on dark backgrounds', m[0] + raw);
+  });
+  // Letter spacing: no brand text style has any. A var() is not read; a non-zero length is.
+  each(/(?<![\w-])(letter-spacing|letterSpacing)["']?\s*:\s*(?=([^;}\n]*))/g, t, (m) => {
+    if (inRanges(m.index, ctx.faces)) return;
+    const script = ctx.script(m.index);
+    const raw = script ? m[2].split(/,\s*["']?[\w$-]+["']?\s*:/)[0] : m[2];
+    const lengths = [...raw.matchAll(/(?<![\w.-])(-?\d*\.?\d+)(em|px|rem|ch|%)?(?![\w.%-])/g)].filter((x) => x[2] || script);
+    if (lengths.some((x) => Number(x[1]) !== 0)) report(file, m.index, 'letter-spacing', 'letter spacing: no brand text style has tracking (918:2323); use var(--mfb-tracking-<level>) or none', m[0] + raw);
+  });
 
   // Gradients, highlighter bands and filters
   each(/(?:repeating-)?(?:linear|radial|conic)-gradient\(/g, t, (m) => {
@@ -555,7 +632,15 @@ function checkSource(abs) {
     if (band && band[1] === band[2]) {
       return report(file, m.index, 'hand-rolled-highlighter', 'local highlighter band: delete it, the package\'s .highlighter draws the Brand Book\'s thin line (since v1.4.0)', text.split('\n')[0]);
     }
+    // Solid areas side by side (a two-color split, a dashed line) blend nothing. An orange band
+    // drawn that way is still reported: it is how a highlighter gets drawn by hand.
+    if (hardStops(body) && !isOrange(body)) return;
     report(file, m.index, 'gradient', 'gradient (the Brand Book uses solid palette fills only)', text.split('\n')[0]);
+  });
+  each(/<(linearGradient|radialGradient)\b/g, t, (m) => {
+    const open = t.lastIndexOf('<mask', m.index);
+    if (open !== -1 && t.indexOf('</mask>', open) > m.index) return; // an alpha mask
+    report(file, m.index, 'gradient', `an SVG ${m[1]} (the Brand Book uses solid palette fills only; a third-party mark goes in the allowlist)`, m[0]);
   });
   // An orange pseudo-element drawn as a marker: sized in em or %, put behind the text, or named
   // like a highlight. An orange bar of a few px (an active tab, say) is not one.
@@ -567,10 +652,28 @@ function checkSource(abs) {
       report(file, m.index + m[0].indexOf('{'), 'hand-rolled-highlighter', 'local highlighter (an orange pseudo-element drawn as a marker): use the package\'s .highlighter', sel.trim());
     }
   });
-  each(/(?<![\w-])(?:box-shadow|boxShadow)["']?\s*:\s*["'`]?\s*inset\s+0\s+(-?[\d.]+)(em|px|rem)\s+0\s+([^;\n"'`]*)/g, t, (m) => {
+  each(/(?<![\w-])(?:box-shadow|boxShadow)["']?\s*:\s*["'`]?\s*inset\s+0\s+(-?[\d.]+)(em|px|rem)(?:\s+-?[\d.]+(?:em|px|rem)?){0,2}\s+([^;\n"'`]*)/g, t, (m) => {
     if ((m[2] === 'em' || px(m[1] + m[2]) >= 6) && isOrange(m[3]))
       report(file, m.index, 'hand-rolled-highlighter', 'local highlighter (an orange inset shadow under the text): use the package\'s .highlighter', m[0]);
   });
+  // A thick orange underline, or an orange mark element: a highlighter drawn another way. A thin
+  // orange underline (a link's) is not one.
+  const thickOrangeUnderline = (text) => {
+    const decl = [...text.matchAll(/(?<![\w-])(?:text-decoration(?:-(?:color|thickness))?|textDecoration(?:Color|Thickness)?)["']?\s*:\s*([^;\n]*)/g)].map((d) => d[1]);
+    return decl.some((v) => isOrange(v)) &&
+      decl.some((v) => [...v.matchAll(/(?<![\w.-])(\d*\.?\d+)(em|px|rem)(?![\w-])/g)].some((x) => (x[2] === 'em' ? Number(x[1]) >= 0.2 : px(x[1] + x[2]) >= 4)));
+  };
+  each(/([^{}]*)\{([^{}]*)\}/g, t, (m) => {
+    if (!CSS_EXT.has(ext) && !inRanges(m.index + m[1].length, blocks)) return;
+    const at = m.index + m[1].length;
+    const sel = m[1].split('\n').pop().trim();
+    if (thickOrangeUnderline(m[2])) report(file, at, 'hand-rolled-highlighter', 'local highlighter (a thick orange underline): use the package\'s .highlighter', sel);
+    const fill = m[2].match(/(?<![\w-])background(?:-color)?\s*:\s*([^;]*)/);
+    if (fill && isOrange(fill[1]) && /(?:^|[\s,>+~(])mark(?![\w-])/.test(sel)) report(file, at, 'hand-rolled-highlighter', 'local highlighter (an orange mark element): use the package\'s .highlighter', sel);
+  });
+  for (const [a, b] of ctx.styles) {
+    if (thickOrangeUnderline(t.slice(a, b))) report(file, a, 'hand-rolled-highlighter', 'local highlighter (a thick orange underline): use the package\'s .highlighter', t.slice(a, b));
+  }
   each(/--mfb-gradient(?:-brand)?(?![\w-])|(?<![\w-])sg-bg-gradient(?![\w-])|(?<![\w-])sg-photo-zone(?![\w-])/g, t, (m) =>
     report(file, m.index, 'deprecated-gradient', 'deprecated brand gradient or smooth gradient class (use a solid palette fill)', m[0]));
   each(/(?<![\w-])(?:grayscale|sepia|hue-rotate|saturate)\s*\(/g, t, (m) =>
@@ -595,6 +698,13 @@ function checkSource(abs) {
     for (const r of m[1].matchAll(/rotate\(\s*(-?\d*\.?\d+)/g)) {
       if (Math.abs(Number(r[1]) % 90) > 1e-9) report(file, m.index, 'angle', 'rotation in an SVG transform that is not a quarter turn (the logo and the shapes are never tilted by hand)', r[0]);
     }
+  });
+  each(/<(?:text|tspan)\b[^>]*?\srotate\s*=\s*\{?\s*["'`]?\s*(-?[\d.]+(?:[\s,]+-?[\d.]+)*)/g, t, (m) => {
+    if (m[1].split(/[\s,]+/).map(Number).some((n) => Number.isFinite(n) && Math.abs(n % 90) > 1e-9))
+      report(file, m.index, 'angle', 'SVG text with rotated glyphs (a rotate attribute that is not a quarter turn)', m[0].slice(0, 60));
+  });
+  each(/<clipPath\b[^>]*>([\s\S]*?)<\/clipPath>/g, t, (m) => {
+    if (/<poly(?:gon|line)\b/.test(m[1])) report(file, m.index, 'clip-path', 'an SVG clipPath drawn with a polygon (use the supergraphics shape classes; a logo goes in the allowlist)', m[0].split('\n')[0].slice(0, 60));
   });
   // A unitless rotation or skew in script code: an animation or style prop (rotate: -15).
   each(/(?<![\w-])(rotate[XYZ]?|skew[XY]?)["']?\s*:\s*(-?\d*\.?\d+|\[[^\]\n]*\])(?=\s*[,}\n])/g, t, (m) => {
@@ -628,17 +738,43 @@ function checkSource(abs) {
       report(file, m.index, 'font-family', 'font family that is not exactly var(--mfb-font-heading|body|sans)', m[0]);
   });
   each(/--mfb-font-mono|var\(--font-(?:mono|serif)\)/g, t, (m) => report(file, m.index, 'font-family', 'the deprecated mono family, or the serif family', m[0]));
-  each(/(["'])(?:IBM Plex[^"']*|Arial|Helvetica[^"']*|Inter|Roboto|Georgia|Times New Roman|Courier[^"']*|monospace|sans-serif|serif|system-ui)\1/g, t, (m) => {
+  // The font shorthand and Tailwind 4's --font-* theme variables set a family too. Each is reported
+  // once, so the family names inside it are not reported again below.
+  const BRAND_FAMILY = /^(?:var\(--(?:mfb-)?font-(?:heading|body|sans)\)|inherit|initial|unset|revert)$/;
+  const familyDecls = [];
+  const declEnd = (i) => { const e = t.slice(i).search(/[;}\n]/); return e === -1 ? t.length : i + e; };
+  // A family list holds quotes, so in CSS the value runs to the end of the declaration; in script
+  // code it is the quoted string.
+  const familyValue = (i, script) => (script && /^["'`]/.test(t[i]) ? readValue(t, i, true) : t.slice(i, declEnd(i)).replace(/\s*!important\s*$/, '').trim());
+  each(/(?<![\w-])font["']?\s*:\s*/g, t, (m) => {
     if (inRanges(m.index, ctx.faces)) return;
+    const v = familyValue(m.index + m[0].length, ctx.script(m.index));
+    if (!v) return;
+    // The family follows the size and its line height: 500 18px/1.22 "IBM Plex Serif", serif.
+    const size = [...v.matchAll(/(?<=^|\s)(?:-?\d*\.?\d+(?:px|rem|em|%|pt|vw|vh|vmin|vmax|ch|ex|lh)|(?:xx?-)?(?:small|large)|medium|smaller|larger|(?:var|calc|clamp|min|max)\((?:[^()]|\([^()]*\))*\))(?:\s*\/\s*[^\s,]+)?(?=\s+\S)/g)].at(-1);
+    if (!size) return;
+    familyDecls.push([m.index, declEnd(m.index)]);
+    const family = v.slice(size.index + size[0].length).trim();
+    if (!BRAND_FAMILY.test(family)) report(file, m.index, 'font-family', 'font shorthand whose family is not exactly var(--mfb-font-heading|body|sans)', `font: ${v}`);
+  });
+  each(/(?<![\w-])(--font-[\w-]+)["']?\s*:\s*/g, t, (m) => {
+    if (/^--font-(?:weight|size|feature|variation|stretch|style|optical|smoothing)(?![\w])/.test(m[1]) || m[1].slice(2).includes('--')) return;
+    const v = (familyValue(m.index + m[0].length, ctx.script(m.index)) ?? '').trim();
+    if (!v) return;
+    familyDecls.push([m.index, declEnd(m.index)]);
+    if (!BRAND_FAMILY.test(v)) report(file, m.index, 'font-family', `${m[1]} sets a family other than var(--mfb-font-heading|body|sans)`, `${m[1]}: ${v}`);
+  });
+  each(/(["'])(?:IBM Plex[^"']*|Arial|Helvetica[^"']*|Inter|Roboto|Georgia|Times New Roman|Courier[^"']*|monospace|sans-serif|serif|system-ui)\1/g, t, (m) => {
+    if (inRanges(m.index, ctx.faces) || inRanges(m.index, familyDecls)) return;
     if (!FAMILY_CONTEXT.test(t.slice(t.lastIndexOf('\n', m.index - 1) + 1, m.index))) return; // a word in data, not a family
     report(file, m.index, 'font-family', 'font family literal', m[0]);
   });
-  each(/(?:text-transform|textTransform)\s*:\s*["'`]?uppercase|small-caps|smallCaps|font-variant-caps\s*:\s*all|(?:font-feature-settings|fontFeatureSettings)\s*:[^;}\n]*["'](?:smcp|c2sc)["']/g, t, (m) =>
+  each(/(?:text-transform|textTransform)["']?\s*:\s*["'`]?uppercase|small-caps|smallCaps|(?:font-variant-caps|fontVariantCaps)["']?\s*:\s*["'`]?all|(?:font-feature-settings|fontFeatureSettings)["']?\s*:[^;}\n]*["'](?:smcp|c2sc)["']/gi, t, (m) =>
     report(file, m.index, 'uppercase', 'uppercase or small caps (Brand Book: Title Case, never all caps)', m[0]));
   each(/(?:font-weight|fontWeight)\s*:\s*["'`]?\s*(?:[7-9]00|1000|bold|bolder)\b/g, t, (m) => {
     if (!inRanges(m.index, ctx.faces)) report(file, m.index, 'weight', 'weight above 600 (the brand uses 400, 500 and 600)', m[0]);
   });
-  if (!CSS_EXT.has(ext) && !['.js', '.mjs', '.cjs', '.ts'].includes(ext)) {
+  if (!CSS_EXT.has(ext) && !SCRIPT_ONLY_EXT.has(ext)) {
     each(/(?<![=\-])>([^<>{}]+)</g, t, (m) => {
       const caps = m[1].match(TYPED_CAPS);
       if (caps) report(file, m.index + 1 + caps.index, 'typed-caps', 'words typed in capitals: type them in Title Case or sentence case (Rule 1); all caps is never a style', caps[0]);
@@ -655,24 +791,26 @@ function checkSource(abs) {
     const op = m[0].match(/\bstyle\s*=[^>]*?\bopacity["']?\s*:\s*["'`]?\s*(\d*\.?\d+)/);
     if (op && Number(op[1]) < 1) report(file, m.index, 'translucent-shape', 'translucent brand shape (solid palette fills only)', `opacity: ${op[1]}`);
   });
-  // An orange or purple fill is solid: no opacity or fill-opacity beside it (0 hides, it does not
-  // tint), and no color-mix with transparent.
-  const OPACITY = /(?<![\w-])(opacity|fill-?opacity|fillOpacity)["']?\s*[:=]\s*\{?\s*["'`]?\s*(\d*\.?\d+)(%?)/gi;
+  // An orange or purple fill is solid: no opacity, fill-opacity or filter: opacity() beside it (0
+  // hides, it does not tint; a disabled state may dim it), and no color-mix with transparent in a
+  // fill or a border.
+  const OPACITY = /(?<![\w-])(?:(opacity|fill-?opacity|fillOpacity)["']?\s*[:=]\s*\{?\s*["'`]?\s*|(filter)["']?\s*:\s*["'`]?[^;\n]*?opacity\(\s*)(\d*\.?\d+)(%?)/gi;
   const FILLS_BRAND = new RegExp(`(?<![\\w-])(?:background(?:-?color)?|fill)["']?\\s*[:=]\\s*\\{?\\s*["'\`]?(?:(?!,\\s*["']?[\\w-]+["']?\\s*:)[^;\\n])*?(?:${BRAND_FILL.source})`, 'i');
   const translucentFill = (text, offset) => {
     if (!FILLS_BRAND.test(text)) return;
     for (const o of text.matchAll(OPACITY)) {
-      const v = Number(o[2]) / (o[3] ? 100 : 1);
-      if (v > 0 && v < 1) report(file, offset + o.index, 'translucent-shape', 'translucent orange or purple fill (the brand fills are solid)', `${o[1]}: ${o[2]}${o[3]}`);
+      const v = Number(o[3]) / (o[4] ? 100 : 1);
+      if (v > 0 && v < 1) report(file, offset + o.index, 'translucent-shape', 'translucent orange or purple fill (the brand fills are solid)', o[2] ? `filter: opacity(${o[3]}${o[4]})` : `${o[1]}: ${o[3]}${o[4]}`);
     }
   };
   each(/([^{}]*)\{([^{}]*)\}/g, t, (m) => {
+    if (/:disabled|\[disabled\]|\[aria-disabled/.test(m[1].split('\n').pop())) return;
     if (CSS_EXT.has(ext) || inRanges(m.index + m[1].length, blocks)) translucentFill(m[2], m.index + m[1].length + 1);
   });
   for (const [a, b] of ctx.styles) translucentFill(t.slice(a, b), a);
   each(/<[a-zA-Z][\w.:-]*\s[^<>]*>/g, t, (m) => translucentFill(m[0], m.index));
-  each(new RegExp(`(?<![\\w-])(?:background(?:-?color)?|fill)["']?\\s*:\\s*["'\`]?\\s*color-mix\\([^;\\n]*?(?:${BRAND_FILL.source})[^;\\n]*?transparent`, 'gi'), t, (m) =>
-    report(file, m.index, 'translucent-shape', 'translucent orange or purple fill (the brand fills are solid)', m[0]));
+  each(new RegExp(`(?<![\\w-])(?:background(?:-?color)?|fill|border(?:-?(?:top|right|bottom|left|block|inline)(?:-?(?:start|end))?)?(?:-?color)?|outline(?:-?color)?)["']?\\s*:\\s*["'\`]?(?:(?!gradient\\()[^;\\n"'\`])*?color-mix\\([^;\\n]*?(?:${BRAND_FILL.source})[^;\\n]*?transparent`, 'gi'), t, (m) =>
+    report(file, m.index, 'translucent-shape', 'translucent orange or purple fill or border (the brand colors are solid)', m[0]));
   each(/--sg-highlighter-color["']?\s*:\s*/g, t, (m) => {
     const v = (readValue(t, m.index + m[0].length, ctx.script(m.index)) ?? '').trim();
     const name = v.match(/^var\(--mfb-([\w-]+)\)$/)?.[1];
@@ -728,9 +866,9 @@ function declarations(css) {
   flush(css.length); // a style attribute's last declaration has no ";"
   return out;
 }
-/** The utility each class of a selector names, without its variants: .md\:hover\:uppercase -> uppercase. */
-const utilitiesOf = (sel) => [...sel.matchAll(/\.((?:\\.|[\w-])+)/g)].map((m) => {
-  const name = m[1].replace(/\\(.)/g, '$1');
+/** The utility a class names, without its variants: md\:hover\:uppercase -> uppercase. */
+const utilityOf = (cls) => {
+  const name = cls.replace(/\\(.)/g, '$1');
   let depth = 0, cut = 0;
   for (let i = 0; i < name.length; i++) {
     if (name[i] === '[' || name[i] === '(') depth++;
@@ -738,12 +876,16 @@ const utilitiesOf = (sel) => [...sel.matchAll(/\.((?:\\.|[\w-])+)/g)].map((m) =>
     else if (name[i] === ':' && depth === 0) cut = i + 1;
   }
   return name.slice(cut).replace(/^!|!$/g, '');
-});
+};
 // A utility class definition is not a use: Tailwind 3 emits .uppercase or .font-mono when its
 // content scanner sees the word anywhere (a comment, a string), and Tailwind 4 when theme.css
 // gives it the font. Whether a page uses the class is checked in the source, where it is written.
 const BUILT_UTILITY = /^(?:uppercase|font-mono|font-serif)$/;
-const inUtility = (rules) => rules.some((r) => !r.startsWith('@') && splitTop(r).every((part) => utilitiesOf(part).some((u) => BUILT_UTILITY.test(u))));
+// The utility class must stand alone in its compound selector: .group:hover .group-hover\:uppercase
+// is a definition, .eyebrow.uppercase is a page's own rule.
+const inUtility = (rules) => rules.some((r) => !r.startsWith('@') && splitTop(r).every((part) =>
+  [...part.matchAll(/\.((?:\\.|[\w-])+)/g)].some((m) => BUILT_UTILITY.test(utilityOf(m[1])) &&
+    !/[\w\\)\]-]/.test(part[m.index - 1] ?? '') && part[m.index + m[0].length] !== '.')));
 // Tailwind's base styles set code, kbd, samp and pre in the mono family (Tailwind 4 through
 // --default-mono-font-family, which theme.css's --font-mono feeds); that is code, not text.
 const inCodeBase = (rules) => rules.some((r) => !r.startsWith('@') && splitTop(r).every((part) => {
@@ -780,7 +922,11 @@ function checkBuilt() {
     if (!which) return;
     const want = which === 'base' ? ANGLE : ANGLE_ALT;
     const v = d.value.replace(/\s*!important$/i, '').trim();
-    if (v.toLowerCase() === String(want).toLowerCase()) { if (which === 'base') angleFound = true; return; }
+    const deg = (x) => {
+      const n = String(x).trim().match(/^(-?\d*\.?\d+)(deg|grad|rad|turn)$/i);
+      return n ? Number(n[1]) * { deg: 1, grad: 0.9, rad: 180 / Math.PI, turn: 360 }[n[2].toLowerCase()] : null;
+    };
+    if (v.toLowerCase() === String(want).toLowerCase() || (deg(v) !== null && Math.abs(deg(v) - deg(want)) < 1e-9)) { if (which === 'base') angleFound = true; return; }
     add(file, text, offset + d.index, 'built-angle', `${prop} is set to ${d.value}, the token is ${want}`, `${d.prop}: ${d.value}`);
   };
   for (const [file, value, at, text] of inline) {

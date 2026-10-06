@@ -15,7 +15,8 @@ under the source rule below.
    the book says nothing is the best evidence there is. Such a token is declared with its exact
    origin on the site's main branch: `"sourceKind": "declared"` and
    `"source": "myfirstbitcoin.org@<commit>:<file>:<line>"`, with the number of uses in its note.
-   The website's CSS is public, so citing it is fine.
+   The site's source repository is private, so only people with access to it can open the cited
+   file and line; what a visitor's browser receives from the site (its CSS and pages) is public.
 3. **Never a website value that contradicts the Brand Book**, however often the site uses it: a
    slant other than the book's angle, a highlighter other than the book's thin line, duotone
    photos, a font or a color outside the book, all-caps text, orange text on a light background.
