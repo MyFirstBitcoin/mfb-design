@@ -18,11 +18,13 @@ contributions, by people and AI assistants alike.
 | `src/brand-spec.template.md` | The prose of the brand specification | Yes |
 | `scripts/` | Build, spec generator and checks | Yes |
 | `README.md`, `brand.css`, `theme.css`, `tailwind.js`, `index.js`, `supergraphics.css` | Generated package files (published) | No: rebuild them |
-| `brand-spec.md` | Generated brand specification (public, not part of the package) | No: regenerate it |
+| `brand-spec.md` | Generated brand specification (published, so consumers and their AI tools read the rules from `node_modules`) | No: regenerate it |
 
 What consumers install is exactly the list in `package.json`'s `files`, plus `package.json`
-itself: `README.md`, `brand.css`, `index.js`, `supergraphics.css`, `tailwind.js`, `theme.css`
-and `tokens.json`. Nothing else in this repository reaches them.
+itself: `README.md`, `brand-spec.md`, `brand.css`, `index.js`, `supergraphics.css`,
+`tailwind.js`, `theme.css` and `tokens.json`. Nothing else in this repository reaches them.
+`brand-spec.md` is there so that a consumer, and the AI tools working in its repository, read
+the brand rules at `node_modules/@myfirstbitcoin/design/brand-spec.md`, at the version they pin.
 
 `package.json` must never get `scripts` (including `prepare` or `postinstall`) or any kind of
 dependencies. Consumers install this package as a git dependency, and npm runs a git

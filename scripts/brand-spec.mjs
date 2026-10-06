@@ -9,8 +9,9 @@
 // template. Rules cannot be generated and should not be; values must be, so the spec can never
 // disagree with the tokens it says it comes from.
 //
-// brand-spec.md is committed and public, but it is NOT in package.json's `files`, so it is not
-// part of what consumers install.
+// brand-spec.md is committed and public, and it is in package.json's `files` (and exports, as
+// ./brand-spec.md), so consumers install it with the package and read the rules at the version
+// they pin.
 //
 // It refuses to write when:
 //   - a token the prose depends on is absent (a blank where a brand value belongs);

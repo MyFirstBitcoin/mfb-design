@@ -292,3 +292,5 @@ node scripts/brand-spec.mjs
 ```
 
 `node scripts/check.mjs` fails when this file is out of date, and so does the rebuild check on every pull request.
+
+This file ships in the `@myfirstbitcoin/design` package. A project that installs the package can read it at `node_modules/@myfirstbitcoin/design/brand-spec.md` (or import `@myfirstbitcoin/design/brand-spec.md`), at the version it pins.

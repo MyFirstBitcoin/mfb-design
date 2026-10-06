@@ -10,7 +10,8 @@
     "./theme.css": "./theme.css",
     "./brand.css": "./brand.css",
     "./supergraphics.css": "./supergraphics.css",
-    "./tokens.json": "./tokens.json"
+    "./tokens.json": "./tokens.json",
+    "./brand-spec.md": "./brand-spec.md"
   },
   "files": [
     "index.js",
@@ -19,7 +20,8 @@
     "brand.css",
     "supergraphics.css",
     "tokens.json",
-    "README.md"
+    "README.md",
+    "brand-spec.md"
   ],
   "repository": {
     "type": "git",
