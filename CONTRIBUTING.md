@@ -1,9 +1,36 @@
 # Contributing to @myfirstbitcoin/design
 
 This repository is the single source of the My First Bitcoin brand as code: the design tokens,
-the build that turns them into the published package, the written brand specification, and the
-check against the Brand Book in Figma. The Brand Book in Figma is where the brand is decided;
-`tokens.json` mirrors it and is edited only to match it.
+the build that turns them into the published package, the written brand specification, and
+the check against the Brand Book in Figma. The Brand Book in
+Figma is where the brand is decided; `tokens.json` mirrors it and is edited only to match it,
+under the source rule below.
+
+## The source rule
+
+1. **Brand Book first.** Where the Brand Book in Figma (file `mFIc75UUSyftaqnNUQgjLX`, page
+   `262:2`) defines a value, its value is the token, cited by node (`"source": "figma:<node>"`).
+2. **Where the Brand Book is silent**, the value used on the live website, myfirstbitcoin.org,
+   may become the token. The website was built following the Brand Book, so what it does where
+   the book says nothing is the best evidence there is. Such a token is declared with its exact
+   origin on the site's main branch: `"sourceKind": "declared"` and
+   `"source": "myfirstbitcoin.org@<commit>:<file>:<line>"`, with the number of uses in its note.
+   The website's CSS is public, so citing it is fine.
+3. **Never a website value that contradicts the Brand Book**, however often the site uses it: a
+   slant other than the book's angle, a highlighter other than the book's thin line, duotone
+   photos, a font or a color outside the book, all-caps text, orange text on a light background.
+   `brand-spec.md` lists the ones found so far under "Not imported from the website".
+4. **Where the site has no single value** (several near-duplicates with no convention), no token
+   is made until someone picks one.
+5. **Quentin or Patrick decides** every brand change, as for any pull request here.
+
+Every token carries `$extensions.mfb.sourceKind`, defined in `$verification` at the end of
+`tokens.json`: `rendered-fill` or `rendered-text` (checked by the Figma check), `prose` (stated in
+the Brand Book in words), `measured` (read off the Brand Book's vector geometry or a node's
+rendered fill, with the node ids in the note), `declared` (not in the Brand Book: a website value
+with its site source, or a value this package recommends, with `"source": "declared"` and the
+reason in the note), or `unverified`. Color roles and shape tones are aliases of palette colors
+(`{color.black}`).
 
 Propose every change by pull request. The conventions in [AGENTS.md](AGENTS.md) apply to all
 contributions, by people and AI assistants alike.
@@ -70,7 +97,8 @@ release only when they raise their pin.
 ## The brand-change loop
 
 1. Patrick changes the Brand Book in Figma and tells Quentin, or the Monday check flags a
-   difference between Figma and `tokens.json`.
+   difference between Figma and `tokens.json`, or a value the Brand Book is silent on is
+   declared from the website under the source rule.
 2. The admin session opens a pull request with the change to `tokens.json` and the rebuild.
 3. Quentin or Patrick decides.
 4. Merging a pull request that raises the version releases it.
