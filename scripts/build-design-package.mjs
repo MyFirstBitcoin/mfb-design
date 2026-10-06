@@ -117,9 +117,9 @@ const twFontWeight = {};
 for (const [k, v] of Object.entries(fontWeight)) twFontWeight[k] = String(v);
 if (fontWeight.regular !== undefined && !('normal' in fontWeight)) twFontWeight.normal = String(fontWeight.regular);
 const gradient = tokens.gradient?.brand?.$value;
-// Halftone colours (geometry group, $type color): book-specified values that are deliberately
+// Halftone colors (geometry group, $type color): book-specified values that are deliberately
 // NOT palette tokens, so they get their own --mfb-halftone-* names and stay out of the
-// Tailwind colour utilities. supergraphics.css reads them in .sg-halftone-cutout.
+// Tailwind color utilities. supergraphics.css reads them in .sg-halftone-cutout.
 const halftone = Object.entries(tokens.geometry || {})
   .filter(([k, tok]) => k.startsWith('halftone-') && tok.$type === 'color')
   .map(([k, tok]) => [`--mfb-${k}`, tok.$value]);
@@ -242,6 +242,20 @@ const readme = [
   ``,
   `Pin a tag. A new release reaches your project only when you raise the pin (and refresh the lockfile).`,
   ``,
+  `## Upgrading from v1.3.0`,
+  ``,
+  `Make these changes in the same commit that raises your pin:`,
+  ``,
+  `- **Delete any local ${code('.highlighter')} band** (for example a ${code('linear-gradient(transparent 80%, ...)')} background on ${code('.highlighter')}), and any local rule that changes its ${code('display')} or ${code('text-align')}. ` +
+    `The package now draws the Brand Book's line itself, and a local band would draw on top of it. On orange surfaces it no longer paints a white band or turns the word white: it draws a white line, and the word keeps the heading's color.`,
+  `- **Remove any padding your project adds around ${code('.sg-para-pattern')} to make room for the slant.** Each row now insets itself by half its height times tan(${ANGLE}), so its first shape is no longer clipped; extra padding moves the rows further right.`,
+  `- **Set ${code('--sg-aspect')} on parallelogram frames too.** The photo scale in ${code('.sg-para-frame')} was a fixed 1.12; it is now ${code('1 + tan(--sg-angle-base) / --sg-aspect')}, the smallest scale that covers the frame, so it depends on the frame's real shape.`,
+  `- **${code('supergraphics.css')} sets more variables in ${code(':root')}**: the font families, sizes and weights and the halftone colors, besides the palette and the geometry. If you override any of them, do it after importing ${code('supergraphics.css')}, or import the file into a cascade layer.`,
+  `- ${code('.sg-cover__title')} reads ${code('--mfb-size-h2')}. The ${code('--mfb-font-h2')} variable it used to read was never defined by this package; set ${code('font-size')} on the title instead.`,
+  `- **Tailwind 4 projects that restrict font weights** with ${code('--font-weight-*: initial')} must put that reset in its own ${code('@theme')} block before importing ${code('theme.css')}: placed after the import, it removes the package's weights too, and no weight utility is generated.`,
+  ``,
+  `${FENCE}css\n@import "tailwindcss";\n@theme { --font-weight-*: initial; }\n@import "@myfirstbitcoin/design/theme.css";\n${FENCE}`,
+  ``,
   `## Use - Tailwind 3`,
   ``,
   `${FENCE}js\n// tailwind.config.mjs\nimport mfb from '@myfirstbitcoin/design/tailwind';\nexport default { presets: [mfb], content: ['./src/**/*.{astro,html,js,ts}'] };\n${FENCE}`,
@@ -285,12 +299,12 @@ const readme = [
   ``,
   `Plain CSS variables are namespaced ${code('--mfb-*')} (brand values) and ${code('--sg-*')} (geometry) to avoid collisions. ${code('brand.css')} has all of them; ${code('supergraphics.css')} repeats what its classes need.`,
   ``,
-  `- **Colours:** ${code('--mfb-<name>')}, for example ${code('--mfb-purple-300')}, ${code('--mfb-orange-300')}, ${code('--mfb-gray-900')}`,
+  `- **Colors:** ${code('--mfb-<name>')}, for example ${code('--mfb-purple-300')}, ${code('--mfb-orange-300')}, ${code('--mfb-gray-900')}`,
   `- **Font families:** ${code('--mfb-font-heading')}, ${code('--mfb-font-body')}, ${code('--mfb-font-sans')} (IBM Plex Sans, then Arial, the Brand Book's system fallback)`,
   `- **Font sizes:** ${code('--mfb-size-<level>')}, for example ${code('--mfb-size-h1')}, ${code('--mfb-size-body')}`,
   `- **Font weights:** ${weightList}. Tailwind 4 (${code('theme.css')}) and Tailwind 3 (the preset) get the same names as ${code('font-regular')}, ${code('font-medium')} and ${code('font-semibold')}, ` +
     `plus ${code('font-normal')} with the regular value; they extend Tailwind's scale rather than replace it`,
-  `- **Halftone colours:** ${halftoneList} (highlight for cutout portraits, highlight for full portraits, shadow). They are book-specified values, not palette colours, so they have no Tailwind utilities`,
+  `- **Halftone colors:** ${halftoneList} (highlight for cutout portraits, highlight for full portraits, shadow). They are book-specified values, not palette colors, so they have no Tailwind utilities`,
   `- **Geometry:** ${Object.values(GEOM_VARS).map(code).join(', ')}`,
   ``,
   `Both utility conventions are served: top-level (preferred for new pages) and mfb- prefixed (legacy, e.g. roadmap). Utilities use the brand palette at the top level (e.g. ${code('bg-purple-400')}, ${code('text-orange-300')}, ${code('text-gray-900')}, ${code('text-h1')}), overriding Tailwind's default purple/orange/gray with the brand values. Other defaults (red, blue, etc.) are untouched.`,

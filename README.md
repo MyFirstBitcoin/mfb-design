@@ -10,6 +10,23 @@ The My First Bitcoin brand as code: a Tailwind preset, CSS variables, the superg
 
 Pin a tag. A new release reaches your project only when you raise the pin (and refresh the lockfile).
 
+## Upgrading from v1.3.0
+
+Make these changes in the same commit that raises your pin:
+
+- **Delete any local `.highlighter` band** (for example a `linear-gradient(transparent 80%, ...)` background on `.highlighter`), and any local rule that changes its `display` or `text-align`. The package now draws the Brand Book's line itself, and a local band would draw on top of it. On orange surfaces it no longer paints a white band or turns the word white: it draws a white line, and the word keeps the heading's color.
+- **Remove any padding your project adds around `.sg-para-pattern` to make room for the slant.** Each row now insets itself by half its height times tan(13°), so its first shape is no longer clipped; extra padding moves the rows further right.
+- **Set `--sg-aspect` on parallelogram frames too.** The photo scale in `.sg-para-frame` was a fixed 1.12; it is now `1 + tan(--sg-angle-base) / --sg-aspect`, the smallest scale that covers the frame, so it depends on the frame's real shape.
+- **`supergraphics.css` sets more variables in `:root`**: the font families, sizes and weights and the halftone colors, besides the palette and the geometry. If you override any of them, do it after importing `supergraphics.css`, or import the file into a cascade layer.
+- `.sg-cover__title` reads `--mfb-size-h2`. The `--mfb-font-h2` variable it used to read was never defined by this package; set `font-size` on the title instead.
+- **Tailwind 4 projects that restrict font weights** with `--font-weight-*: initial` must put that reset in its own `@theme` block before importing `theme.css`: placed after the import, it removes the package's weights too, and no weight utility is generated.
+
+```css
+@import "tailwindcss";
+@theme { --font-weight-*: initial; }
+@import "@myfirstbitcoin/design/theme.css";
+```
+
 ## Use - Tailwind 3
 
 ```js
@@ -51,11 +68,11 @@ Wrap the one word you emphasize in a heading: `<h2>Open Source <span class="high
 
 Plain CSS variables are namespaced `--mfb-*` (brand values) and `--sg-*` (geometry) to avoid collisions. `brand.css` has all of them; `supergraphics.css` repeats what its classes need.
 
-- **Colours:** `--mfb-<name>`, for example `--mfb-purple-300`, `--mfb-orange-300`, `--mfb-gray-900`
+- **Colors:** `--mfb-<name>`, for example `--mfb-purple-300`, `--mfb-orange-300`, `--mfb-gray-900`
 - **Font families:** `--mfb-font-heading`, `--mfb-font-body`, `--mfb-font-sans` (IBM Plex Sans, then Arial, the Brand Book's system fallback)
 - **Font sizes:** `--mfb-size-<level>`, for example `--mfb-size-h1`, `--mfb-size-body`
 - **Font weights:** `--mfb-weight-regular` (400), `--mfb-weight-medium` (500), `--mfb-weight-semibold` (600). Tailwind 4 (`theme.css`) and Tailwind 3 (the preset) get the same names as `font-regular`, `font-medium` and `font-semibold`, plus `font-normal` with the regular value; they extend Tailwind's scale rather than replace it
-- **Halftone colours:** `--mfb-halftone-highlight`, `--mfb-halftone-highlight-full`, `--mfb-halftone-shadow` (highlight for cutout portraits, highlight for full portraits, shadow). They are book-specified values, not palette colours, so they have no Tailwind utilities
+- **Halftone colors:** `--mfb-halftone-highlight`, `--mfb-halftone-highlight-full`, `--mfb-halftone-shadow` (highlight for cutout portraits, highlight for full portraits, shadow). They are book-specified values, not palette colors, so they have no Tailwind utilities
 - **Geometry:** `--sg-angle-base`, `--sg-angle-alt`, `--sg-aspect`, `--sg-logo-icon-h`, `--sg-base-h-ratio`, `--sg-highlighter-coverage`, `--sg-highlighter-aspect`, `--sg-highlighter-offset`, `--sg-highlighter-shape`
 
 Both utility conventions are served: top-level (preferred for new pages) and mfb- prefixed (legacy, e.g. roadmap). Utilities use the brand palette at the top level (e.g. `bg-purple-400`, `text-orange-300`, `text-gray-900`, `text-h1`), overriding Tailwind's default purple/orange/gray with the brand values. Other defaults (red, blue, etc.) are untouched.

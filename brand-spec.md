@@ -80,7 +80,7 @@ the Brand Book Figma file mFIc75UUSyftaqnNUQgjLX. To regenerate: node scripts/br
 
 ### CSS Variables
 
-This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font families as `var(--mfb-font-<role>)`, the font sizes as `var(--mfb-size-<level>)`, the font weights as `var(--mfb-weight-<name>)`, the halftone colours as `var(--mfb-halftone-highlight)`, `var(--mfb-halftone-highlight-full)` and `var(--mfb-halftone-shadow)`, and the geometry as `var(--sg-angle-base)` and its siblings, the highlighter's `var(--sg-highlighter-*)` included. `theme.css` (Tailwind 4) carries the same colors, font families, font sizes and font weights (`--font-weight-<name>`, with `normal` as Tailwind's name for regular), and `tailwind.js` (Tailwind 3) carries those plus the deprecated brand gradient; the geometry and halftone variables are only in `brand.css` and `supergraphics.css`, and the halftone colours are deliberately not colour utilities.
+This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font families as `var(--mfb-font-<role>)`, the font sizes as `var(--mfb-size-<level>)`, the font weights as `var(--mfb-weight-<name>)`, the halftone colors as `var(--mfb-halftone-highlight)`, `var(--mfb-halftone-highlight-full)` and `var(--mfb-halftone-shadow)`, and the geometry as `var(--sg-angle-base)` and its siblings, the highlighter's `var(--sg-highlighter-*)` included. `theme.css` (Tailwind 4) carries the same colors, font families, font sizes and font weights (`--font-weight-<name>`, with `normal` as Tailwind's name for regular), and `tailwind.js` (Tailwind 3) carries those plus the deprecated brand gradient; the geometry and halftone variables are only in `brand.css` and `supergraphics.css`, and the halftone colors are deliberately not color utilities.
 
 ## 2. Binding Rules (The 12)
 
@@ -279,7 +279,7 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 
 ### Rules
 
-- **Links on light backgrounds:** a dark brand colour (purple-300) with an orange-300 underline. Orange is a light colour, so orange link text on white breaks the Brand Book's *Colour contrast* rule (`918:2588`: "Light text should be placed on dark colors, and dark text on light colors")
+- **Links on light backgrounds:** a dark brand color for the text, such as purple-300. The Brand Book's *Color Contrast* slide (`918:2588`) says "Light text should be placed on dark colors, and dark text on light colors", and it pairs every orange with dark text, so orange link text on white breaks it. An orange-300 underline is this package's recommendation, not a Brand Book rule
 - **Links on dark backgrounds:** orange-300 or white
 - **Text on dark backgrounds:** white
 - **Text on light backgrounds:** gray-900 (`#25252B`), never pure black
