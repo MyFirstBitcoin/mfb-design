@@ -52,7 +52,7 @@ the Brand Book Figma file {{FIGMA_FILE}}. To regenerate: node scripts/brand-spec
 
 ### CSS Variables
 
-This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font families as `var(--mfb-font-<role>)`, the font sizes as `var(--mfb-size-<level>)`, and the geometry as `var(--sg-angle-base)` and its siblings. `theme.css` (Tailwind 4) carries the same colors, font families and font sizes, and `tailwind.js` (Tailwind 3) carries those plus the brand gradient; the geometry variables are only in `brand.css` and `supergraphics.css`.
+This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font families as `var(--mfb-font-<role>)`, the font sizes as `var(--mfb-size-<level>)`, the font weights as `var(--mfb-weight-<name>)`, the halftone colours as `var(--mfb-halftone-highlight)`, `var(--mfb-halftone-highlight-full)` and `var(--mfb-halftone-shadow)`, and the geometry as `var(--sg-angle-base)` and its siblings, the highlighter's `var(--sg-highlighter-*)` included. `theme.css` (Tailwind 4) carries the same colors, font families, font sizes and font weights (`--font-weight-<name>`, with `normal` as Tailwind's name for regular), and `tailwind.js` (Tailwind 3) carries those plus the deprecated brand gradient; the geometry and halftone variables are only in `brand.css` and `supergraphics.css`, and the halftone colours are deliberately not colour utilities.
 
 ## 2. Binding Rules (The 12)
 
@@ -250,10 +250,11 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 
 ### Rules
 
-- **Links:** orange-300, underline on hover
+- **Links on light backgrounds:** a dark brand colour (purple-300) with an orange-300 underline. Orange is a light colour, so orange link text on white breaks the Brand Book's *Colour contrast* rule (`918:2588`: "Light text should be placed on dark colors, and dark text on light colors")
+- **Links on dark backgrounds:** orange-300 or white
 - **Text on dark backgrounds:** white
 - **Text on light backgrounds:** gray-900 (`{{GRAY900}}`), never pure black
-- **Orange is for accents only** (CTAs, links, highlights, ₿ symbol), never a full background fill beyond explicit orange-300 brand shapes
+- **Orange is for accents only** (CTAs, link underlines, links on dark backgrounds, highlights, ₿ symbol), never a full background fill beyond explicit orange-300 brand shapes
 - **Gradient:** the brand gradient is deprecated (Section 1): do not use it in new designs. Where an existing page still uses it, keep its 135deg direction (top-left to bottom-right), and never use it on covers.
 
 ### Logo files
