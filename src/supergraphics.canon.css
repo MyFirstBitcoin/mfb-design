@@ -31,7 +31,7 @@
 }
 .sg-para-frame img,
 .sg-para-frame .sg-photo-zone {
-  transform: skewX(var(--sg-angle-base)) scale(1.12);
+  transform: skewX(var(--sg-angle-base)) scale(calc(1 + tan(var(--sg-angle-base)) / var(--sg-aspect)));
   display: block;
   width: 100%;
   height: 100%;
@@ -552,7 +552,9 @@
 .sg-para-pattern__row {
   display: flex;
   align-items: stretch;
-  height: var(--sg-base-h);
+  --sg-row-h: var(--sg-base-h);
+  height: var(--sg-row-h);
+  padding-left: calc(tan(var(--sg-angle-base)) * var(--sg-row-h) / 2);
 }
 .sg-para-pattern__row > .sg-para {
   background: var(--mfb-purple-200);
@@ -565,5 +567,5 @@
 .sg-para-pattern__row:nth-child(2n) { margin-left: 26px; }
 .sg-para-pattern__row:nth-child(3n) { margin-left: 52px; }
 /* progressive scale option (book: "rows can scale progressively") */
-.sg-para-pattern--progressive .sg-para-pattern__row:nth-child(2) { height: calc(var(--sg-base-h) * 1.25); }
-.sg-para-pattern--progressive .sg-para-pattern__row:nth-child(3) { height: calc(var(--sg-base-h) * 1.55); }
+.sg-para-pattern--progressive .sg-para-pattern__row:nth-child(2) { --sg-row-h: calc(var(--sg-base-h) * 1.25); }
+.sg-para-pattern--progressive .sg-para-pattern__row:nth-child(3) { --sg-row-h: calc(var(--sg-base-h) * 1.55); }
