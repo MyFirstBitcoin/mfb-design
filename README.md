@@ -5,7 +5,7 @@ The My First Bitcoin brand as code: a Tailwind preset, CSS variables, the superg
 ## Install (git dependency)
 
 ```json
-"dependencies": { "@myfirstbitcoin/design": "github:MyFirstBitcoin/mfb-design#v1.3.0" }
+"dependencies": { "@myfirstbitcoin/design": "github:MyFirstBitcoin/mfb-design#v1.4.0" }
 ```
 
 Pin a tag. A new release reaches your project only when you raise the pin (and refresh the lockfile).
