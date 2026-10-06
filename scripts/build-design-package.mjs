@@ -181,6 +181,15 @@ let sgPrelude =
   ':root {\n';
 for (const [name, tok] of Object.entries(tokens.color)) sgPrelude += `  --mfb-${name}: ${tok.$value};\n`;
 if (gradient) sgPrelude += `  --mfb-gradient: ${gradient};\n`;
+// The canon's type classes (.sg-headline, .sg-cta ...) read the font, size and weight
+// variables, so the prelude carries them. Deprecated families (mono) are left out: nothing in
+// the canon uses them, and brand.css still serves them for compatibility.
+const isDeprecated = (tok) => /^DEPRECATED/i.test(String(tok?.$status || ''));
+for (const [k, v] of Object.entries(fontFamily)) {
+  const tok = tokens.fontFamily[k] || tokens.fontFamily.body; // `sans` mirrors body
+  if (!isDeprecated(tok)) sgPrelude += `  --mfb-font-${k}: ${ff(v)};\n`;
+}
+for (const [k, tok] of Object.entries(tokens.fontSize || {})) sgPrelude += `  --mfb-size-${k}: ${tok.$value};\n`;
 for (const [k, v] of Object.entries(fontWeight)) sgPrelude += `  --mfb-weight-${k}: ${v};\n`;
 for (const [cssVar, v] of halftone) sgPrelude += `  ${cssVar}: ${v};\n`;
 for (const [tokenName, cssVar] of Object.entries(GEOM_VARS)) {
