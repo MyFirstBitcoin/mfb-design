@@ -274,10 +274,11 @@ const readme = [
   `### The highlighter`,
   ``,
   `Wrap the one word you emphasize in a heading: ${code('<h2>Open Source <span class="highlighter">Education</span></h2>')}. ` +
-    `It draws the Brand Book's highlighter (Figma node 918:2874): a thin line at the baseline, behind the letters, under ${tokens.geometry['highlighter-coverage'].$value} of the word, centred. ` +
-    `It is orange-300, and white inside ${code('sg-bg-orange')}, ${code('sg-spotlight--orange')}, ${code('sg-cover--orange')} and ${code('sg-bg-gray')}; ` +
-    `on another orange or grey surface, set ${code('--sg-highlighter-color: var(--mfb-white)')} on the section. One word per heading, never more. ` +
-    `The span becomes ${code('inline-block')}. If your project draws its own ${code('.highlighter')} band, delete it when you move to this version, or the two draw on top of each other. ` +
+    `It draws the Brand Book's highlighter (Figma node 918:2874): a thin line at the baseline, drawn beneath the glyphs (not a band), under ${tokens.geometry['highlighter-coverage'].$value} of the word, centered. ` +
+    `The line is orange-300, and white inside the orange surfaces ${['sg-bg-orange', 'sg-spotlight--orange', 'sg-cover--orange', 'sg-spotlight-frame--orange', 'sg-book-frame--orange'].map(code).join(', ')} and ${code('sg-halftone-cutout--orange-bg')}. The word keeps the heading's color. ` +
+    `On another orange surface, or on a mid grey such as gray-500, set ${code('--sg-highlighter-color: var(--mfb-white)')} on the section. ` +
+    `On a light grey such as gray-200 (${code('sg-bg-gray')}) keep the orange line: a white one cannot be seen there. One word per heading, never more. ` +
+    `The span is an ${code('inline-block')}, and the line's length and thickness are computed from the span's own width: do not override its ${code('display')} or ${code('text-align')}. ` +
     `Its measurements are the ${code('--sg-highlighter-*')} variables (coverage, aspect, offset, shape), from the geometry tokens of the same names.`,
   ``,
   `## Variables`,

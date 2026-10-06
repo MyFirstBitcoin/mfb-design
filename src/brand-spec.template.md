@@ -74,25 +74,26 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 
 ### Rule 2. Highlighter: ONE word, a thin line at the baseline
 
-**Source:** Brand Book *Highlighter* (`918:2874`): "The Highlighter is used to emphasize a single word in a heading ... Apply it to only one word per heading, covering up to 80% of the word length. Do not alter its appearance."
+**Source:** Brand Book *Highlighter* (`918:2874`): "The Highlighter is used to emphasize a single word in a heading ... Apply it to only one word per heading, covering up to 80% of the word length. Do not alter its appearance to ensure a clean and cohesive typographic style."
 
-**What it is:** a thin line drawn behind one word, at its baseline. It is not a band behind the letters. Measured from the Brand Book's own vectors (all twelve highlighters in it are one shape, copied and scaled):
+**What it is:** a thin line at the baseline of one word, drawn beneath the glyphs. It is not a band behind the letters. Measured from the Brand Book's own vectors (its twelve highlighters are one vector, copied and scaled, with small variants on three copies):
 
-- **Length:** {{HL_COVERAGE}} of the word, centred, so it starts a little in from the first letter and stops short of the last
-- **Thickness:** the line's length divided by {{HL_ASPECT}}, about 3% of the word's width. It grows with the word, not with the font size
-- **Position:** its centre sits {{HL_OFFSET}} below the baseline, so it straddles the baseline and sits mostly below it; the glyphs, descenders included, paint over it
+- **Length:** {{HL_COVERAGE}} of the word, centered, so it starts a little in from the first letter and stops short of the last
+- **Thickness:** the line's length divided by {{HL_ASPECT}}, about 3% of the word's width. It is proportional to the word's width, so at the same font size a longer word gets a thicker line
+- **Position:** the center of its bounding box (half-way between its top and bottom edges) sits {{HL_OFFSET}} below the baseline, so it straddles the baseline and sits mostly below it; the glyphs, descenders included, paint over it
 - **Shape:** a filled quad that tapers from 6/7 of its height at the start to 4/7 at the end, rises slightly to the right, with slant-cut ends (as a CSS clip-path: `{{HL_SHAPE}}`)
-- **Colour:** orange-300 on purple and on white; white on grey and on orange
+- **Color:** orange-300 on purple and on white; white on orange and on the mid grey of the Brand Book's example (close to gray-500). The word itself keeps the heading's color
 
 **Do:**
-- Use the `highlighter` class from this package's `supergraphics.css` on a span around the one word: `<h2>Open Source <span class="highlighter">Education</span></h2>`. It draws the line above, orange-300 by default and white inside `sg-bg-orange`, `sg-spotlight--orange`, `sg-cover--orange` and `sg-bg-gray`. On another orange or grey surface, set `--sg-highlighter-color: var(--mfb-white)` on the section
+- Use the `highlighter` class from this package's `supergraphics.css` on a span around the one word: `<h2>Open Source <span class="highlighter">Education</span></h2>`. It draws the line described above, orange-300 by default and white inside the orange surfaces `sg-bg-orange`, `sg-spotlight--orange`, `sg-cover--orange`, `sg-spotlight-frame--orange`, `sg-book-frame--orange` and `sg-halftone-cutout--orange-bg`. On another orange surface, or on a mid grey such as gray-500, set `--sg-highlighter-color: var(--mfb-white)` on the section. On a light grey such as gray-200 (`sg-bg-gray`) keep the orange line: a white one cannot be seen there
+- Leave the span's `display` and `text-align` alone: the line's length and thickness are computed from the span's own width
 - Where CSS cannot be used (print, canvas), draw the same construction from the geometry tokens `highlighter-coverage`, `highlighter-aspect`, `highlighter-offset` and `highlighter-shape`
 - End the highlight at the word boundary, with no trailing punctuation inside it (`Foundations` ✓ · `Foundations.` ✗)
 
 **Don't:**
 - Highlight two or more words, an italic phrase, or a whole heading
 - Paint a band behind the letters: the old `linear-gradient(transparent 80%, ...)` CSS draws a band about 0.26em thick under the whole word, about twice as thick, lower and wider than the Brand Book's line
-- Stretch it over the whole word or past it, tilt it, round it, or give it another colour than the pairs above ("Do not alter its appearance")
+- Stretch it over the whole word or past it, tilt it, round it, or give it another color than the pairs above ("Do not alter its appearance")
 
 ### Rule 3. No translucent colors on brand shapes
 

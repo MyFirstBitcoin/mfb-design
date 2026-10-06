@@ -44,6 +44,6 @@
   --sg-base-h-ratio: 2;
   --sg-highlighter-coverage: 80%;
   --sg-highlighter-aspect: 26.6;
-  --sg-highlighter-offset: 0.03em;
+  --sg-highlighter-offset: 0.054em;
   --sg-highlighter-shape: polygon(1.24% calc(100% / 7), 100% 0, 99.47% calc(400% / 7), 0 100%);
 }

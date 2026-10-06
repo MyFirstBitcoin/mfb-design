@@ -45,7 +45,7 @@
   --sg-base-h-ratio: 2;
   --sg-highlighter-coverage: 80%;
   --sg-highlighter-aspect: 26.6;
-  --sg-highlighter-offset: 0.03em;
+  --sg-highlighter-offset: 0.054em;
   --sg-highlighter-shape: polygon(1.24% calc(100% / 7), 100% 0, 99.47% calc(400% / 7), 0 100%);
 }
 
@@ -497,7 +497,7 @@
 :root {
   --sg-highlighter-coverage: 80%;
   --sg-highlighter-aspect: 26.6;
-  --sg-highlighter-offset: 0.03em;
+  --sg-highlighter-offset: 0.054em;
   --sg-highlighter-shape: polygon(1.24% calc(100% / 7), 100% 0, 99.47% calc(400% / 7), 0 100%);
 }
 
@@ -505,6 +505,8 @@
   display: inline-block;
   position: relative;
   isolation: isolate;
+  text-align: left;
+  text-indent: 0;
 }
 .highlighter::after {
   content: '';
@@ -521,16 +523,12 @@
   pointer-events: none;
 }
 
-.sg-spotlight--orange .highlighter {
-  --sg-highlighter-color: var(--mfb-white);
-  color: var(--mfb-white);
-}
-.sg-bg-orange .highlighter {
-  --sg-highlighter-color: var(--mfb-white);
-  color: var(--mfb-white);
-}
+.sg-spotlight--orange .highlighter,
+.sg-bg-orange .highlighter,
 .sg-cover--orange .highlighter,
-.sg-bg-gray .highlighter {
+.sg-spotlight-frame--orange .highlighter,
+.sg-book-frame--orange .highlighter,
+.sg-halftone-cutout--orange-bg .highlighter {
   --sg-highlighter-color: var(--mfb-white);
 }
 
