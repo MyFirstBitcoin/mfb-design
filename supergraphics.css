@@ -47,6 +47,44 @@
   --sg-highlighter-aspect: 26.6;
   --sg-highlighter-offset: 0.054em;
   --sg-highlighter-shape: polygon(1.24% calc(100% / 7), 100% 0, 99.47% calc(400% / 7), 0 100%);
+  --mfb-heading-on-light: var(--mfb-black);
+  --mfb-body-on-light: var(--mfb-black);
+  --mfb-muted-on-light: var(--mfb-gray-700);
+  --mfb-link-on-light: var(--mfb-purple-300);
+  --mfb-link-underline-on-light: var(--mfb-orange-300);
+  --mfb-border-on-light: var(--mfb-gray-200);
+  --mfb-highlighter-on-light: var(--mfb-orange-300);
+  --mfb-logo-on-light: var(--mfb-purple-300);
+  --mfb-heading-on-dark: var(--mfb-white);
+  --mfb-body-on-dark: var(--mfb-white);
+  --mfb-muted-on-dark: var(--mfb-gray-400);
+  --mfb-link-on-dark: var(--mfb-orange-300);
+  --mfb-highlighter-on-dark: var(--mfb-orange-300);
+  --mfb-logo-on-dark: var(--mfb-white);
+  --mfb-heading-on-orange: var(--mfb-black);
+  --mfb-body-on-orange: var(--mfb-black);
+  --mfb-link-on-orange: var(--mfb-black);
+  --mfb-highlighter-on-orange: var(--mfb-white);
+  --mfb-logo-on-orange: var(--mfb-black);
+  --mfb-leading-h1: 1;
+  --mfb-leading-h2: 1;
+  --mfb-leading-h3: 1;
+  --mfb-leading-h4: 1;
+  --mfb-leading-h5: 1.1;
+  --mfb-leading-h6: 1.1;
+  --mfb-leading-body: 1.2;
+  --mfb-leading-body-long: 1.7;
+  --mfb-leading-label: 1.2;
+  --mfb-leading-quote: 1;
+  --mfb-tracking-h1: 0em;
+  --mfb-tracking-h2: 0em;
+  --mfb-tracking-h3: 0em;
+  --mfb-tracking-h4: 0em;
+  --mfb-tracking-h5: 0em;
+  --mfb-tracking-h6: 0em;
+  --mfb-tracking-body: 0em;
+  --mfb-tracking-label: 0em;
+  --mfb-tracking-quote: 0em;
 }
 
 /* My First Bitcoin Supergraphics: Brand Visual Elements Layer */
@@ -368,9 +406,9 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 .sg-bg-purple  { background: var(--mfb-purple-400); color: var(--mfb-white); }
-.sg-bg-orange  { background: var(--mfb-orange-300); color: var(--mfb-white); }
-.sg-bg-gray    { background: var(--mfb-gray-200);   color: var(--mfb-gray-900); }
-.sg-bg-white   { background: var(--mfb-white);      color: var(--mfb-gray-900); }
+.sg-bg-orange  { background: var(--mfb-orange-300); color: var(--mfb-body-on-orange); }
+.sg-bg-gray    { background: var(--mfb-gray-200);   color: var(--mfb-body-on-light); }
+.sg-bg-white   { background: var(--mfb-white);      color: var(--mfb-body-on-light); }
 .sg-bg-gradient { background: var(--mfb-gradient);  color: var(--mfb-white); }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -396,7 +434,7 @@
   background: var(--mfb-purple-400);
 }
 .sg-info-bar--on-light {
-  color: var(--mfb-gray-900);
+  color: var(--mfb-body-on-light);
   background: var(--mfb-white);
 }
 .sg-info-bar__date {
@@ -410,8 +448,16 @@
   font-size: 15px;
   font-weight: var(--mfb-weight-regular);
   color: inherit;
-  opacity: 0.75;
   margin-top: 2px;
+}
+.sg-info-bar--on-dark .sg-info-bar__date small {
+  color: var(--mfb-muted-on-dark);
+}
+.sg-info-bar--on-light .sg-info-bar__date {
+  color: var(--mfb-heading-on-light);
+}
+.sg-info-bar--on-light .sg-info-bar__date small {
+  color: var(--mfb-muted-on-light);
 }
 .sg-info-bar__location {
   text-align: right;
@@ -439,20 +485,21 @@
 .sg-headline {
   font-family: var(--mfb-font-heading);
   font-weight: var(--mfb-weight-medium);
-  line-height: 1.05;
-  letter-spacing: -0.03em; /* book heading tracking */
+  line-height: var(--mfb-leading-h1);
+  letter-spacing: var(--mfb-tracking-h1); /* book headings: no tracking */
 }
 .sg-body {
   font-family: var(--mfb-font-body);
   font-weight: var(--mfb-weight-regular);
-  line-height: 1.2; /* book specimen body LH */
+  line-height: var(--mfb-leading-body); /* book specimen body LH */
 }
 .sg-label {
   font-family: var(--mfb-font-body);
-  font-weight: var(--mfb-weight-medium);
+  font-weight: var(--mfb-weight-regular);
   font-size: 18px;
+  line-height: var(--mfb-leading-label);
   /* no text-transform — brand book p.26 forbids uppercase */
-  letter-spacing: 1.5px;
+  letter-spacing: var(--mfb-tracking-label);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -475,7 +522,7 @@
 .sg-cta {
   display: inline-block;
   background: var(--mfb-orange-300);
-  color: var(--mfb-white);
+  color: var(--mfb-link-on-orange);
   padding: 14px 40px;
   border-radius: 40px;
   font-family: var(--mfb-font-body);
@@ -549,7 +596,7 @@
   background: var(--mfb-purple-300);
   color: var(--mfb-white);
 }
-.sg-cover--orange { background: var(--mfb-orange-300); }
+.sg-cover--orange { background: var(--mfb-orange-300); color: var(--mfb-heading-on-orange); }
 .sg-cover--deep { background: var(--mfb-purple-400); }
 .sg-cover--rule { border-top: 6px solid var(--mfb-orange-300); }
 
@@ -570,8 +617,8 @@
   font-family: var(--mfb-font-heading);
   font-weight: var(--mfb-weight-medium);
   font-size: var(--mfb-size-h2);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  line-height: var(--mfb-leading-h2);
+  letter-spacing: var(--mfb-tracking-h2);
   /* Title Case, short — no text-transform (p.26 forbids uppercase) */
 }
 

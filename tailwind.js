@@ -129,6 +129,7 @@ export default {
         "h5": "1.1",
         "h6": "1.1",
         "body": "1.2",
+        "body-long": "1.7",
         "label": "1.2",
         "quote": "1"
       },

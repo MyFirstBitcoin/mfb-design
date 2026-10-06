@@ -158,6 +158,10 @@ values.TYPE_ROWS = groupEntries('fontSize', true)
   })
   .join('\n');
 
+values.BODY_LH = need('lineHeight', 'body');
+values.BODY_LONG_LH = need('lineHeight', 'body-long');
+values.BODY_LONG_SRC = sourceOf('lineHeight', 'body-long');
+
 values.COLOR_ROLE_ROWS = rows('colorRole', true, (name, tok) =>
   `| \`${name}\` | ${colorOf(`colorRole.${name}`, tok.$value)} | ${cell(tok.$description)} | ${sourceOf('colorRole', name)} |`);
 values.SHAPE_TONE_ITEMS = rows('shapeTone', true, (name, tok) =>

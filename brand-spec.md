@@ -132,6 +132,7 @@ In CSS: `var(--mfb-<role>)`, for example `var(--mfb-heading-on-light)`. In Tailw
 | quote | 40px | 1 | 0em | `clamp(22px, 2.8vw, 40px)` (website `src/styles/global.css:72`) |
 
 - **Line height and letter spacing** are the Brand Book's (type specimen `918:2323`; no brand text style has tracking). Line height is a multiple of the size: `line-height: var(--mfb-leading-h1)`, or `text-h1 leading-h1` in Tailwind (in 1.x, `text-h1` sets only the size). Body text never goes to line height 1 (Type Misuse `918:2841`).
+- **Body line height, short and long.** The Brand Book's body line height is for body copy paired with a heading: its type specimen states 1.2, and Type Relationships (`918:2990`) draws body copy under a heading at 1.22; the token keeps the stated number. The book shows no long reading text. For articles and other long running prose, `--mfb-leading-body-long` (`leading-body-long`) is 1.7, a value declared from the website's article text (website `src/pages/news/[...slug].astro:312`), not a Brand Book value. It is flagged for review: use it only for long reading text, never for headings or for body copy next to a heading.
 - **Weights:** Medium (500) for H1 to H6 and quotes; Regular (400) for body text and labels; SemiBold (600) only for emphasis inside a line. Body text is never Medium or bold (`918:2841`).
 - **Fluid sizes** are for web pages: each grows with the viewport up to the Brand Book size and never past it. The cap is the Brand Book's; the floor and the slope are the website's. Body text stays at its fixed size, so below about 1125px wide the fluid label is smaller than body text (16px against 18px at a phone's width), the reverse of the Brand Book's order; where a label sits next to body text on small screens, use the fixed label size. A fluid body size is not decided yet.
 - **Space after a heading:** 40px between any heading and the body text under it, at the 18px body size (Brand Book `918:2990`, measured). **Between a quote and its label:** 48px (Brand Book `918:3005`, measured).
@@ -225,7 +226,7 @@ The website also carries values that contradict the Brand Book. They are not tok
 - teal, indigo and other off-palette colors, a blue-grey page text color, and translucent white text: palette colors only
 - orange text and links on light backgrounds, and white text on orange buttons: dark text on light colors and on every orange (`918:2588`)
 - gray-900 headings and body text: black (`918:2990`)
-- heading line height 1.05 and body line height 1.55 or 1.7: the Brand Book's line heights (Type relationships above)
+- heading line height 1.05, and body line height 1.55 in page sections: the Brand Book's line heights (Type relationships above). The website's 1.7 is declared for long reading text only (`--mfb-leading-body-long`), not for body copy next to a heading
 
 ## 2. Binding Rules (The 12)
 
@@ -431,7 +432,7 @@ The roles behind this table are in Section 1 (Color roles).
 - **Headings on light backgrounds:** black (`#000000`), as in the Brand Book's *Type Relationships* (`918:2990`) and its Brand in Use examples. purple-300 is the brand's surface and shape color, not a heading color on white
 - **Text on light backgrounds:** black (`#000000`), body copy included (`918:2994`). gray-700 is for secondary text only (captions, meta), on white or gray-100
 - **Headings and text on dark backgrounds:** white
-- **Text on orange:** black, never white (white on orange-300 is 2.3:1). This applies to buttons too: an orange-300 button has black text. The supergraphics classes `.sg-bg-orange`, `.sg-cover--orange` and `.sg-cta` still set white text on orange; set the text color yourself until a release changes them (see "Supergraphics classes that differ from the Brand Book" below)
+- **Text on orange:** black, never white (white on orange-300 is 2.3:1). This applies to buttons too: an orange-300 button has black text. The supergraphics classes `.sg-bg-orange`, `.sg-cover--orange` and `.sg-cta` set it (black, 9.2:1 on orange-300)
 - **Links on light backgrounds:** purple-300 text with an orange-300 underline. The Brand Book has no link style; its *Color Contrast* slide (`918:2588`) says "Light text should be placed on dark colors, and dark text on light colors", and it pairs every orange with dark text, so orange link text on white breaks it. The purple-300 text and the orange-300 underline are this package's recommendation, not a Brand Book rule. A link on a light background never loses its underline: purple-300 is only 1.8:1 from black text, so the underline is what marks it. On gray-400 and gray-500 an orange underline cannot be seen (1.3:1 and 1.0:1): underline in the link's own color there
 - **Links on dark backgrounds:** orange-300 on purple-300 and purple-400 (5.0:1 and 6.5:1), or white. On purple-200 (orange-300 is 3.8:1 there) and on the dark greys, links are white and underlined (8.7:1 on purple-200)
 - **Orange is for accents only** (CTA fills with black text, link underlines, links on dark backgrounds, highlights, ₿ symbol), never a full background fill beyond explicit orange-300 brand shapes, and never text on a light background
@@ -439,18 +440,13 @@ The roles behind this table are in Section 1 (Color roles).
 
 ### Supergraphics classes that differ from the Brand Book
 
-A few classes in this package's `supergraphics.css` still carry values from before the Brand Book was measured. Changing them changes how existing pages look, so it waits for a release that decides it. Until then, set the value yourself where you use the class:
+The classes in this package's `supergraphics.css` read the color roles and the type relationships above: text on orange is black (`.sg-cta`, `.sg-bg-orange`, `.sg-cover--orange`), text on light surfaces is black (`.sg-bg-white`, `.sg-bg-gray`, `.sg-info-bar--on-light`, whose date is black and whose date line is gray-700, with no opacity), `.sg-headline` and `.sg-cover__title` have line height 1 and no tracking, and `.sg-label` is Regular at line height 1.2 with no tracking. A few values from before the Brand Book was measured remain. Changing them changes how existing pages look, so it waits for a release that decides it. Until then, set the value yourself where you use the class:
 
 | Class | What it sets | The Brand Book | Set instead |
 |-------|--------------|----------------|-------------|
-| `.sg-cta` | white text on orange-300 (2.3:1), 1px letter spacing, a 40px radius | black text on orange, no tracking | `color: var(--mfb-link-on-orange)` and `letter-spacing: 0` (its 40px radius draws the same pill as `var(--mfb-radius-pill)`) |
-| `.sg-bg-orange` | white text on orange-300 | black text on orange | `color: var(--mfb-body-on-orange)` |
-| `.sg-cover--orange` | white title and text on orange-300 (from `.sg-cover`) | black text on orange | `color: var(--mfb-heading-on-orange)` |
-| `.sg-info-bar--on-light` | gray-900 text; the date (`.sg-info-bar__date`) in orange-300 on white (2.3:1), and the line under it at 75% opacity (1.9:1) | black text on light colors, never orange text there | `color: var(--mfb-body-on-light)` on the bar, and the same on its date and the date's `small` (with `opacity: 1`) |
-| `.sg-bg-white`, `.sg-bg-gray` | gray-900 text | black text on light colors | `color: var(--mfb-body-on-light)` |
-| `.sg-headline`, `.sg-cover__title` | line height 1.05, letter spacing -0.03em | line height 1 for H1 to H4 (1.1 for H5 and H6), no tracking | `line-height: var(--mfb-leading-h1)` (the level you set) and `letter-spacing: 0` |
-| `.sg-label` | 18px, Medium (500), 1.5px letter spacing | 22px, Regular (400), no tracking | `font-size: var(--mfb-size-label)`, `font-weight: var(--mfb-weight-regular)`, `letter-spacing: 0` |
-| `.sg-para-frame`, `.sg-para-accent` | a 6px corner radius on a parallelogram | sharp corners | `border-radius: 0` |
+| `.sg-cta` | 1px letter spacing, a 40px radius | no tracking | `letter-spacing: 0` (its 40px radius draws the same pill as `var(--mfb-radius-pill)` on a button up to 80px tall; no radius token is 40px, so the class keeps it) |
+| `.sg-label` | 18px | 22px | `font-size: var(--mfb-size-label)` |
+| `.sg-para-frame`, `.sg-para-accent` | a 6px corner radius on a parallelogram (no radius token is 6px) | sharp corners | `border-radius: 0` |
 | `.sg-para-pattern` | rows 10px apart, stepped by 1.25 and 1.55 | rows that touch, each 1.2 times the one before (Rule 7) | nothing yet: a release changes the class |
 | `.sg-logo`, `.sg-cover__logo` | a logo 40px tall | a logo at least 63px tall on screens (Logo, Section 1) | nothing yet: the height is not decided |
 
