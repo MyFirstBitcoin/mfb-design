@@ -31,6 +31,9 @@
   --mfb-size-body: 18px;
   --mfb-size-label: 22px;
   --mfb-size-quote: 40px;
+  --mfb-weight-regular: 400;
+  --mfb-weight-medium: 500;
+  --mfb-weight-semibold: 600;
   --sg-angle-base: 13deg;
   --sg-angle-alt: 24deg;
   --sg-aspect: 1.5;

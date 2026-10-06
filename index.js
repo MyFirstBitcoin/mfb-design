@@ -57,4 +57,9 @@ export const fontSize = {
   "label": "22px",
   "quote": "40px"
 };
+export const fontWeight = {
+  "regular": 400,
+  "medium": 500,
+  "semibold": 600
+};
 export const gradientBrand = "linear-gradient(135deg, #2B1C58 0%, #5E378E 100%)";

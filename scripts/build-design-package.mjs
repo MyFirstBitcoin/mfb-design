@@ -103,6 +103,15 @@ for (const [k, tok] of Object.entries(tokens.fontFamily || {})) fontFamily[k] = 
 if (fontFamily.body) fontFamily.sans = fontFamily.body;
 const fontSize = {};
 for (const [k, tok] of Object.entries(tokens.fontSize || {})) fontSize[k] = tok.$value;
+// Font weights as numbers (400, 500, 600). Tailwind calls 400 `normal`, tokens.json calls it
+// `regular`: the Tailwind outputs carry both names with the same value (as `sans` mirrors
+// `body` above), so `font-regular` and `font-normal` both give the brand's regular weight.
+// The weights EXTEND Tailwind's scale; they never replace it, so font-bold and the rest keep working.
+const fontWeight = {};
+for (const [k, tok] of Object.entries(tokens.fontWeight || {})) fontWeight[k] = tok.$value;
+const twFontWeight = {};
+for (const [k, v] of Object.entries(fontWeight)) twFontWeight[k] = String(v);
+if (fontWeight.regular !== undefined && !('normal' in fontWeight)) twFontWeight.normal = String(fontWeight.regular);
 const gradient = tokens.gradient?.brand?.$value;
 const ff = (arr) => arr.map((f) => (/\s/.test(f) ? `"${f}"` : f)).join(', ');
 
@@ -113,6 +122,7 @@ const preset = {
       colors: { ...mfb, mfb }, // both conventions: bg-purple-400 and bg-mfb-purple-400
       fontFamily,
       fontSize,
+      fontWeight: twFontWeight,
       ...(gradient ? { backgroundImage: { 'brand-gradient': gradient } } : {}),
     },
   },
@@ -130,6 +140,7 @@ for (const [name, tok] of Object.entries(tokens.color)) {
 }
 for (const [k, v] of Object.entries(fontFamily)) theme += `  --font-${k}: ${ff(v)};\n`;
 for (const [k, tok] of Object.entries(tokens.fontSize || {})) theme += `  --text-${k}: ${tok.$value};\n`;
+for (const [k, v] of Object.entries(twFontWeight)) theme += `  --font-weight-${k}: ${v};\n`;
 theme += '}\n';
 write('theme.css', theme);
 
@@ -139,6 +150,7 @@ for (const [name, tok] of Object.entries(tokens.color)) css += `  --mfb-${name}:
 if (gradient) css += `  --mfb-gradient-brand: ${gradient};\n`;
 for (const [k, v] of Object.entries(fontFamily)) css += `  --mfb-font-${k}: ${ff(v)};\n`;
 for (const [k, tok] of Object.entries(tokens.fontSize || {})) css += `  --mfb-size-${k}: ${tok.$value};\n`;
+for (const [k, v] of Object.entries(fontWeight)) css += `  --mfb-weight-${k}: ${v};\n`;
 for (const [tokenName, cssVar] of Object.entries(GEOM_VARS)) css += `  ${cssVar}: ${tokens.geometry[tokenName].$value};\n`;
 css += '}\n';
 write('brand.css', css);
@@ -162,6 +174,7 @@ let sgPrelude =
   ':root {\n';
 for (const [name, tok] of Object.entries(tokens.color)) sgPrelude += `  --mfb-${name}: ${tok.$value};\n`;
 if (gradient) sgPrelude += `  --mfb-gradient: ${gradient};\n`;
+for (const [k, v] of Object.entries(fontWeight)) sgPrelude += `  --mfb-weight-${k}: ${v};\n`;
 for (const [tokenName, cssVar] of Object.entries(GEOM_VARS)) {
   sgPrelude += `  ${cssVar}: ${tokens.geometry[tokenName].$value};\n`;
 }
@@ -176,6 +189,7 @@ write(
     `export const colors = ${JSON.stringify(mfb, null, 2)};\n` +
     `export const fontFamily = ${JSON.stringify(fontFamily, null, 2)};\n` +
     `export const fontSize = ${JSON.stringify(fontSize, null, 2)};\n` +
+    `export const fontWeight = ${JSON.stringify(fontWeight, null, 2)};\n` +
     (gradient ? `export const gradientBrand = ${JSON.stringify(gradient)};\n` : '')
 );
 

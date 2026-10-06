@@ -85,6 +85,12 @@ export default {
         "label": "22px",
         "quote": "40px"
       },
+      "fontWeight": {
+        "regular": "400",
+        "medium": "500",
+        "semibold": "600",
+        "normal": "400"
+      },
       "backgroundImage": {
         "brand-gradient": "linear-gradient(135deg, #2B1C58 0%, #5E378E 100%)"
       }

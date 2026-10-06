@@ -20,6 +20,9 @@
   --mfb-gray-200: #EAEAF4;
   --mfb-gray-100: #F3F3FA;
   --mfb-gradient: linear-gradient(135deg, #2B1C58 0%, #5E378E 100%);
+  --mfb-weight-regular: 400;
+  --mfb-weight-medium: 500;
+  --mfb-weight-semibold: 600;
   --sg-angle-base: 13deg;
   --sg-angle-alt: 24deg;
   --sg-aspect: 1.5;
