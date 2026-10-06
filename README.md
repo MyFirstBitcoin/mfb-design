@@ -28,8 +28,9 @@ Make these changes in the same commit that raises your pin:
 ```
 
 - **Headings and body text on light backgrounds are black.** The written spec said purple-300 headings and gray-900 text; the Brand Book draws both in black (Type Relationships, 918:2990), and the spec and the color descriptions in `tokens.json` now say so. No variable changed value: a project that colors its headings purple-300 or its text gray-900 changes it when it chooses to.
+- **Text on orange is black, buttons included.** `.sg-cta`, `.sg-bg-orange` and `.sg-cover--orange` still set white text on orange-300 (2.3:1, below the 4.5:1 that body text and buttons need); set `color: var(--mfb-link-on-orange)` (or `text-link-on-orange`) on them yourself. The other supergraphics classes that differ from the Brand Book are listed in `brand-spec.md` ("Supergraphics classes that differ from the Brand Book").
 - **A test that snapshots the `--mfb-*` variables of `brand.css` whose value is a hex** must refresh its snapshot: this release adds `--mfb-halftone-highlight`, `--mfb-halftone-highlight-full`, `--mfb-halftone-shadow`. The other new variables carry no hex; they reference the palette with `var()`.
-- **Everything else is added, not changed.** Every new Tailwind utility is `mfb-` prefixed, a type level (`leading-h1`, `tracking-h1`, `text-h1-fluid`) or a color role (`text-heading-on-light`), and none of them replaces a Tailwind default or an existing key. See "Layout, motion and color roles" below.
+- **Everything else is added, not changed.** Every new Tailwind utility is `mfb-` prefixed, a type level (`leading-h1`, `tracking-h1`, `text-h1-fluid`), a color role (`text-heading-on-light`) or `font-regular`. The weights `font-normal`, `font-medium` and `font-semibold` restate Tailwind's own values (400, 500, 600), and the build refuses a weight that would change one. None of them replaces a Tailwind default or an existing key. See "Layout, motion and color roles" below.
 
 ## Use - Tailwind 3
 
@@ -60,6 +61,8 @@ export default { presets: [mfb], content: ['./src/**/*.{astro,html,js,ts}'] };
 
 The signature My First Bitcoin shapes as ready-made classes: `sg-para` / `sg-para-frame` (13° parallelograms), `sg-para-pattern`, `sg-spotlight` / `sg-spotlight-frame` (13°+24° corner cuts), `sg-book` / `sg-book-frame` / `sg-book-stack`, `sg-cover`, `sg-halftone-cutout`, and the `highlighter`. **Never hand-roll these shapes in a page**: the brand angle is exactly 13° (`--sg-angle-base`) and hand-rolled copies drift. The file is standalone (token prelude included), so it works with theme.css-only Tailwind 4 setups.
 
+Some classes still carry values the Brand Book does not have, and a release will change them: most visibly, `.sg-cta`, `.sg-bg-orange` and `.sg-cover--orange` set white text on orange, where the book puts black. Set `color: var(--mfb-link-on-orange)` on them until then. `brand-spec.md` lists every such class and what to set.
+
 ### Set --sg-aspect on every frame
 
 `sg-spotlight-frame`, `sg-book-frame`, `sg-halftone-cutout` and `sg-para-frame` compute their cuts (and the parallelogram frame its photo scale) from `--sg-aspect`, the frame's width divided by its height. The default, 1.5, is right only for a frame of that shape. Set it to the frame's real ratio, for example `style="--sg-aspect: 0.75"` on a 3:4 frame; otherwise the cuts are not at 13° and 24°, and a parallelogram frame's photo may not cover the frame.
@@ -87,16 +90,16 @@ Where the Brand Book defines a value, the token takes it. Where the book is sile
 | Container widths | `--mfb-container-page`, `--mfb-container-wide`, `--mfb-container-measure` (px) | `max-w-mfb-page`, `max-w-mfb-wide`, `max-w-mfb-measure` (rem) |
 | Logo size and clear space | `--mfb-logo-min-width`, `--mfb-logo-min-width-print`, `--mfb-logo-aspect`, `--mfb-logo-min-height`, `--mfb-logo-clearspace`, `--mfb-logo-edge-margin` | none |
 | Shape tones (a shape one step lighter than its base) | `--mfb-shape-on-purple-300`, `--mfb-shape-on-orange-300`, `--mfb-shape-on-gray-700` | none |
-| Breakpoints, for JavaScript and `matchMedia` (a variable cannot be read inside `@media`) | `--mfb-breakpoint-phone`, `--mfb-breakpoint-stack`, `--mfb-breakpoint-nav` | none: the package adds no Tailwind breakpoint |
 | Layers | `--mfb-z-header`, `--mfb-z-dropdown`, `--mfb-z-overlay` | none |
 | Media ratios | `--mfb-ratio-video`, `--mfb-ratio-photo`, `--mfb-ratio-portrait`, `--mfb-ratio-square` | none (Tailwind has `aspect-video` and `aspect-square`) |
 | Interface | `--mfb-ui-touch-target`, `--mfb-ui-link-underline-offset` | none |
 
-- **New utilities never replace Tailwind's.** Keys are `mfb-` prefixed (`rounded-mfb-md`, not `rounded-md`; `ease-mfb-out`, not `ease-out`, which is a different curve), type levels or color roles. The build refuses a key that equals a Tailwind 3 or 4 default.
+- **New utilities never replace Tailwind's.** Keys are `mfb-` prefixed (`rounded-mfb-md`, not `rounded-md`; `ease-mfb-out`, not `ease-out`, which is a different curve), type levels or color roles. The build refuses a key that equals a Tailwind 3 or 4 default, and a font weight that would change Tailwind's value for its name.
 - **In 1.x, `text-h1` sets only the size.** Add `leading-h1` yourself (and `tracking-h1` where something else sets tracking). Folding line height into `text-h1` would change every existing page, so it waits for a major release.
 - **New `brand.css` variables reference the palette with `var()`** and add no hex: roles are `var(--mfb-black)` and the like, shadows `color-mix(in srgb, var(--mfb-purple-400) 25%, transparent)`. `theme.css` and `tailwind.js` carry the same colors as hex, so Tailwind's opacity modifiers work.
 - **Tailwind 4 emits a theme variable only when something uses it.** To read `var(--mfb-radius-md)` or another new variable in your own CSS, import `brand.css` as well, or use the utility.
-- **index.js** exports `colorRoles`, `shapeTones`, `fontSizeFluid`, `lineHeight`, `letterSpacing`, `logo`, `spacing`, `space`, `radius`, `shadow`, `easing`, `duration`, `container`, `breakpoint`, `zIndex`, `mediaRatio`, `ui` next to the existing `colors`, `fontFamily`, `fontSize` and `fontWeight`.
+- **Shadows in Tailwind 4: prefer the `shadow-mfb-*` utilities.** Tailwind compiles them to a hex color with alpha. A `var(--mfb-shadow-*)` from `brand.css` goes through Tailwind 4's CSS compiler, which gives it a fallback without `color-mix()` for browsers that lack it (Chrome before 111, Safari before 16.2), and that fallback draws the shadow fully opaque.
+- **index.js** exports `colorRoles`, `shapeTones`, `fontSizeFluid`, `lineHeight`, `letterSpacing`, `logo`, `spacing`, `space`, `radius`, `shadow`, `easing`, `duration`, `container`, `zIndex`, `mediaRatio`, `ui` next to the existing `colors`, `fontFamily`, `fontSize` and `fontWeight`.
 
 ## Brand check
 
@@ -106,19 +109,24 @@ Where the Brand Book defines a value, the token takes it. Where the book is sile
 node node_modules/@myfirstbitcoin/design/brand-check.mjs [--src src] [--dist dist] [--allow brand-check.allow.json]
 ```
 
-Run it in your build, for example `"build": "astro build && node node_modules/@myfirstbitcoin/design/brand-check.mjs"`. It exits 1 when the source (`--src`, default `src`, comments ignored) has:
+Run it in your build, for example `"build": "astro build && node node_modules/@myfirstbitcoin/design/brand-check.mjs"`. To find its path from a script, resolve `@myfirstbitcoin/design/brand-check.mjs` (it is in the package's `exports`). It exits 1 when the source (`--src`, default `src`, comments ignored) has:
 
-- a color literal (hex, `rgb()`, `rgba()`, `hsl()` and the other color functions), or a named color in a color property
-- a font family other than `var(--mfb-font-heading)`, `var(--mfb-font-body)` or `var(--mfb-font-sans)`, a family name, or the deprecated mono family
-- a skew, a rotation or an angle literal that is not a quarter turn, or a transform matrix: the 13° slant comes only from the supergraphics classes
-- a hand-rolled `clip-path` shape, or a typed `--sg-aspect`
-- `text-transform: uppercase`, the `uppercase` class or small caps
-- a gradient (the deprecated brand gradient and `.sg-photo-zone` included), or a smooth color filter (Rule 4: halftone, never duotone)
+- a color literal (hex, `rgb()`, `rgba()`, `hsl()` and the other color functions), or a named color in a color property, a style, an SVG color attribute or an arbitrary utility (`bg-[teal]`)
+- a font family other than `var(--mfb-font-heading)`, `var(--mfb-font-body)` or `var(--mfb-font-sans)` (in Tailwind 4, `var(--font-sans)` too), a family name, or the deprecated mono family. Inside `@font-face`, which describes a face rather than using one, family names and weights are allowed
+- a skew, a rotation or an angle literal that is not a quarter turn (in CSS or in an SVG `transform` attribute), a transform matrix that rotates or skews, or slant geometry computed from `--sg-angle-*`: the 13° slant comes only from the supergraphics classes
+- a hand-rolled `clip-path` shape, or a hand-rolled highlighter (a `linear-gradient(transparent 80%, ...)` band, or an orange pseudo-element sized in `em`)
+- a redefinition of a variable the package defines (`--mfb-*`, or the `--sg-*` geometry such as `--sg-angle-base`); pages set only `--sg-aspect` and `--sg-highlighter-color`, which must be a palette variable
+- `text-transform: uppercase`, the `uppercase` class, small caps or small-cap font features
+- a gradient (the deprecated brand gradient and `.sg-photo-zone` included), a smooth color filter or a blend mode (Rule 4: halftone, never duotone)
 - a Tailwind color utility outside the palette, such as `bg-teal-500` or Tailwind's own `text-purple-500`
-- a weight above 600, or opacity on a brand shape
-- a raw value that has a token: a spacing, radius, duration, easing, container width, font size or font weight literal equal to a token value (`padding: 24px`, `border-radius: 12px`, `180ms`), with the token to use instead
+- a weight above 600, or opacity on a brand shape (a class, `opacity-[.85]` or an inline style)
+- a raw value that has a token: a radius, duration, easing, container width, font size, font weight, shadow or semantic spacing literal equal to a token value (`border-radius: 12px`, `180ms`, `clamp(64px, 9vw, 128px)`), with the token to use instead
 
-and when the built CSS (`--dist`, default `dist`) lacks `--sg-angle-base` with the token value (import `brand.css` or `supergraphics.css`), defines a `--color-*` that is not a palette color or a color role, or sets uppercase or the mono family. `--source-only` skips the built CSS.
+and when the built CSS (`--dist`, default `dist`) lacks `--sg-angle-base` with the token value (import `brand.css` or `supergraphics.css`) or sets either angle to another value, defines a `--color-*` that is not a palette color or a color role, or sets uppercase or the mono family outside a utility class definition (Tailwind emits a definition such as `.uppercase` when it sees the word in a comment; the source check already reports the class where it is used). `--source-only` skips the built CSS.
+
+Three rules only warn, because the right answer depends on what the check cannot see: `raw-spacing` (a px or rem spacing literal on the scale, such as `padding: 24px`: Tailwind's own steps are the same values), `text-color` (orange text, which is right only on purple-300 and purple-400, and a purple heading) and `typed-caps` (two or more words typed in capitals). `--error RULE[,RULE]` makes them fail.
+
+**What it does not check.** It reads how values are written, not how the page looks: it cannot measure contrast, tell which background a text sits on, or read text that a script or a content system supplies. It does not check line height, the one-word highlighter rule, which shape fits which content, or photos themselves. Status colors for forms (error, success) are not in the Brand Book or the palette, so there is no token for them yet: a project that needs them lists them in its allowlist, with the reason.
 
 `--allow FILE` (default `brand-check.allow.json` when it exists) lists the exceptions, each with its reason, for example a third-party mark:
 
@@ -140,7 +148,7 @@ Plain CSS variables are namespaced `--mfb-*` (brand values) and `--sg-*` (geomet
 - **Halftone colors:** `--mfb-halftone-highlight`, `--mfb-halftone-highlight-full`, `--mfb-halftone-shadow` (highlight for cutout portraits, highlight for full portraits, shadow). They are book-specified values, not palette colors, so they have no Tailwind utilities
 - **Geometry:** `--sg-angle-base`, `--sg-angle-alt`, `--sg-aspect`, `--sg-logo-icon-h`, `--sg-base-h-ratio`, `--sg-highlighter-coverage`, `--sg-highlighter-aspect`, `--sg-highlighter-offset`, `--sg-highlighter-shape`
 
-Both utility conventions are served: top-level (preferred for new pages) and mfb- prefixed (legacy, e.g. roadmap). Utilities use the brand palette at the top level (e.g. `bg-purple-400`, `text-orange-300`, `text-gray-900`, `text-h1`), overriding Tailwind's default purple/orange/gray with the brand values. Other defaults (red, blue, etc.) are untouched.
+Both utility conventions are served: top-level (preferred for new pages) and mfb- prefixed (legacy). Utilities use the brand palette at the top level (e.g. `bg-purple-400`, `bg-orange-300`, `text-gray-700`, `text-h1`), overriding Tailwind's default purple/orange/gray with the brand values. Other defaults (red, blue, etc.) are untouched.
 
 ## Deprecated (still shipped for compatibility)
 
@@ -148,7 +156,7 @@ These are not in the Brand Book. They stay until a major release so that pages u
 
 - **The brand gradient:** `--mfb-gradient-brand` (brand.css), `--mfb-gradient` (supergraphics.css), `bg-brand-gradient` (Tailwind 3 preset) and `.sg-bg-gradient`. Use a solid palette fill instead, for example purple-300 or purple-400 (`.sg-bg-purple`).
 - **`.sg-photo-zone`:** a gradient placeholder. Put the photo itself (an `img`) in the frame, or a solid palette fill while it is missing.
-- **The mono font:** `--mfb-font-mono`, `--font-mono` (Tailwind 4) and `font-mono` (Tailwind 3). IBM Plex Mono is not in the Brand Book. Use the brand sans (`--mfb-font-body`, `font-sans`), whose system fallback is Arial (Brand Book 918:2375).
+- **The mono font:** `--mfb-font-mono`, `--font-mono` (Tailwind 4) and `font-mono` (Tailwind 3). IBM Plex Mono is not in the Brand Book. Use the brand sans (`--mfb-font-body`, `font-sans`), whose system fallback is Arial (Brand Book 918:2375). Tailwind 4's base styles set `code`, `kbd`, `samp` and `pre` in `--default-mono-font-family`, which reads `--font-mono`; to keep them in the brand sans, add `@theme { --default-mono-font-family: var(--font-sans); }` after importing `theme.css`.
 
 ## Brand rules
 

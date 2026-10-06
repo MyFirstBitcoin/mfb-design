@@ -11,7 +11,8 @@
     "./brand.css": "./brand.css",
     "./supergraphics.css": "./supergraphics.css",
     "./tokens.json": "./tokens.json",
-    "./brand-spec.md": "./brand-spec.md"
+    "./brand-spec.md": "./brand-spec.md",
+    "./brand-check.mjs": "./brand-check.mjs"
   },
   "files": [
     "index.js",

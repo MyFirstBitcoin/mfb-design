@@ -176,7 +176,6 @@ values.SHADOW_ROWS = rows('shadow', true, (name, tok) =>
 values.EASING_ROWS = rows('easing', true, (name, tok) =>
   `| \`--mfb-ease-${name}\` | \`cubic-bezier(${[].concat(tok.$value).join(', ')})\` | ${cell(tok.$description)} | ${sourceOf('easing', name)} |`);
 values.DURATION_ROWS = rows('duration', true, valueRow('duration', '--mfb-duration-'));
-values.BREAKPOINT_ROWS = rows('breakpoint', true, valueRow('breakpoint', '--mfb-breakpoint-'));
 values.Z_ROWS = rows('zIndex', true, valueRow('zIndex', '--mfb-z-'));
 values.RATIO_ROWS = rows('mediaRatio', true, valueRow('mediaRatio', '--mfb-ratio-'));
 values.UI_ROWS = rows('ui', true, valueRow('ui', '--mfb-ui-'));

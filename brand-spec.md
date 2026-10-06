@@ -61,21 +61,21 @@ Which palette color to use for each element, by background. Every role is a pale
 | `body-on-light` | black (`#000000`) | Body text on white and light greys. | Brand Book `918:2368`, measured |
 | `muted-on-light` | gray-700 (`#6C6C7D`) | Secondary text on white and gray-100 (captions, meta, descriptions), never body copy. | website `src/components/blocks/Features.tsx:103` |
 | `link-on-light` | purple-300 (`#422C70`) | Link text on white and light greys, underlined. | this package's recommendation |
-| `link-underline-on-light` | orange-300 (`#F7941F`) | Underline of a link on white and light greys. | this package's recommendation |
+| `link-underline-on-light` | orange-300 (`#F7941F`) | Underline of a link on white and gray-100 to gray-300. | this package's recommendation |
 | `border-on-light` | gray-200 (`#EAEAF4`) | Card and divider borders on white. | website `src/components/blocks/BlogCarousel.tsx:96` |
-| `highlighter-on-light` | orange-300 (`#F7941F`) | Highlighter line on white and light greys. | Brand Book `918:2898`, measured |
+| `highlighter-on-light` | orange-300 (`#F7941F`) | Highlighter line on white and gray-100 to gray-300. | Brand Book `918:2898`, measured |
 | `logo-on-light` | purple-300 (`#422C70`) | Logo on white and on greys up to gray-500. | Brand Book `918:2976`, measured |
-| `heading-on-dark` | white (`#FFFFFF`) | Headings on purples and on gray-600 to gray-900. | Brand Book `918:3829`, measured |
+| `heading-on-dark` | white (`#FFFFFF`) | Headings on purples and on gray-700 to gray-900 (gray-600: headings at 24px and up only). | Brand Book `918:3829`, measured |
 | `body-on-dark` | white (`#FFFFFF`) | Body text on purples and on gray-700 to gray-900 (gray-600: large text only). | Brand Book `918:2623`, measured |
-| `muted-on-dark` | gray-400 (`#C0C0D0`) | Secondary text on purples. | website `src/components/blocks/BlogCarousel.tsx:94` |
-| `link-on-dark` | orange-300 (`#F7941F`) | Link text on purples. | website `src/styles/global.css:166` |
+| `muted-on-dark` | gray-400 (`#C0C0D0`) | Secondary text on purples. | this package's recommendation |
+| `link-on-dark` | orange-300 (`#F7941F`) | Link text on purple-300 and purple-400. On purple-200 and on dark greys, links are white and underlined. | website `src/styles/global.css:166` |
 | `highlighter-on-dark` | orange-300 (`#F7941F`) | Highlighter line on purples. | Brand Book `918:2883`, measured |
 | `logo-on-dark` | white (`#FFFFFF`) | Logo on purples and on photos. | Brand Book `918:2974`, measured |
 | `heading-on-orange` | black (`#000000`) | Headings on orange-200, orange-300 and orange-400. | Brand Book `918:4183`, measured |
 | `body-on-orange` | black (`#000000`) | Body text on oranges. | Brand Book `918:4184`, measured |
 | `link-on-orange` | black (`#000000`) | Link and call-to-action text on oranges. | Brand Book `918:4185`, measured |
-| `highlighter-on-orange` | white (`#FFFFFF`) | Highlighter line on oranges (and on mid greys such as gray-500). | Brand Book `918:2887`, measured |
-| `logo-on-orange` | black (`#000000`) | Logo on oranges. | Brand Book `918:2978`, measured |
+| `highlighter-on-orange` | white (`#FFFFFF`) | Highlighter line on oranges, and on gray-400 and gray-500. | Brand Book `918:2887`, measured |
+| `logo-on-orange` | black (`#000000`) | Logo on oranges (the Brand Book also shows white there). | Brand Book `918:2978`, measured |
 
 In CSS: `var(--mfb-<role>)`, for example `var(--mfb-heading-on-light)`. In Tailwind: `text-heading-on-light`, `decoration-link-underline-on-light`, `border-border-on-light`.
 
@@ -133,7 +133,7 @@ In CSS: `var(--mfb-<role>)`, for example `var(--mfb-heading-on-light)`. In Tailw
 
 - **Line height and letter spacing** are the Brand Book's (type specimen `918:2323`; no brand text style has tracking). Line height is a multiple of the size: `line-height: var(--mfb-leading-h1)`, or `text-h1 leading-h1` in Tailwind (in 1.x, `text-h1` sets only the size). Body text never goes to line height 1 (Type Misuse `918:2841`).
 - **Weights:** Medium (500) for H1 to H6 and quotes; Regular (400) for body text and labels; SemiBold (600) only for emphasis inside a line. Body text is never Medium or bold (`918:2841`).
-- **Fluid sizes** are for web pages: each grows with the viewport up to the Brand Book size and never past it. The cap is the Brand Book's; the floor and the slope are the website's. Body text stays at its fixed size.
+- **Fluid sizes** are for web pages: each grows with the viewport up to the Brand Book size and never past it. The cap is the Brand Book's; the floor and the slope are the website's. Body text stays at its fixed size, so below about 1125px wide the fluid label is smaller than body text (16px against 18px at a phone's width), the reverse of the Brand Book's order; where a label sits next to body text on small screens, use the fixed label size. A fluid body size is not decided yet.
 - **Space after a heading:** 40px between any heading and the body text under it, at the 18px body size (Brand Book `918:2990`, measured). **Between a quote and its label:** 48px (Brand Book `918:3005`, measured).
 
 ### Logo
@@ -147,7 +147,7 @@ In CSS: `var(--mfb-<role>)`, for example `var(--mfb-heading-on-light)`. In Tailw
 
 This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font families as `var(--mfb-font-<role>)`, the font sizes as `var(--mfb-size-<level>)`, the font weights as `var(--mfb-weight-<name>)`, the halftone colors as `var(--mfb-halftone-highlight)`, `var(--mfb-halftone-highlight-full)` and `var(--mfb-halftone-shadow)`, and the geometry as `var(--sg-angle-base)` and its siblings, the highlighter's `var(--sg-highlighter-*)` included. `theme.css` (Tailwind 4) carries the same colors, font families, font sizes and font weights (`--font-weight-<name>`, with `normal` as Tailwind's name for regular), and `tailwind.js` (Tailwind 3) carries those plus the deprecated brand gradient; the geometry and halftone variables are only in `brand.css` and `supergraphics.css`, and the halftone colors are deliberately not color utilities.
 
-The values in the next sections are in `brand.css` as `--mfb-<family>-<name>` (for example `--mfb-space-section`, `--mfb-radius-lg`, `--mfb-ease-out`, `--mfb-heading-on-light`). In Tailwind (both versions) the new utility names never replace a Tailwind default: they are `mfb-` prefixed (`rounded-mfb-lg`, `shadow-mfb-media`, `ease-mfb-out`, `duration-mfb-fast`, `max-w-mfb-page`, `py-mfb-section`), type levels (`leading-h1`, `tracking-h1`, `text-h1-fluid`) or color roles (`text-heading-on-light`). Breakpoints, layers, media ratios, logo and interface values are in `brand.css` and `index.js` only.
+The values in the next sections are in `brand.css` as `--mfb-<family>-<name>` (for example `--mfb-space-section`, `--mfb-radius-lg`, `--mfb-ease-out`, `--mfb-heading-on-light`). In Tailwind (both versions) the new utility names never replace a Tailwind default: they are `mfb-` prefixed (`rounded-mfb-lg`, `shadow-mfb-media`, `ease-mfb-out`, `duration-mfb-fast`, `max-w-mfb-page`, `py-mfb-section`), type levels (`leading-h1`, `tracking-h1`, `text-h1-fluid`) or color roles (`text-heading-on-light`). Layers, media ratios, logo and interface values are in `brand.css` and `index.js` only.
 
 ### Layout and spacing
 
@@ -166,11 +166,11 @@ Where the Brand Book is silent, these come from the website (Section 0).
 | `--mfb-space-block-end` | `clamp(32px, 4vw, 48px)` | Space before a section's closing call to action. | website `src/components/blocks/BlogCarousel.tsx:297` |
 | `--mfb-container-page` | `1280px` | Maximum width of the page container, gutter included (content is 1152px wide at the largest gutter). | website `src/styles/global.css:96` |
 | `--mfb-container-wide` | `1440px` | Maximum width of full-width frames such as the header, the footer and wide blocks. | website `src/components/blocks/BlockWrapper.tsx:18` |
-| `--mfb-container-measure` | `720px` | Maximum width of running text and of a centered section header. | website `src/components/blocks/Features.tsx:133` |
+| `--mfb-container-measure` | `720px` | Maximum width of running text and of a centered section header. | website `src/styles/global.css:131` |
 
 ### Radius and shadow
 
-Radius is for interface elements (cards, buttons, inputs, images). **Brand shapes keep sharp corners**: never round a parallelogram, a spotlight, a book or the highlighter.
+Radius is for interface elements (cards, buttons, inputs, images). **Brand shapes keep sharp corners**: never round a parallelogram, a spotlight, a book or the highlighter. (`.sg-para-frame` and `.sg-para-accent` still round their corners by 6px: see "Supergraphics classes that differ from the Brand Book" in Section 3.)
 
 | Variable | Value | Use | Source |
 |----------|-------|-----|--------|
@@ -197,22 +197,19 @@ Shadows are tinted with palette colors only, and none is used on dark background
 
 Under `prefers-reduced-motion: reduce`, nothing moves: reveals show at once, marquees and carousels stop, and transitions are instant. Moving text pauses on hover. Never animate the highlighter ("Do not alter its appearance", `918:2874`).
 
-### Breakpoints, layers, media and interface
+### Layers, media and interface
 
-Breakpoints are for JavaScript and `matchMedia` (`index.js` exports them as `breakpoint`): a CSS variable cannot be read inside `@media`, and the package adds no Tailwind breakpoint, so Tailwind's own `sm:`, `md:` and `lg:` stay as they are.
+**Breakpoints:** the package declares none yet. The website has no single convention: 13 different `max-width` values in its media queries, the most used being 720px, 900px and 600px, next to near-duplicates such as 760px, 768px and 860px. Under the source rule no value becomes a token until one is chosen. Tailwind's own `sm:`, `md:` and `lg:` stay as they are.
 
 | Variable | Value | Use | Source |
 |----------|-------|-----|--------|
-| `--mfb-breakpoint-phone` | `600px` | Phone layouts: max-width 600px. | website `src/styles/global.css:749` |
-| `--mfb-breakpoint-stack` | `720px` | Multi-column layouts stack into one column: max-width 720px. | website `src/styles/global.css:590` |
-| `--mfb-breakpoint-nav` | `900px` | The navigation collapses into a menu: max-width 900px. | website `src/components/Header.astro:777` |
 | `--mfb-z-header` | `100` | Sticky page header. | website `src/components/Header.astro:381` |
 | `--mfb-z-dropdown` | `200` | Navigation dropdowns, above the header. | website `src/components/Header.astro:486` |
 | `--mfb-z-overlay` | `1000` | Modals, lightboxes and the mobile menu, above everything. | website `src/styles/global.css:1115` |
 | `--mfb-ratio-video` | `16 / 9` | Video and wide media. | website `src/components/VideoTile.astro:50` |
 | `--mfb-ratio-photo` | `4 / 3` | Landscape photos. | website `src/components/blocks/ImageGallery.tsx:168` |
 | `--mfb-ratio-portrait` | `4 / 5` | Portrait photos of people. | website `src/components/blocks/EducatorCarousel.tsx:107` |
-| `--mfb-ratio-square` | `1 / 1` | Square images and avatars. | website `src/components/blocks/TeamGrid.tsx:201` |
+| `--mfb-ratio-square` | `1 / 1` | Square images and avatars. | website `src/components/blocks/SupporterStories.tsx:84` |
 | `--mfb-ui-touch-target` | `44px` | Smallest width and height of an icon button or any other tap target. | website `src/components/blocks/VideoCarousel.tsx:409` |
 | `--mfb-ui-link-underline-offset` | `3px` | Distance between a link and its underline. | website `src/pages/news/[...slug].astro:342` |
 
@@ -258,10 +255,10 @@ The website also carries values that contradict the Brand Book. They are not tok
 - **Thickness:** the line's length divided by 26.6, about 3% of the word's width. It is proportional to the word's width, so at the same font size a longer word gets a thicker line
 - **Position:** the center of its bounding box (half-way between its top and bottom edges) sits 0.054em below the baseline, so it straddles the baseline and sits mostly below it; the glyphs, descenders included, paint over it
 - **Shape:** a filled quad that tapers from 6/7 of its height at the start to 4/7 at the end, rises slightly to the right, with slant-cut ends (as a CSS clip-path: `polygon(1.24% calc(100% / 7), 100% 0, 99.47% calc(400% / 7), 0 100%)`)
-- **Color:** orange-300 on purple and on white; white on orange and on the mid grey of the Brand Book's example (close to gray-500). The word itself keeps the heading's color
+- **Color:** orange-300 on purple, on white and on light greys up to gray-300; white on orange, and on gray-400 and gray-500 (the Brand Book's example is a mid grey close to gray-500), where an orange line all but disappears. The word itself keeps the heading's color
 
 **Do:**
-- Use the `highlighter` class from this package's `supergraphics.css` on a span around the one word: `<h2>Open Source <span class="highlighter">Education</span></h2>`. It draws the line described above, orange-300 by default and white inside the orange surfaces `sg-bg-orange`, `sg-spotlight--orange`, `sg-cover--orange`, `sg-spotlight-frame--orange`, `sg-book-frame--orange` and `sg-halftone-cutout--orange-bg`. On another orange surface, or on a mid grey such as gray-500, set `--sg-highlighter-color: var(--mfb-white)` on the section. On a light grey such as gray-200 (`sg-bg-gray`) keep the orange line: a white one cannot be seen there
+- Use the `highlighter` class from this package's `supergraphics.css` on a span around the one word: `<h2>Open Source <span class="highlighter">Education</span></h2>`. It draws the line described above, orange-300 by default and white inside the orange surfaces `sg-bg-orange`, `sg-spotlight--orange`, `sg-cover--orange`, `sg-spotlight-frame--orange`, `sg-book-frame--orange` and `sg-halftone-cutout--orange-bg`. On another orange surface, or on gray-400 or gray-500, set `--sg-highlighter-color: var(--mfb-white)` on the section. On a light grey such as gray-200 (`sg-bg-gray`) keep the orange line: a white one cannot be seen there
 - Leave the span's `display` and `text-align` alone: the line's length and thickness are computed from the span's own width
 - Where CSS cannot be used (print, canvas), draw the same construction from the geometry tokens `highlighter-coverage`, `highlighter-aspect`, `highlighter-offset` and `highlighter-shape`
 - End the highlight at the word boundary, with no trailing punctuation inside it (`Foundations` ✓ · `Foundations.` ✗)
@@ -423,8 +420,8 @@ The website also carries values that contradict the Brand Book. They are not tok
 
 | Background | Headings and text | Links | Accents |
 |------------|-------------------|-------|---------|
-| purple-200, purple-300, purple-400, gray-600 to gray-900 | white | orange-300 | orange-300 highlighter; purple-200 shapes on purple-300; gray-400 for secondary text |
-| white, gray-100 to gray-500 | black | purple-300, underlined in orange-300 | orange-300 highlighter and fills (with black text); gray-700 for secondary text |
+| purple-200, purple-300, purple-400, gray-600 to gray-900 | white (on gray-600, headings and text at 24px and up only) | orange-300 on purple-300 and purple-400; white and underlined on purple-200 and the greys | orange-300 highlighter; purple-200 shapes on purple-300; gray-400 for secondary text on purples |
+| white, gray-100 to gray-500 | black | purple-300, always underlined: in orange-300 on white to gray-300, in the link's own color on gray-400 and gray-500 | orange-300 highlighter on white to gray-300, white on gray-400 and gray-500; orange-300 fills (with black text); gray-700 for secondary text on white and gray-100 |
 | orange-200, orange-300, orange-400 | black | black | white highlighter; orange-200 shapes on orange-300; no other accent |
 
 The roles behind this table are in Section 1 (Color roles).
@@ -434,11 +431,28 @@ The roles behind this table are in Section 1 (Color roles).
 - **Headings on light backgrounds:** black (`#000000`), as in the Brand Book's *Type Relationships* (`918:2990`) and its Brand in Use examples. purple-300 is the brand's surface and shape color, not a heading color on white
 - **Text on light backgrounds:** black (`#000000`), body copy included (`918:2994`). gray-700 is for secondary text only (captions, meta), on white or gray-100
 - **Headings and text on dark backgrounds:** white
-- **Text on orange:** black, never white (white on orange-300 is 2.3:1). This applies to buttons too: an orange-300 button has black text. The supergraphics classes `.sg-bg-orange`, `.sg-cover--orange` and `.sg-cta` still set white text on orange; set the text color yourself until a release changes them
-- **Links on light backgrounds:** purple-300 text with an orange-300 underline. The Brand Book has no link style; its *Color Contrast* slide (`918:2588`) says "Light text should be placed on dark colors, and dark text on light colors", and it pairs every orange with dark text, so orange link text on white breaks it. The purple-300 text and the orange-300 underline are this package's recommendation, not a Brand Book rule
-- **Links on dark backgrounds:** orange-300 (or white)
+- **Text on orange:** black, never white (white on orange-300 is 2.3:1). This applies to buttons too: an orange-300 button has black text. The supergraphics classes `.sg-bg-orange`, `.sg-cover--orange` and `.sg-cta` still set white text on orange; set the text color yourself until a release changes them (see "Supergraphics classes that differ from the Brand Book" below)
+- **Links on light backgrounds:** purple-300 text with an orange-300 underline. The Brand Book has no link style; its *Color Contrast* slide (`918:2588`) says "Light text should be placed on dark colors, and dark text on light colors", and it pairs every orange with dark text, so orange link text on white breaks it. The purple-300 text and the orange-300 underline are this package's recommendation, not a Brand Book rule. A link on a light background never loses its underline: purple-300 is only 1.8:1 from black text, so the underline is what marks it. On gray-400 and gray-500 an orange underline cannot be seen (1.3:1 and 1.0:1): underline in the link's own color there
+- **Links on dark backgrounds:** orange-300 on purple-300 and purple-400 (5.0:1 and 6.5:1), or white. On purple-200 (orange-300 is 3.8:1 there) and on the dark greys, links are white and underlined (8.7:1 on purple-200)
 - **Orange is for accents only** (CTA fills with black text, link underlines, links on dark backgrounds, highlights, ₿ symbol), never a full background fill beyond explicit orange-300 brand shapes, and never text on a light background
 - **Gradient:** the brand gradient is deprecated (Section 1): do not use it in new designs. Where an existing page still uses it, keep its 135deg direction (top-left to bottom-right), and never use it on covers.
+
+### Supergraphics classes that differ from the Brand Book
+
+A few classes in this package's `supergraphics.css` still carry values from before the Brand Book was measured. Changing them changes how existing pages look, so it waits for a release that decides it. Until then, set the value yourself where you use the class:
+
+| Class | What it sets | The Brand Book | Set instead |
+|-------|--------------|----------------|-------------|
+| `.sg-cta` | white text on orange-300 (2.3:1), 1px letter spacing, a 40px radius | black text on orange, no tracking | `color: var(--mfb-link-on-orange)` and `letter-spacing: 0` (its 40px radius draws the same pill as `var(--mfb-radius-pill)`) |
+| `.sg-bg-orange` | white text on orange-300 | black text on orange | `color: var(--mfb-body-on-orange)` |
+| `.sg-cover--orange` | white title and text on orange-300 (from `.sg-cover`) | black text on orange | `color: var(--mfb-heading-on-orange)` |
+| `.sg-info-bar--on-light` | gray-900 text; the date (`.sg-info-bar__date`) in orange-300 on white (2.3:1), and the line under it at 75% opacity (1.9:1) | black text on light colors, never orange text there | `color: var(--mfb-body-on-light)` on the bar, and the same on its date and the date's `small` (with `opacity: 1`) |
+| `.sg-bg-white`, `.sg-bg-gray` | gray-900 text | black text on light colors | `color: var(--mfb-body-on-light)` |
+| `.sg-headline`, `.sg-cover__title` | line height 1.05, letter spacing -0.03em | line height 1 for H1 to H4 (1.1 for H5 and H6), no tracking | `line-height: var(--mfb-leading-h1)` (the level you set) and `letter-spacing: 0` |
+| `.sg-label` | 18px, Medium (500), 1.5px letter spacing | 22px, Regular (400), no tracking | `font-size: var(--mfb-size-label)`, `font-weight: var(--mfb-weight-regular)`, `letter-spacing: 0` |
+| `.sg-para-frame`, `.sg-para-accent` | a 6px corner radius on a parallelogram | sharp corners | `border-radius: 0` |
+| `.sg-para-pattern` | rows 10px apart, stepped by 1.25 and 1.55 | rows that touch, each 1.2 times the one before (Rule 7) | nothing yet: a release changes the class |
+| `.sg-logo`, `.sg-cover__logo` | a logo 40px tall | a logo at least 63px tall on screens (Logo, Section 1) | nothing yet: the height is not decided |
 
 ### Logo files
 

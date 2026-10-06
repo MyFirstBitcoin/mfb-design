@@ -1,4 +1,4 @@
-// @myfirstbitcoin/design - programmatic access to MFB brand tokens.
+// @myfirstbitcoin/design - programmatic access to My First Bitcoin brand tokens.
 export { default as tailwindPreset } from './tailwind.js';
 export const colors = {
   "purple": {
@@ -175,11 +175,6 @@ export const container = {
   "page": "1280px",
   "wide": "1440px",
   "measure": "720px"
-};
-export const breakpoint = {
-  "phone": "600px",
-  "stack": "720px",
-  "nav": "900px"
 };
 export const zIndex = {
   "header": 100,

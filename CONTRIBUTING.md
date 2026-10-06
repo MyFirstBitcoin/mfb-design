@@ -22,7 +22,7 @@ under the source rule below.
    `brand-spec.md` lists the ones found so far under "Not imported from the website".
 4. **Where the site has no single value** (several near-duplicates with no convention), no token
    is made until someone picks one.
-5. **Quentin or Patrick decides** every brand change, as for any pull request here.
+5. **The deciders named under Releases decide** every brand change, as for any pull request here.
 
 Every token carries `$extensions.mfb.sourceKind`, defined in `$verification` at the end of
 `tokens.json`: `rendered-fill` or `rendered-text` (checked by the Figma check), `prose` (stated in
@@ -73,8 +73,9 @@ node scripts/check.mjs                  # the rebuild check that GitHub Actions 
 Commit the source change and the regenerated files together. The build refuses to write
 anything if the canon's geometry disagrees with `tokens.json`, if a geometry token is neither
 gated against the canon nor listed as token-only, if a tokens.json group has no entry in its
-`GROUP_MAP` (where each group is emitted), or if a new Tailwind key would equal a Tailwind 3 or 4
-default. The spec generator refuses if a token it needs, or its source, is missing.
+`GROUP_MAP` (where each group is emitted), if a new Tailwind key would equal a Tailwind 3 or 4
+default, or if a font weight would change Tailwind's value for its name (`font-medium` is 500).
+The spec generator refuses if a token it needs, or its source, is missing.
 
 A new token group needs an entry in `GROUP_MAP` in `scripts/build-design-package.mjs`: its
 Tailwind 4 namespace, its Tailwind 3 key and its `brand.css` prefix, or `null` where it is not
@@ -135,9 +136,10 @@ check runs it outside GitHub. `--status FILE` writes the full result as JSON for
 (`node node_modules/@myfirstbitcoin/design/brand-check.mjs`; the README says how). It needs
 Node.js and nothing else, and reads every value it compares with from the `tokens.json` next to
 it, so a token change reaches the guard without editing it. It generalises the guards that two
-of My First Bitcoin's sites already ran. When you change a rule, add a planted line for it to
-`scripts/brand-check.test.mjs` (and a clean line for anything it must not report);
-`scripts/check.mjs` runs that test.
+of My First Bitcoin's sites already ran. A rule that cannot see enough to be sure (which
+background a text sits on, say) is listed in `DEFAULT_WARN` and only warns unless a project passes
+`--error`. When you change a rule, add a planted line for it to `scripts/brand-check.test.mjs`
+(and a clean line for anything it must not report); `scripts/check.mjs` runs that test.
 
 ## The supergraphics canon
 

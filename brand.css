@@ -133,9 +133,6 @@
   --mfb-container-page: 1280px;
   --mfb-container-wide: 1440px;
   --mfb-container-measure: 720px;
-  --mfb-breakpoint-phone: 600px;
-  --mfb-breakpoint-stack: 720px;
-  --mfb-breakpoint-nav: 900px;
   --mfb-z-header: 100;
   --mfb-z-dropdown: 200;
   --mfb-z-overlay: 1000;
