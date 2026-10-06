@@ -1,18 +1,18 @@
-/* MFB Supergraphics — Brand Visual Elements Layer */
+/* My First Bitcoin Supergraphics: Brand Visual Elements Layer */
 /* Builds on brand.css variables. Prefix: sg- to avoid collisions. */
 /*
    2026-08-19: the five skew transforms below used to hardcode 13deg while this same
    file declared --sg-angle-base: 13deg twenty lines further down and the twelve clip-path
    calculations used the variable correctly. A file disagreeing with its own variable is
    how five different slant angles (-13, -10, -19, -1.4, 0) reached production. The angle
-   now has one origin: geometry.angle-base in shared-context/brand/tokens.json, emitted
+   now has one origin: geometry.angle-base in tokens.json, emitted
    into the :root block below by build-design-package.mjs.
 */
 
 /* ═══════════════════════════════════════════════════════════════════
    PARALLELOGRAM FRAMES
    Brand book Rule 7 (p.30) — Skew always -13deg (left-to-right tilt),
-   the same 13° angle as the MFB logo icon. Base height = 2x logo-icon
+   the same 13° angle as the My First Bitcoin logo icon. Base height = 2x logo-icon
    height. Never alter angle. Vary scale. Never uniform spacing.
    ═══════════════════════════════════════════════════════════════════ */
 
@@ -31,7 +31,7 @@
 }
 .sg-para-frame img,
 .sg-para-frame .sg-photo-zone {
-  transform: skewX(var(--sg-angle-base)) scale(1.12);
+  transform: skewX(var(--sg-angle-base)) scale(calc(1 + tan(var(--sg-angle-base)) / var(--sg-aspect)));
   display: block;
   width: 100%;
   height: 100%;
@@ -282,7 +282,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: #45265B; /* book-specified shadow value (not a palette token) */
+  background: var(--mfb-halftone-shadow); /* book-specified shadow value (not a palette token) */
   clip-path: var(--sg-wedge);
 }
 
@@ -303,8 +303,8 @@
   inset: 0;
   /* highlight cap + dot texture: whites multiply down to #F7E6FF,
      dot grid adds the newspaper-print texture (Halftone Scale ~2.5) */
-  background-color: #F7E6FF; /* book-specified highlight value */
-  background-image: radial-gradient(circle, #45265B 0.8px, transparent 1px);
+  background-color: var(--mfb-halftone-highlight); /* book-specified highlight value */
+  background-image: radial-gradient(circle, var(--mfb-halftone-shadow) 0.8px, transparent 1px);
   background-size: 5px 5px;
   mix-blend-mode: multiply;
   clip-path: var(--sg-wedge);
@@ -317,9 +317,9 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 .sg-bg-purple  { background: var(--mfb-purple-400); color: var(--mfb-white); }
-.sg-bg-orange  { background: var(--mfb-orange-300); color: var(--mfb-white); }
-.sg-bg-gray    { background: var(--mfb-gray-200);   color: var(--mfb-gray-900); }
-.sg-bg-white   { background: var(--mfb-white);      color: var(--mfb-gray-900); }
+.sg-bg-orange  { background: var(--mfb-orange-300); color: var(--mfb-body-on-orange); }
+.sg-bg-gray    { background: var(--mfb-gray-200);   color: var(--mfb-body-on-light); }
+.sg-bg-white   { background: var(--mfb-white);      color: var(--mfb-body-on-light); }
 .sg-bg-gradient { background: var(--mfb-gradient);  color: var(--mfb-white); }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -335,7 +335,7 @@
   justify-content: space-between;
   align-items: flex-end;
   padding: 20px 48px;
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--mfb-font-body);
   border-top: 3px solid var(--mfb-orange-300);
   z-index: 10;
 }
@@ -345,27 +345,44 @@
   background: var(--mfb-purple-400);
 }
 .sg-info-bar--on-light {
-  color: var(--mfb-gray-900);
+  color: var(--mfb-body-on-light);
   background: var(--mfb-white);
 }
 .sg-info-bar__date {
   font-size: 32px;
-  font-weight: 600; /* book allows max 600 */
+  font-weight: var(--mfb-weight-semibold); /* book allows max 600 */
   color: var(--mfb-orange-300);
   line-height: 1.1;
 }
 .sg-info-bar__date small {
   display: block;
   font-size: 15px;
-  font-weight: 400;
+  font-weight: var(--mfb-weight-regular);
   color: inherit;
-  opacity: 0.75;
   margin-top: 2px;
+}
+:where(.sg-bg-white, .sg-bg-gray) > .sg-info-bar .sg-info-bar__date {
+  color: var(--mfb-heading-on-light);
+}
+:where(.sg-bg-orange, .sg-cover--orange, .sg-spotlight--orange, .sg-spotlight-frame--orange, .sg-book-frame--orange, .sg-halftone-cutout--orange-bg) > .sg-info-bar .sg-info-bar__date {
+  color: var(--mfb-heading-on-orange);
+}
+.sg-info-bar--on-dark .sg-info-bar__date {
+  color: var(--mfb-orange-300);
+}
+.sg-info-bar--on-dark .sg-info-bar__date small {
+  color: var(--mfb-muted-on-dark);
+}
+.sg-info-bar--on-light .sg-info-bar__date {
+  color: var(--mfb-heading-on-light);
+}
+.sg-info-bar--on-light .sg-info-bar__date small {
+  color: var(--mfb-muted-on-light);
 }
 .sg-info-bar__location {
   text-align: right;
   font-size: 17px;
-  font-weight: 400;
+  font-weight: var(--mfb-weight-regular);
   line-height: 1.3;
 }
 
@@ -386,22 +403,26 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 .sg-headline {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -0.03em; /* book heading tracking */
+  font-family: var(--mfb-font-heading);
+  font-weight: var(--mfb-weight-medium);
+  line-height: var(--mfb-leading-h1);
+  letter-spacing: var(--mfb-tracking-h1); /* book headings: no tracking */
 }
+.sg-headline--h5 { line-height: var(--mfb-leading-h5); }
+.sg-headline--h6 { line-height: var(--mfb-leading-h6); }
 .sg-body {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400;
-  line-height: 1.2; /* book specimen body LH */
+  font-family: var(--mfb-font-body);
+  font-weight: var(--mfb-weight-regular);
+  line-height: var(--mfb-leading-body); /* book specimen body LH */
+  letter-spacing: var(--mfb-tracking-body);
 }
 .sg-label {
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 500;
+  font-family: var(--mfb-font-body);
+  font-weight: var(--mfb-weight-regular);
   font-size: 18px;
+  line-height: var(--mfb-leading-label);
   /* no text-transform — brand book p.26 forbids uppercase */
-  letter-spacing: 1.5px;
+  letter-spacing: var(--mfb-tracking-label);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -424,12 +445,12 @@
 .sg-cta {
   display: inline-block;
   background: var(--mfb-orange-300);
-  color: var(--mfb-white);
+  color: var(--mfb-link-on-orange);
   padding: 14px 40px;
   border-radius: 40px;
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--mfb-font-body);
   font-size: 20px;
-  font-weight: 600;
+  font-weight: var(--mfb-weight-semibold);
   /* no text-transform — brand book p.26 forbids uppercase */
   letter-spacing: 1px;
 }
@@ -443,13 +464,42 @@
    HIGHLIGHTER VARIANT — for orange backgrounds where default is invisible
    ═══════════════════════════════════════════════════════════════════ */
 
-.sg-spotlight--orange .highlighter {
-  background-image: linear-gradient(transparent 80%, var(--mfb-white) 80%);
-  color: var(--mfb-white);
+:root {
+  --sg-highlighter-coverage: 80%;
+  --sg-highlighter-aspect: 26.6;
+  --sg-highlighter-offset: 0.054em;
+  --sg-highlighter-shape: polygon(1.24% calc(100% / 7), 100% 0, 99.47% calc(400% / 7), 0 100%);
 }
-.sg-bg-orange .highlighter {
-  background-image: linear-gradient(transparent 80%, var(--mfb-white) 80%);
-  color: var(--mfb-white);
+
+.highlighter {
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  text-align: left;
+  text-indent: 0;
+}
+.highlighter::after {
+  content: '';
+  display: inline-block;
+  position: relative;
+  z-index: -1;
+  vertical-align: baseline;
+  width: var(--sg-highlighter-coverage);
+  aspect-ratio: var(--sg-highlighter-aspect);
+  margin-left: calc(-0.5 * (100% + var(--sg-highlighter-coverage)));
+  background: var(--sg-highlighter-color, var(--mfb-orange-300));
+  clip-path: var(--sg-highlighter-shape);
+  transform: translateY(calc(50% + var(--sg-highlighter-offset)));
+  pointer-events: none;
+}
+
+.sg-spotlight--orange .highlighter,
+.sg-bg-orange .highlighter,
+.sg-cover--orange .highlighter,
+.sg-spotlight-frame--orange .highlighter,
+.sg-book-frame--orange .highlighter,
+.sg-halftone-cutout--orange-bg .highlighter {
+  --sg-highlighter-color: var(--mfb-white);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -469,7 +519,7 @@
   background: var(--mfb-purple-300);
   color: var(--mfb-white);
 }
-.sg-cover--orange { background: var(--mfb-orange-300); }
+.sg-cover--orange { background: var(--mfb-orange-300); color: var(--mfb-heading-on-orange); }
 .sg-cover--deep { background: var(--mfb-purple-400); }
 .sg-cover--rule { border-top: 6px solid var(--mfb-orange-300); }
 
@@ -487,11 +537,11 @@
   right: 18%;
   margin: 0;
   color: inherit; /* beat brand.css h1 color */
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 500;
-  font-size: var(--mfb-font-h2, 58px);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  font-family: var(--mfb-font-heading);
+  font-weight: var(--mfb-weight-medium);
+  font-size: var(--mfb-size-h2);
+  line-height: var(--mfb-leading-h2);
+  letter-spacing: var(--mfb-tracking-h2);
   /* Title Case, short — no text-transform (p.26 forbids uppercase) */
 }
 
@@ -521,7 +571,9 @@
 .sg-para-pattern__row {
   display: flex;
   align-items: stretch;
-  height: var(--sg-base-h);
+  --sg-row-h: var(--sg-base-h);
+  height: var(--sg-row-h);
+  padding-left: calc(tan(var(--sg-angle-base)) * var(--sg-row-h) / 2);
 }
 .sg-para-pattern__row > .sg-para {
   background: var(--mfb-purple-200);
@@ -534,5 +586,5 @@
 .sg-para-pattern__row:nth-child(2n) { margin-left: 26px; }
 .sg-para-pattern__row:nth-child(3n) { margin-left: 52px; }
 /* progressive scale option (book: "rows can scale progressively") */
-.sg-para-pattern--progressive .sg-para-pattern__row:nth-child(2) { height: calc(var(--sg-base-h) * 1.25); }
-.sg-para-pattern--progressive .sg-para-pattern__row:nth-child(3) { height: calc(var(--sg-base-h) * 1.55); }
+.sg-para-pattern--progressive .sg-para-pattern__row:nth-child(2) { --sg-row-h: calc(var(--sg-base-h) * 1.25); }
+.sg-para-pattern--progressive .sg-para-pattern__row:nth-child(3) { --sg-row-h: calc(var(--sg-base-h) * 1.55); }

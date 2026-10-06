@@ -1,6 +1,6 @@
 {
   "name": "@myfirstbitcoin/design",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "My First Bitcoin brand design tokens: Tailwind preset (v3 + v4), CSS variables, and raw tokens. Generated from the canonical brand tokens.json.",
   "type": "module",
   "license": "UNLICENSED",
@@ -10,7 +10,9 @@
     "./theme.css": "./theme.css",
     "./brand.css": "./brand.css",
     "./supergraphics.css": "./supergraphics.css",
-    "./tokens.json": "./tokens.json"
+    "./tokens.json": "./tokens.json",
+    "./brand-spec.md": "./brand-spec.md",
+    "./brand-check.mjs": "./brand-check.mjs"
   },
   "files": [
     "index.js",
@@ -19,7 +21,9 @@
     "brand.css",
     "supergraphics.css",
     "tokens.json",
-    "README.md"
+    "README.md",
+    "brand-spec.md",
+    "brand-check.mjs"
   ],
   "repository": {
     "type": "git",

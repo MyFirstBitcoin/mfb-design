@@ -12,13 +12,16 @@ the Brand Book Figma file mFIc75UUSyftaqnNUQgjLX. To regenerate: node scripts/br
 
 **The Brand Book Figma (`mFIc75UUSyftaqnNUQgjLX`) is the single source of truth for My First Bitcoin's visual rules.** This markdown is a mirror. If anything here conflicts with the Brand Book, the Brand Book wins. Before generating any brand artifact, screenshot the relevant Brand Book rule page (for example with the Figma MCP server's `get_screenshot` tool) so you are working from the visual, not from a summary.
 
+**Where the Brand Book is silent** (spacing, radius, shadow, motion, page widths), the values below are declared from the live website, myfirstbitcoin.org, which was built following the Brand Book. Each one names the CSS that carries it in what the site serves (a custom property, a selector and property, or a property set inline), on the site's main branch at commit `6368b2a`. A website value that contradicts the Brand Book is never imported (see "Not imported from the website" in Section 1), so do not copy values from the website's code: take them from this package.
+
 **Canonical rule pages (Brand Book node IDs):**
 
-- Type Relationships: `918:2990` · Type Misuse: `918:2841`
+- Type specimen: `918:2323` · Type Relationships: `918:2990` · Type Misuse: `918:2841`
+- Color Contrast: `918:2588` · Logo Size and Clearspace: `918:2681` · Logo Placement: `918:2714` · Logo Usage and Variations: `918:2972`
 - Highlighter (p.42): `918:2874`
 - Halftones: `918:3730` · Halftones in use: `918:3790`
-- Spotlights & Books: `918:3604` · Construction: `918:3632` · Frames: `918:3686` · Book Panel: `918:3716` · In use: `918:3757`
-- Parallelogram: `918:4212` · Patterns: `918:4126` · Frames: `918:4189` · Misuse: `918:3958`
+- Spotlights & Books: `918:3604` · Construction: `918:3632` · Frames: `918:3686` · Book Panel: `918:3757` · In use: `918:3716`
+- Parallelogram: `918:4189` · Patterns: `918:4212` · Frames: `918:4126` · Misuse: `918:3958`
 - Cover master: `918:2798`
 - Brand-in-use posters: `918:3514` · Program cards: `918:3508` · Merch: `918:3502`
 
@@ -26,25 +29,61 @@ the Brand Book Figma file mFIc75UUSyftaqnNUQgjLX. To regenerate: node scripts/br
 
 ### Colors
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| purple-300 | #422C70 | Primary purple: brand hero color, backgrounds, headers |
-| purple-400 | #2B1C58 | Accent dark purple: deep contrast, footer backgrounds |
-| purple-200 | #5E378E | Accent light purple: secondary headings, gradient endpoint |
-| orange-300 | #F7941F | Primary orange: CTAs, highlights, Bitcoin symbol color |
-| orange-400 | #EF7B00 | Accent dark orange: hover/active states, strong emphasis |
-| orange-200 | #FBB040 | Accent light orange: soft highlights, secondary accents |
-| black | #000000 | Primary black: high-contrast text, bold headlines |
-| white | #FFFFFF | Primary white: backgrounds, text on dark surfaces |
-| gray-900 | #25252B | Neutral: near-black, body text on light backgrounds |
-| gray-800 | #4F4F5D | Neutral: secondary text, subtle headings |
-| gray-700 | #6C6C7D | Neutral: muted text, placeholders |
-| gray-600 | #88889C | Neutral: disabled text, borders |
-| gray-500 | #ADADBE | Neutral: subtle borders, dividers |
-| gray-400 | #C0C0D0 | Neutral: light borders, inactive elements |
-| gray-300 | #D8D8E7 | Neutral: card borders, separators |
-| gray-200 | #EAEAF4 | Neutral: light backgrounds, alternating rows |
-| gray-100 | #F3F3FA | Neutral: page background, subtle tint |
+| Token | Hex | CMYK (print) | Usage |
+|-------|-----|--------------|-------|
+| purple-300 | #422C70 | 41 61 0 56 | Primary purple: the main brand color for surfaces and shapes (backgrounds, covers, parallelograms, spotlights). Takes white text. Not a heading color on light backgrounds: headings there are black (Type Relationships 918:2990) |
+| purple-400 | #2B1C58 | 51 68 0 65 | Accent dark purple: deep contrast, footer backgrounds |
+| purple-200 | #5E378E | 34 61 0 44 | Accent light purple: supergraphic shapes on purple-300 (one step lighter than the base, 918:3604), halftone cutout backgrounds (918:3730). Takes white text |
+| orange-300 | #F7941F | 0 40 87 3 | Primary orange: CTA and shape fills with black text (Color Contrast 918:2588), the highlighter line, the Bitcoin symbol, links on dark backgrounds. Never text on light backgrounds |
+| orange-400 | #EF7B00 | 0 46 100 6 | Accent dark orange: hover and active fills, shapes; takes black text (918:2616). Never text on light backgrounds |
+| orange-200 | #FBB040 | 0 30 75 2 | Accent light orange: supergraphic shapes on orange-300 (one step lighter than the base, 918:3604), soft accents on dark backgrounds. Takes black text |
+| black | #000000 | 0 0 0 100 | Primary black: headings and body text on light backgrounds and on orange (Type Relationships 918:2990, Color Contrast 918:2588) |
+| white | #FFFFFF | 0 0 0 0 | Primary white: backgrounds, text on dark surfaces |
+| gray-900 | #25252B | 14 14 0 83 | Neutral: the darkest grey, a dark surface that takes white text (918:2588). Text on light backgrounds is black, not gray-900 (918:2990) |
+| gray-800 | #4F4F5D | 15 15 0 64 | Neutral: a dark grey surface that takes white text (918:2588) |
+| gray-700 | #6C6C7D | 14 14 0 51 | Neutral: muted text, placeholders |
+| gray-600 | #88889C | 13 13 0 39 | Neutral: borders and dividers. As text, large sizes only (3.5:1 on white); as a surface it takes white text at large sizes (918:2588) |
+| gray-500 | #ADADBE | 9 9 0 25 | Neutral: subtle borders, dividers |
+| gray-400 | #C0C0D0 | 8 8 0 18 | Neutral: light borders, inactive elements |
+| gray-300 | #D8D8E7 | 6 6 0 9 | Neutral: card borders, separators |
+| gray-200 | #EAEAF4 | 4 4 0 4 | Neutral: light backgrounds, alternating rows |
+| gray-100 | #F3F3FA | 3 3 0 2 | Neutral: page background, subtle tint |
+
+CMYK values are the Brand Book's own (`918:2258`, `918:2386`, `918:2465`).
+
+### Color roles
+
+Which palette color to use for each element, by background. Every role is a palette color. **Light** backgrounds are white and gray-100 to gray-500; **dark** backgrounds are the purples and gray-600 to gray-900; **orange** backgrounds are orange-200, orange-300 and orange-400. The rule behind them is the Brand Book's *Color Contrast* slide (`918:2588`): "Light text should be placed on dark colors, and dark text on light colors", with dark text on every orange.
+
+| Role | Color | Use | Source |
+|------|-------|-----|--------|
+| `heading-on-light` | black (`#000000`) | Headings on white and light greys (gray-100 to gray-500). | Brand Book `918:2335`, measured |
+| `body-on-light` | black (`#000000`) | Body text on white and light greys. | Brand Book `918:2368`, measured |
+| `muted-on-light` | gray-700 (`#6C6C7D`) | Secondary text on white and gray-100 (captions, meta, descriptions), never body copy. | website `--gray-700` (inline text color) |
+| `link-on-light` | purple-300 (`#422C70`) | Link text on white and light greys, underlined. | this package's recommendation |
+| `link-underline-on-light` | orange-300 (`#F7941F`) | Underline of a link on white and gray-100 to gray-300. | this package's recommendation |
+| `border-on-light` | gray-200 (`#EAEAF4`) | Card and divider borders on white. | website `--gray-200` (inline border color) |
+| `highlighter-on-light` | orange-300 (`#F7941F`) | Highlighter line on white and gray-100 to gray-300. | Brand Book `918:2898`, measured |
+| `logo-on-light` | purple-300 (`#422C70`) | Logo on white and on greys up to gray-500. | Brand Book `918:2976`, measured |
+| `heading-on-dark` | white (`#FFFFFF`) | Headings on purples and on gray-700 to gray-900 (gray-600: headings at 24px and up only). | Brand Book `918:3829`, measured |
+| `body-on-dark` | white (`#FFFFFF`) | Body text on purples and on gray-700 to gray-900 (gray-600: large text only). | Brand Book `918:2623`, measured |
+| `muted-on-dark` | gray-400 (`#C0C0D0`) | Secondary text on purples. | this package's recommendation |
+| `link-on-dark` | orange-300 (`#F7941F`) | Link text on purple-300 and purple-400. On purple-200 and on dark greys, links are white and underlined. | website `--accent` (the color of every link) |
+| `highlighter-on-dark` | orange-300 (`#F7941F`) | Highlighter line on purples. | Brand Book `918:2883`, measured |
+| `logo-on-dark` | white (`#FFFFFF`) | Logo on purples and on photos. | Brand Book `918:2974`, measured |
+| `heading-on-orange` | black (`#000000`) | Headings on orange-200, orange-300 and orange-400. | Brand Book `918:4183`, measured |
+| `body-on-orange` | black (`#000000`) | Body text on oranges. | Brand Book `918:4184`, measured |
+| `link-on-orange` | black (`#000000`) | Link and call-to-action text on oranges. | Brand Book `918:4185`, measured |
+| `highlighter-on-orange` | white (`#FFFFFF`) | Highlighter line on oranges, and on gray-400 and gray-500. | Brand Book `918:2887`, measured |
+| `logo-on-orange` | black (`#000000`) | Logo on oranges (the Brand Book also shows white there). | Brand Book `918:2978`, measured |
+
+In CSS: `var(--mfb-<role>)`, for example `var(--mfb-heading-on-light)`. In Tailwind: `text-heading-on-light`, `decoration-link-underline-on-light`, `border-border-on-light`.
+
+**Shape tones.** A supergraphic shape is one step lighter than the base it sits on (Brand Book `918:3604`):
+
+- On purple-300: purple-200 (Brand Book `918:3612`, measured)
+- On orange-300: orange-200 (Brand Book `918:3614`, measured)
+- On gray-700: gray-600 (Brand Book `918:3616`, measured)
 
 ### Gradients
 
@@ -78,9 +117,116 @@ the Brand Book Figma file mFIc75UUSyftaqnNUQgjLX. To regenerate: node scripts/br
 | label | 22px | Labels: IBM Plex Sans Regular, line-height: 1.2 |
 | quote | 40px | Block quotes: IBM Plex Sans Medium, line-height: 1 |
 
+### Type relationships
+
+| Level | Size | Line height | Letter spacing | On web pages (fluid) |
+|-------|------|-------------|----------------|----------------------|
+| h1 | 70px | 1 | 0em | `clamp(44px, 6vw, 70px)` (website `--fs-h1`) |
+| h2 | 58px | 1 | 0em | `clamp(36px, 5vw, 58px)` (website `--fs-h2`) |
+| h3 | 48px | 1 | 0em | `clamp(30px, 4vw, 48px)` (website `--fs-h3`) |
+| h4 | 40px | 1 | 0em | `clamp(26px, 3.2vw, 40px)` (website `--fs-h4`) |
+| h5 | 36px | 1.1 | 0em | `clamp(22px, 2.6vw, 36px)` (website `--fs-h5`) |
+| h6 | 32px | 1.1 | 0em | `clamp(20px, 2.2vw, 32px)` (website `--fs-h6`) |
+| body | 18px | 1.2 | 0em | fixed, 18px |
+| label | 22px | 1.2 | 0em | `clamp(16px, 1.6vw, 22px)` (website `--fs-label`) |
+| quote | 40px | 1 | 0em | `clamp(22px, 2.8vw, 40px)` (website `--fs-quote`) |
+
+- **Line height and letter spacing** are the Brand Book's (type specimen `918:2323`; no brand text style has tracking). Line height is a multiple of the size: `line-height: var(--mfb-leading-h1)`, or `text-h1 leading-h1` in Tailwind (in 1.x, `text-h1` sets only the size). Body text never goes to line height 1 (Type Misuse `918:2841`).
+- **Body line height, short and long.** The Brand Book's body line height is for body copy paired with a heading: its type specimen states 1.2, and Type Relationships (`918:2990`) draws body copy under a heading at 1.22; the token keeps the stated number. The book shows no long reading text. For articles and other long running prose, `--mfb-leading-body-long` (`leading-body-long`) is 1.7, a value declared from the website's article text (website `.article-prose line-height`), not a Brand Book value. It is flagged for review: use it only for long reading text, never for headings or for body copy next to a heading.
+- **Weights:** Medium (500) for H1 to H6 and quotes; Regular (400) for body text and labels; SemiBold (600) only for emphasis inside a line. Body text is never Medium or bold (`918:2841`).
+- **Fluid sizes** are for web pages: each grows with the viewport up to the Brand Book size and never past it. The cap is the Brand Book's; the floor and the slope are the website's. Body text stays at its fixed size, so below about 1125px wide the fluid label is smaller than body text (16px against 18px at a phone's width), the reverse of the Brand Book's order; where a label sits next to body text on small screens, use the fixed label size. A fluid body size is not decided yet.
+- **Space after a heading:** 40px between any heading and the body text under it, at the 18px body size (Brand Book `918:2990`, measured). **Between a quote and its label:** 48px (Brand Book `918:3005`, measured).
+
+### Logo
+
+- **Minimum size:** 120px wide on screens (63px tall), 25mm wide in print (Brand Book `918:2681`). The logo is 1.904 times as wide as it is tall.
+- **Clear space:** 0.5 times the logo's height on every side (the book labels the logo height 2x and the clear space x, `918:2681`). A logo in a corner sits that same distance from the page edges (0.5 times its height, `918:2714`).
+- **Color by background** (Logo Usage and Variations, `918:2972`): white on purples and on photos; purple-300 on white and on greys up to gray-500; black on orange (the book also shows white there; black is the one that keeps to the contrast rule). The black and greyscale logos are for limited-color printing.
+- The supergraphics classes draw `.sg-logo` and `.sg-cover__logo` 40px tall, which is below the minimum size: that height is not in the Brand Book, and it is kept until it is decided.
+
 ### CSS Variables
 
-This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font families as `var(--mfb-font-<role>)`, the font sizes as `var(--mfb-size-<level>)`, and the geometry as `var(--sg-angle-base)` and its siblings. `theme.css` (Tailwind 4) carries the same colors, font families and font sizes, and `tailwind.js` (Tailwind 3) carries those plus the brand gradient; the geometry variables are only in `brand.css` and `supergraphics.css`.
+This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font families as `var(--mfb-font-<role>)`, the font sizes as `var(--mfb-size-<level>)`, the font weights as `var(--mfb-weight-<name>)`, the halftone colors as `var(--mfb-halftone-highlight)`, `var(--mfb-halftone-highlight-full)` and `var(--mfb-halftone-shadow)`, and the geometry as `var(--sg-angle-base)` and its siblings, the highlighter's `var(--sg-highlighter-*)` included. `theme.css` (Tailwind 4) carries the same colors, font families, font sizes and font weights (`--font-weight-<name>`, with `normal` as Tailwind's name for regular), and `tailwind.js` (Tailwind 3) carries those plus the deprecated brand gradient; the geometry and halftone variables are only in `brand.css` and `supergraphics.css`, and the halftone colors are deliberately not color utilities.
+
+The values in the next sections are in `brand.css` as `--mfb-<family>-<name>` (for example `--mfb-space-section`, `--mfb-radius-lg`, `--mfb-ease-out`, `--mfb-heading-on-light`). In Tailwind (both versions) the new utility names never replace a Tailwind default: they are `mfb-` prefixed (`rounded-mfb-lg`, `shadow-mfb-media`, `ease-mfb-out`, `duration-mfb-fast`, `max-w-mfb-page`, `py-mfb-section`), type levels (`leading-h1`, `tracking-h1`, `text-h1-fluid`) or color roles (`text-heading-on-light`). Layers, media ratios, logo and interface values are in `brand.css` and `index.js` only.
+
+### Layout and spacing
+
+Where the Brand Book is silent, these come from the website (Section 0).
+
+**Spacing scale:** 1: 4px, 2: 8px, 3: 12px, 4: 16px, 6: 24px, 8: 32px, 12: 48px, 16: 64px, 24: 96px, 32: 128px (website `--s-1` to `--s-10`). Each step N is `--mfb-space-N`, the same value as Tailwind's own `p-N`, `m-N` and `gap-N`, so use Tailwind's utilities and the package adds none. Stay on the scale: no 6px, 10px, 14px, 18px, 20px or 28px.
+
+| Variable | Value | Use | Source |
+|----------|-------|-----|--------|
+| `--mfb-space-heading-to-body` | `40px` | Space between a heading and the body text that follows it, for any heading level (at the 18px body size). | Brand Book `918:2990`, measured |
+| `--mfb-space-quote-to-label` | `48px` | Space between a quote and its label (the attribution). | Brand Book `918:3005`, measured |
+| `--mfb-space-gutter` | `clamp(20px, 4vw, 64px)` | Horizontal page gutter inside the page container. | website `--container-px` |
+| `--mfb-space-section` | `clamp(64px, 9vw, 128px)` | Vertical padding of a page section (top and bottom). | website `.section padding` |
+| `--mfb-space-section-tight` | `clamp(48px, 6vw, 96px)` | Vertical padding of a compact page section. | website `.section--tight padding` |
+| `--mfb-space-header-gap` | `clamp(32px, 4vw, 56px)` | Space between a section's header (title and intro) and its content. | website `margin-bottom` (inline, section headers) |
+| `--mfb-space-block-end` | `clamp(32px, 4vw, 48px)` | Space before a section's closing call to action. | website `margin-top` (inline, section calls to action) |
+| `--mfb-container-page` | `1280px` | Maximum width of the page container, gutter included (content is 1152px wide at the largest gutter). | website `--container` |
+| `--mfb-container-wide` | `1440px` | Maximum width of full-width frames such as the header, the footer and wide blocks. | website `max-width` (inline, wide frames) |
+| `--mfb-container-measure` | `720px` | Maximum width of running text and of a centered section header. | website `article width` |
+
+### Radius and shadow
+
+Radius is for interface elements (cards, buttons, inputs, images). **Brand shapes keep sharp corners**: never round a parallelogram, a spotlight, a book or the highlighter. (`.sg-para-frame` and `.sg-para-accent` still round their corners by 6px: see "Supergraphics classes that differ from the Brand Book" in Section 3.)
+
+| Variable | Value | Use | Source |
+|----------|-------|-----|--------|
+| `--mfb-radius-sm` | `4px` | Small radius: focus rings, small tags. | website `--r-sm` |
+| `--mfb-radius-md` | `8px` | Medium radius: inputs, small media, menus. | website `--r-md` |
+| `--mfb-radius-lg` | `12px` | Large radius: cards and media frames. | website `--r-lg` |
+| `--mfb-radius-pill` | `999px` | Pill radius: buttons and chips. In Tailwind, use rounded-full. | website `--r-pill` |
+| `--mfb-shadow-media` | `0px 20px 60px -20px`, purple-400 at 25% | Shadow under images and video on light backgrounds. None on dark backgrounds. | website `box-shadow` (inline, media frames) |
+| `--mfb-shadow-media-control` | `0px 12px 32px -8px`, black at 40% | Shadow of a control that sits on an image or video, such as a play button. | website `box-shadow` (inline, video play buttons) |
+| `--mfb-shadow-overlay` | `0px 40px 80px -20px`, black at 50% | Shadow of a modal or lightbox above the page. | website `.mfb-overlay__dialog box-shadow` |
+
+Shadows are tinted with palette colors only, and none is used on dark backgrounds.
+
+### Motion
+
+| Variable | Value | Use | Source |
+|----------|-------|-----|--------|
+| `--mfb-ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | Easing for hovers, presses, color changes and reveals. | website `--ease-out` |
+| `--mfb-ease-in-out` | `cubic-bezier(0.65, 0, 0.35, 1)` | Easing for carousel slides. | website `--ease-in-out` |
+| `--mfb-duration-fast` | `180ms` | Hover, press and color transitions. | website `--dur-fast` |
+| `--mfb-duration-med` | `320ms` | Small state changes, such as a carousel pager dot growing. | website `--dur-med` |
+| `--mfb-duration-slide` | `520ms` | A carousel track sliding to the next item (with easing.in-out). | website `transition` (inline, carousel tracks) |
+| `--mfb-duration-reveal` | `700ms` | Scroll reveal: an element fades in and rises 24px into place (with easing.out). None under reduced motion. | website `.reveal transition` |
+
+Under `prefers-reduced-motion: reduce`, nothing moves: reveals show at once, marquees and carousels stop, and transitions are instant. Moving text pauses on hover. Never animate the highlighter ("Do not alter its appearance", `918:2874`).
+
+### Layers, media and interface
+
+**Breakpoints:** the package declares none yet. The website has no single convention: 13 different `max-width` values in its media queries, the most used being 720px, 900px and 600px, next to near-duplicates such as 760px, 768px and 860px. Under the source rule no value becomes a token until one is chosen. Tailwind's own `sm:`, `md:` and `lg:` stay as they are.
+
+| Variable | Value | Use | Source |
+|----------|-------|-----|--------|
+| `--mfb-z-header` | `100` | Sticky page header. | website `.mfb-header z-index` |
+| `--mfb-z-dropdown` | `200` | Navigation dropdowns, above the header. | website `.mfb-dropdown z-index` |
+| `--mfb-z-overlay` | `1000` | Modals, lightboxes and the mobile menu, above everything. | website `.mfb-overlay z-index` |
+| `--mfb-ratio-video` | `16 / 9` | Video and wide media. | website `.video-tile aspect-ratio` |
+| `--mfb-ratio-photo` | `4 / 3` | Landscape photos. | website `aspect-ratio` (inline, gallery images) |
+| `--mfb-ratio-portrait` | `4 / 5` | Portrait photos of people. | website `aspect-ratio` (inline, educator photos) |
+| `--mfb-ratio-square` | `1 / 1` | Square images and avatars. | website `aspect-ratio` (inline, supporter photos) |
+| `--mfb-ui-touch-target` | `44px` | Smallest width and height of an icon button or any other tap target. | website `width and height` (inline, icon buttons) |
+| `--mfb-ui-link-underline-offset` | `3px` | Distance between a link and its underline. | website `.article-prose a text-underline-offset` |
+
+### Not imported from the website
+
+The website also carries values that contradict the Brand Book. They are not tokens, and they must not be copied from the website's code:
+
+- a 10 degree parallelogram slant, a hero cut of about 5 degrees (an 8%/92% polygon) and its mirrored and mobile versions, a 9 degree ribbon, a 45 degree corner triangle, and a logo icon at 15.5 degrees: the angle is 13°, always left to right
+- a thick, animated highlighter bar: the highlighter is a thin line under 80% of one word (Rule 2), never animated
+- duotone photos and a dot-texture overlay: photos are halftone (Rule 4)
+- IBM Plex Mono labels, a Georgia quote mark and weight 700: IBM Plex Sans only, in Regular, Medium and SemiBold
+- all-caps labels and 0.12em label tracking: no uppercase (Rule 1), no tracking
+- teal, indigo and other off-palette colors, a blue-grey page text color, and translucent white text: palette colors only
+- orange text and links on light backgrounds, and white text on orange buttons: dark text on light colors and on every orange (`918:2588`)
+- gray-900 headings and body text: black (`918:2990`)
+- heading line height 1.05, and body line height 1.55 in page sections: the Brand Book's line heights (Type relationships above). The website's 1.7 is declared for long reading text only (`--mfb-leading-body-long`), not for body copy next to a heading
 
 ## 2. Binding Rules (The 12)
 
@@ -100,19 +246,28 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 - `text-transform: uppercase` or setting `.characters = "SOME LABEL"` in generators; re-case the source characters instead
 - Mix Title Case and sentence case within a single role (all kickers Title Case, all captions sentence case)
 
-### Rule 2. Highlighter: ONE word, thin line
+### Rule 2. Highlighter: ONE word, a thin line at the baseline
 
-**Source:** Brand Book *Highlighter* (`918:2874`): "Apply it to only one word per heading, covering up to 80% of the word length."
+**Source:** Brand Book *Highlighter* (`918:2874`): "The Highlighter is used to emphasize a single word in a heading ... Apply it to only one word per heading, covering up to 80% of the word length. Do not alter its appearance to ensure a clean and cohesive typographic style."
+
+**What it is:** a thin line at the baseline of one word, drawn beneath the glyphs. It is not a band behind the letters. Measured from the Brand Book's own vectors (its twelve highlighters are one vector, copied and scaled, with small variants on three copies):
+
+- **Length:** 80% of the word, centered, so it starts a little in from the first letter and stops short of the last
+- **Thickness:** the line's length divided by 26.6, about 3% of the word's width. It is proportional to the word's width, so at the same font size a longer word gets a thicker line
+- **Position:** the center of its bounding box (half-way between its top and bottom edges) sits 0.054em below the baseline, so it straddles the baseline and sits mostly below it; the glyphs, descenders included, paint over it
+- **Shape:** a filled quad that tapers from 6/7 of its height at the start to 4/7 at the end, rises slightly to the right, with slant-cut ends (as a CSS clip-path: `polygon(1.24% calc(100% / 7), 100% 0, 99.47% calc(400% / 7), 0 100%)`)
+- **Color:** orange-300 on purple, on white and on light greys up to gray-300; white on orange, and on gray-400 and gray-500 (the Brand Book's example is a mid grey close to gray-500), where an orange line all but disappears. The word itself keeps the heading's color
 
 **Do:**
-- CSS: `background-image: linear-gradient(transparent 80%, var(--mfb-orange-300) 80%)`, a thin band of about 20% of the x-height
-- Put that style on a `highlighter` class so it stays bound to the word (this package's `supergraphics.css` turns it white inside its orange spotlight and orange background classes)
+- Use the `highlighter` class from this package's `supergraphics.css` on a span around the one word: `<h2>Open Source <span class="highlighter">Education</span></h2>`. It draws the line described above, orange-300 by default and white inside the orange surfaces `sg-bg-orange`, `sg-spotlight--orange`, `sg-cover--orange`, `sg-spotlight-frame--orange`, `sg-book-frame--orange` and `sg-halftone-cutout--orange-bg`. On another orange surface, or on gray-400 or gray-500, set `--sg-highlighter-color: var(--mfb-white)` on the section. On a light grey such as gray-200 (`sg-bg-gray`) keep the orange line: a white one cannot be seen there
+- Leave the span's `display` and `text-align` alone: the line's length and thickness are computed from the span's own width
+- Where CSS cannot be used (print, canvas), draw the same construction from the geometry tokens `highlighter-coverage`, `highlighter-aspect`, `highlighter-offset` and `highlighter-shape`
 - End the highlight at the word boundary, with no trailing punctuation inside it (`Foundations` ✓ · `Foundations.` ✗)
 
 **Don't:**
 - Highlight two or more words, an italic phrase, or a whole heading
-- Use a tall "highlighter block" that covers 40%+ of the x-height (the legacy `transparent 60%` CSS reads too tall; use `transparent 80%` for the thin line)
-- Create an `hl-bar` rectangle or fixed-width stripe behind the text; it must bind to the word via the text-decoration style
+- Paint a band behind the letters: the old `linear-gradient(transparent 80%, ...)` CSS draws a band about 0.26em thick under the whole word, about twice as thick, lower and wider than the Brand Book's line
+- Stretch it over the whole word or past it, tilt it, round it, or give it another color than the pairs above ("Do not alter its appearance")
 
 ### Rule 3. No translucent colors on brand shapes
 
@@ -120,7 +275,8 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 
 **Do:**
 - Parallelograms, spotlights, book panels: solid fills (purple-300, purple-400, purple-200, orange-300, orange-400, orange-200, or a neutral gray)
-- For depth, use Parallelogram Patterns' scale progression (Brand Book `918:4126`: "Rows can scale progressively in size to create depth")
+- For depth, use Parallelogram Patterns' scale progression (Brand Book `918:4212`: "Rows can scale progressively in size to create depth")
+- A shape on a colored base is one step lighter than the base (shape tones, Section 1)
 
 **Don't:**
 - `opacity: 0.x` on brand shape elements
@@ -134,7 +290,7 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 
 **Do:**
 - Apply in Canva Apps → Halftone Scale 2.5 → Duotone Image Edit (the app name says "Duotone" but the output is halftone dots)
-- **Cutout portraits** (subject isolated on colored bg): highlights `#F7E6FF`, shadows `#45265B`, on purple-300 or orange-300 bg
+- **Cutout portraits** (subject isolated on colored bg): highlights `#F7E6FF`, shadows `#45265B`, on purple-300, purple-200 or orange-300 bg
 - **Full portraits** (subject fills frame): highlights `#EEEEEE`, shadows `#45265B`, on purple-300 bg
 - Place the halftoned image INSIDE a Spotlight Frame (angular wedge) or Parallelogram Frame, never a rectangular full-bleed
 
@@ -144,7 +300,7 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 
 ### Rule 5. Shape family follows content genre
 
-**Source:** Brand Book *Parallelogram* (`918:4212`) + *Spotlights & Books* (`918:3604`).
+**Source:** Brand Book *Parallelogram* (`918:4189`) + *Spotlights & Books* (`918:3604`).
 
 - **Parallelogram = EDUCATIONAL content.** Books, curricula, diplomas, certificates, node announcements, program cards. Brand Book: "used exclusively in educational materials."
 - **Spotlight / Book = LIFESTYLE / EVENTS content.** Community spotlights, unconferences, team photos, documentary stills, social graphics, merch, promotional pieces. Brand Book: "for non-educational content."
@@ -160,7 +316,7 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 
 ### Rule 6. Spotlight vs Book construction
 
-**Source:** Brand Book *Construction* (`918:3632`), *Book Panel* (`918:3716`), misuse (`918:2941`).
+**Source:** Brand Book *Construction* (`918:3632`), *Book Panel* (`918:3757`), misuse (`918:2941`).
 
 - **Spotlight** = two diagonal cuts at **different** angles → dynamic, directional. Stretches horizontally or vertically.
 - **Book** = two diagonal cuts at the **same** angle → stable, structured. Stacks vertically at varying heights.
@@ -177,13 +333,14 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 
 ### Rule 7. Parallelogram construction
 
-**Source:** Brand Book *Parallelogram Patterns* (`918:4126`), misuse (`918:3958`).
+**Source:** Brand Book *Parallelogram* (`918:4189`), *Parallelogram Patterns* (`918:4212`), misuse (`918:3958`).
 
 **Do:**
-- 13° angle (same as logo)
-- Base height = 2× logo-icon height
-- Horizontal or vertical rows with rhythmic offsets
-- Rows can scale progressively for depth
+- 13° angle (same as logo), measured from vertical
+- Base height = 2× logo-icon height (stated on `918:4212`; no drawing in the book shows it)
+- The base shape has the logo icon's proportions: its horizontal edge is 0.572 times its height (measured on `918:4200`). Pattern pieces may be wider or narrower
+- Horizontal or vertical rows with rhythmic offsets; the rows touch (gap 0px, measured on `918:4295`)
+- Rows can scale progressively for depth: each row 1.2 times the height of the one before (measured on `918:4295`). The package's `.sg-para-pattern` does not follow these two measurements yet: it separates rows by 10px and steps them by 1.25 and 1.55
 - Staggered or irregular: variety is the point
 
 **Don't:**
@@ -262,29 +419,47 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 
 ### Contrast Pairs
 
-| Background | Text | Accent |
-|------------|------|--------|
-| purple-300 / purple-400 | white | orange-300 |
-| white / gray-100 | gray-900 | purple-300 headings, orange-300 CTAs |
-| orange-300 | white or gray-900 | none (no secondary accent on orange) |
+| Background | Headings and text | Links | Accents |
+|------------|-------------------|-------|---------|
+| purple-200, purple-300, purple-400, gray-600 to gray-900 | white (on gray-600, headings and text at 24px and up only) | orange-300 on purple-300 and purple-400; white and underlined on purple-200 and the greys | orange-300 highlighter; purple-200 shapes on purple-300; gray-400 for secondary text on purples |
+| white, gray-100 to gray-500 | black | purple-300, always underlined: in orange-300 on white to gray-300, in the link's own color on gray-400 and gray-500 | orange-300 highlighter on white to gray-300, white on gray-400 and gray-500; orange-300 fills (with black text); gray-700 for secondary text on white and gray-100 |
+| orange-200, orange-300, orange-400 | black | black | white highlighter; orange-200 shapes on orange-300; no other accent |
+
+The roles behind this table are in Section 1 (Color roles).
 
 ### Rules
 
-- **Links:** orange-300, underline on hover
-- **Text on dark backgrounds:** white
-- **Text on light backgrounds:** gray-900 (`#25252B`), never pure black
-- **Orange is for accents only** (CTAs, links, highlights, ₿ symbol), never a full background fill beyond explicit orange-300 brand shapes
+- **Headings on light backgrounds:** black (`#000000`), as in the Brand Book's *Type Relationships* (`918:2990`) and its Brand in Use examples. purple-300 is the brand's surface and shape color, not a heading color on white
+- **Text on light backgrounds:** black (`#000000`), body copy included (`918:2994`). gray-700 is for secondary text only (captions, meta), on white or gray-100
+- **Headings and text on dark backgrounds:** white
+- **Text on orange:** black, never white (white on orange-300 is 2.3:1). This applies to buttons too: an orange-300 button has black text. The supergraphics classes `.sg-bg-orange`, `.sg-cover--orange` and `.sg-cta` set it (black, 9.2:1 on orange-300)
+- **Links on light backgrounds:** purple-300 text with an orange-300 underline. The Brand Book has no link style; its *Color Contrast* slide (`918:2588`) says "Light text should be placed on dark colors, and dark text on light colors", and it pairs every orange with dark text, so orange link text on white breaks it. The purple-300 text and the orange-300 underline are this package's recommendation, not a Brand Book rule. A link on a light background never loses its underline: purple-300 is only 1.8:1 from black text, so the underline is what marks it. On gray-400 and gray-500 an orange underline cannot be seen (1.3:1 and 1.0:1): underline in the link's own color there
+- **Links on dark backgrounds:** orange-300 on purple-300 and purple-400 (5.0:1 and 6.5:1), or white. On purple-200 (orange-300 is 3.8:1 there) and on the dark greys, links are white and underlined (8.7:1 on purple-200)
+- **Orange is for accents only** (CTA fills with black text, link underlines, links on dark backgrounds, highlights, ₿ symbol), never a full background fill beyond explicit orange-300 brand shapes, and never text on a light background
 - **Gradient:** the brand gradient is deprecated (Section 1): do not use it in new designs. Where an existing page still uses it, keep its 135deg direction (top-left to bottom-right), and never use it on covers.
+
+### Supergraphics classes that differ from the Brand Book
+
+The classes in this package's `supergraphics.css` read the color roles and the type relationships above: text on orange is black (`.sg-cta`, `.sg-bg-orange`, `.sg-cover--orange`), text on light surfaces is black (`.sg-bg-white`, `.sg-bg-gray`, `.sg-info-bar--on-light`, whose date is black and whose date line is gray-700, with no opacity), an `.sg-info-bar` without a variant has a black date when it sits directly in `.sg-bg-white`, `.sg-bg-gray` or one of the package's orange surfaces (on any other light or orange surface, give the bar a variant), `.sg-headline` and `.sg-cover__title` have line height 1 and no tracking (a headline set at the H5 or H6 size adds `.sg-headline--h5` or `.sg-headline--h6`, for the book's 1.1), `.sg-body` has no tracking, and `.sg-label` is Regular at line height 1.2 with no tracking. A few values from before the Brand Book was measured remain. Changing them changes how existing pages look, so it waits for a release that decides it. Until then, set the value yourself where you use the class:
+
+| Class | What it sets | The Brand Book | Set instead |
+|-------|--------------|----------------|-------------|
+| `.sg-cta` | 1px letter spacing, a 40px radius | no tracking | `letter-spacing: 0` (its 40px radius draws the same pill as `var(--mfb-radius-pill)` on a button up to 80px tall; no radius token is 40px, so the class keeps it) |
+| `.sg-label` | 18px | 22px | `font-size: var(--mfb-size-label)` |
+| `.sg-info-bar` | a 32px date in SemiBold at line height 1.1, a 15px date line, and a 17px location at line height 1.3 | 32px is the H6 size, in Medium at 1.1; body text is 18px and labels 22px, both at 1.2 | `font-weight: var(--mfb-weight-medium)` on `.sg-info-bar__date`; the body or label size and line height on its `small` and on `.sg-info-bar__location` |
+| `.sg-para-frame`, `.sg-para-accent` | a 6px corner radius on a parallelogram (no radius token is 6px) | sharp corners | `border-radius: 0` |
+| `.sg-para-pattern` | rows 10px apart, stepped by 1.25 and 1.55 | rows that touch, each 1.2 times the one before (Rule 7) | nothing yet: a release changes the class |
+| `.sg-logo`, `.sg-cover__logo` | a logo 40px tall | a logo at least 63px tall on screens (Logo, Section 1) | nothing yet: the height is not decided |
 
 ### Logo files
 
 The logo files are in [MyFirstBitcoin/mfb-brand](https://github.com/MyFirstBitcoin/mfb-brand), under `Logo & Logo Animation/logo/`, as PNG and SVG:
 
-- On dark or purple backgrounds: `mfb_logo_white`
-- On orange backgrounds: `mfb_logo_white`
-- On light backgrounds: `mfb_logo_purple`
-- On grey backgrounds: `mfb_logo_black`
-- Minimum clear space around the logo: height of the ₿ symbol
+- On dark or purple backgrounds, and on photos: `mfb_logo_white`
+- On light backgrounds, and on greys up to gray-500: `mfb_logo_purple`
+- On orange backgrounds: `mfb_logo_black` (the Brand Book also shows the white logo there)
+- The black and greyscale logos are otherwise for limited-color printing
+- Minimum size: 120px wide on screens, 25mm in print. Clear space: 0.5 times the logo's height on every side (Section 1, Logo)
 
 ### Photography
 
@@ -294,8 +469,8 @@ Real people in real educational settings, warm natural lighting, diverse represe
 
 1. **Screenshot the relevant Brand Book page** in `mFIc75UUSyftaqnNUQgjLX` (for example with the Figma MCP `get_screenshot` tool): the rule page node for the element you're about to create
 2. **Pick the supergraphic by content type**: educational (parallelogram) vs lifestyle (spotlight/book) per Rule 5
-3. **Sentence case body, Title Case headings**, never ALL-CAPS (Rule 1)
-4. **Highlighter = one word, thin**: if your headline has multiple words you want to emphasize, pick one (Rule 2)
+3. **Sentence case body, Title Case headings**, never ALL-CAPS (Rule 1); black text on light and orange backgrounds, white on dark (Section 3)
+4. **Highlighter = one word, a thin line at the baseline under 80% of it**: if your headline has multiple words you want to emphasize, pick one (Rule 2)
 5. **No translucent fills, no duotone photos**: solid colors, halftone-inside-a-frame for portraits (Rules 3 & 4)
 6. **Verify every name and number** against source systems (network records, finance records, surveys) before typing (Rule 10)
 7. **This file is a mirror**: the Brand Book Figma wins every conflict (Section 0)
@@ -311,3 +486,5 @@ node scripts/brand-spec.mjs
 ```
 
 `node scripts/check.mjs` fails when this file is out of date, and so does the rebuild check on every pull request.
+
+This file ships in the `@myfirstbitcoin/design` package. A project that installs the package can read it at `node_modules/@myfirstbitcoin/design/brand-spec.md` (or import `@myfirstbitcoin/design/brand-spec.md`), at the version it pins.
