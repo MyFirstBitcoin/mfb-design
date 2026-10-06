@@ -55,6 +55,10 @@ const GEOM_VARS = {
   'aspect':       '--sg-aspect',
   'logo-icon-h':  '--sg-logo-icon-h',
   'base-h-ratio': '--sg-base-h-ratio',
+  'highlighter-coverage': '--sg-highlighter-coverage',
+  'highlighter-aspect':   '--sg-highlighter-aspect',
+  'highlighter-offset':   '--sg-highlighter-offset',
+  'highlighter-shape':    '--sg-highlighter-shape',
 };
 const geomMismatch = [];
 for (const [tokenName, cssVar] of Object.entries(GEOM_VARS)) {

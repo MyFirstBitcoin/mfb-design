@@ -71,7 +71,7 @@ for (const [name, tok] of Object.entries(tokens.color)) tokenHex[tok.$value.toUp
 // It reports rather than fails, because most tokens are honestly unverifiable: the Brand Book
 // states the 13 degree angle as English prose, and no API returns that as data.
 const TOKEN_GROUPS = Object.keys(tokens).filter((k) => !k.startsWith('$'));
-const census = { byKind: {}, unverifiable: [], declared: [], noProvenance: [] };
+const census = { byKind: {}, unverifiable: [], measured: [], declared: [], noProvenance: [] };
 for (const group of TOKEN_GROUPS) {
   for (const [name, tok] of Object.entries(tokens[group])) {
     const mfb = (tok.$extensions || {}).mfb;
@@ -79,6 +79,7 @@ for (const group of TOKEN_GROUPS) {
     census.byKind[kind] = (census.byKind[kind] || 0) + 1;
     const ref = `${group}.${name}`;
     if (kind === 'prose') census.unverifiable.push(`${ref} (${mfb.source})`);
+    else if (kind === 'measured') census.measured.push(`${ref} (${mfb.source})`);
     else if (kind === 'declared') census.declared.push(ref);
     else if (kind === 'unverified' || kind === 'no-provenance') census.noProvenance.push(ref);
   }
@@ -188,7 +189,7 @@ const result = {
   coverage: census,
   knownOpenQuestions: [
     `coverage: ${census.machineCheckable}/${census.total} tokens are machine-checkable against Figma; ` +
-      `${census.unverifiable.length} are prose in the brand book, ${census.declared.length} are declared ` +
+      `${census.unverifiable.length} are prose in the brand book, ${census.measured.length} are measured from its vectors, ${census.declared.length} are declared ` +
       `downstream (what Figma owes), ${census.noProvenance.length} have no established provenance`,
     'IBM Plex Mono (fontFamily.mono) is deprecated in tokens.json: absent from the Brand Book, kept for compatibility, phase out',
     'Brand gradient (gradient.brand) is deprecated in tokens.json: absent from the Brand Book, kept for compatibility, phase out',
@@ -212,6 +213,7 @@ if (flags.json) {
   // verified; this line says how much of it actually was.
   console.log(`  Coverage: ${census.machineCheckable}/${census.total} tokens machine-checkable against Figma`);
   console.log(`    ${census.unverifiable.length} prose (stated in the brand book as English; no API returns these)`);
+  console.log(`    ${census.measured.length} measured from the brand book's vectors by a person (re-measure if those slides change)`);
   console.log(`    ${census.declared.length} declared downstream, which is what Figma owes: ${census.declared.join(', ') || 'none'}`);
   if (census.noProvenance.length)
     console.log(`    ${census.noProvenance.length} with NO established provenance: ${census.noProvenance.slice(0, 6).join(', ')}${census.noProvenance.length > 6 ? ' ...' : ''}`);

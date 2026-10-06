@@ -72,19 +72,27 @@ This package's `brand.css` exposes every color as `var(--mfb-<name>)`, the font 
 - `text-transform: uppercase` or setting `.characters = "SOME LABEL"` in generators; re-case the source characters instead
 - Mix Title Case and sentence case within a single role (all kickers Title Case, all captions sentence case)
 
-### Rule 2. Highlighter: ONE word, thin line
+### Rule 2. Highlighter: ONE word, a thin line at the baseline
 
-**Source:** Brand Book *Highlighter* (`918:2874`): "Apply it to only one word per heading, covering up to 80% of the word length."
+**Source:** Brand Book *Highlighter* (`918:2874`): "The Highlighter is used to emphasize a single word in a heading ... Apply it to only one word per heading, covering up to 80% of the word length. Do not alter its appearance."
+
+**What it is:** a thin line drawn behind one word, at its baseline. It is not a band behind the letters. Measured from the Brand Book's own vectors (all twelve highlighters in it are one shape, copied and scaled):
+
+- **Length:** {{HL_COVERAGE}} of the word, centred, so it starts a little in from the first letter and stops short of the last
+- **Thickness:** the line's length divided by {{HL_ASPECT}}, about 3% of the word's width. It grows with the word, not with the font size
+- **Position:** its centre sits {{HL_OFFSET}} below the baseline, so it straddles the baseline and sits mostly below it; the glyphs, descenders included, paint over it
+- **Shape:** a filled quad that tapers from 6/7 of its height at the start to 4/7 at the end, rises slightly to the right, with slant-cut ends (as a CSS clip-path: `{{HL_SHAPE}}`)
+- **Colour:** orange-300 on purple and on white; white on grey and on orange
 
 **Do:**
-- CSS: `background-image: linear-gradient(transparent 80%, var(--mfb-orange-300) 80%)`, a thin band of about 20% of the x-height
-- Put that style on a `highlighter` class so it stays bound to the word (this package's `supergraphics.css` turns it white inside its orange spotlight and orange background classes)
+- Use the `highlighter` class from this package's `supergraphics.css` on a span around the one word: `<h2>Open Source <span class="highlighter">Education</span></h2>`. It draws the line above, orange-300 by default and white inside `sg-bg-orange`, `sg-spotlight--orange`, `sg-cover--orange` and `sg-bg-gray`. On another orange or grey surface, set `--sg-highlighter-color: var(--mfb-white)` on the section
+- Where CSS cannot be used (print, canvas), draw the same construction from the geometry tokens `highlighter-coverage`, `highlighter-aspect`, `highlighter-offset` and `highlighter-shape`
 - End the highlight at the word boundary, with no trailing punctuation inside it (`Foundations` ✓ · `Foundations.` ✗)
 
 **Don't:**
 - Highlight two or more words, an italic phrase, or a whole heading
-- Use a tall "highlighter block" that covers 40%+ of the x-height (the legacy `transparent 60%` CSS reads too tall; use `transparent 80%` for the thin line)
-- Create an `hl-bar` rectangle or fixed-width stripe behind the text; it must bind to the word via the text-decoration style
+- Paint a band behind the letters: the old `linear-gradient(transparent 80%, ...)` CSS draws a band about 0.26em thick under the whole word, about twice as thick, lower and wider than the Brand Book's line
+- Stretch it over the whole word or past it, tilt it, round it, or give it another colour than the pairs above ("Do not alter its appearance")
 
 ### Rule 3. No translucent colors on brand shapes
 
@@ -267,7 +275,7 @@ Real people in real educational settings, warm natural lighting, diverse represe
 1. **Screenshot the relevant Brand Book page** in `{{FIGMA_FILE}}` (for example with the Figma MCP `get_screenshot` tool): the rule page node for the element you're about to create
 2. **Pick the supergraphic by content type**: educational (parallelogram) vs lifestyle (spotlight/book) per Rule 5
 3. **Sentence case body, Title Case headings**, never ALL-CAPS (Rule 1)
-4. **Highlighter = one word, thin**: if your headline has multiple words you want to emphasize, pick one (Rule 2)
+4. **Highlighter = one word, a thin line at the baseline under 80% of it**: if your headline has multiple words you want to emphasize, pick one (Rule 2)
 5. **No translucent fills, no duotone photos**: solid colors, halftone-inside-a-frame for portraits (Rules 3 & 4)
 6. **Verify every name and number** against source systems (network records, finance records, surveys) before typing (Rule 10)
 7. **This file is a mirror**: the Brand Book Figma wins every conflict (Section 0)

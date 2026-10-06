@@ -443,13 +443,44 @@
    HIGHLIGHTER VARIANT — for orange backgrounds where default is invisible
    ═══════════════════════════════════════════════════════════════════ */
 
+:root {
+  --sg-highlighter-coverage: 80%;
+  --sg-highlighter-aspect: 26.6;
+  --sg-highlighter-offset: 0.03em;
+  --sg-highlighter-shape: polygon(1.24% calc(100% / 7), 100% 0, 99.47% calc(400% / 7), 0 100%);
+}
+
+.highlighter {
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+}
+.highlighter::after {
+  content: '';
+  display: inline-block;
+  position: relative;
+  z-index: -1;
+  vertical-align: baseline;
+  width: var(--sg-highlighter-coverage);
+  aspect-ratio: var(--sg-highlighter-aspect);
+  margin-left: calc(-0.5 * (100% + var(--sg-highlighter-coverage)));
+  background: var(--sg-highlighter-color, var(--mfb-orange-300));
+  clip-path: var(--sg-highlighter-shape);
+  transform: translateY(calc(50% + var(--sg-highlighter-offset)));
+  pointer-events: none;
+}
+
 .sg-spotlight--orange .highlighter {
-  background-image: linear-gradient(transparent 80%, var(--mfb-white) 80%);
+  --sg-highlighter-color: var(--mfb-white);
   color: var(--mfb-white);
 }
 .sg-bg-orange .highlighter {
-  background-image: linear-gradient(transparent 80%, var(--mfb-white) 80%);
+  --sg-highlighter-color: var(--mfb-white);
   color: var(--mfb-white);
+}
+.sg-cover--orange .highlighter,
+.sg-bg-gray .highlighter {
+  --sg-highlighter-color: var(--mfb-white);
 }
 
 /* ═══════════════════════════════════════════════════════════════════

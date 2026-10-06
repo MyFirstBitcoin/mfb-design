@@ -77,6 +77,10 @@ const values = {
   HALFTONE_HI: need('geometry', 'halftone-highlight'),
   HALFTONE_HI_FULL: need('geometry', 'halftone-highlight-full'),
   HALFTONE_LO: need('geometry', 'halftone-shadow'),
+  HL_COVERAGE: need('geometry', 'highlighter-coverage'),
+  HL_ASPECT: need('geometry', 'highlighter-aspect'),
+  HL_OFFSET: need('geometry', 'highlighter-offset'),
+  HL_SHAPE: need('geometry', 'highlighter-shape'),
   ORANGE: need('color', 'orange-300'),
   GRAY900: need('color', 'gray-900'),
 };
