@@ -102,9 +102,10 @@ Keep it free of added comments: any byte added here changes the published file. 
 here, by pull request; the internal copy is then brought into line, and a weekly check compares
 the two.
 
-The canon, `tokens.json` and the README template keep the punctuation they were published with,
-em-dashes included, because rewording them changes published files. Such rewording belongs in a
-release pull request.
+The canon and `tokens.json` keep the punctuation they were published with, em-dashes included,
+because rewording them changes published files. Such rewording belongs in a release pull request.
+The README template (in `scripts/build-design-package.mjs`) was reworded in the v1.4.0 release
+and follows the conventions in [AGENTS.md](AGENTS.md): new published prose carries no em-dash.
 
 ## Where the history lives
 
