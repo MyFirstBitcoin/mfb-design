@@ -12,7 +12,9 @@
 //     template or a script without rebuilding, or edited a generated file by hand);
 //   - package.json gains a field that runs code or installs anything in consumers' projects.
 //     Consumers install this package as a git dependency, and npm runs a git dependency's
-//     `prepare` script (installing its dependencies first) on every consumer install.
+//     `prepare` script (installing its dependencies first) on every consumer install;
+//   - brand-check.mjs, the guard the package ships (it is hand-written, not generated), misses a
+//     planted violation or reports a clean line (scripts/brand-check.test.mjs).
 // It changes nothing in the repository.
 
 import fs from 'fs';
@@ -52,6 +54,14 @@ try {
       process.stderr.write(r.stderr || '');
       problems.push(`${gen} failed (exit ${r.status ?? r.signal}); see its message above`);
     }
+  }
+
+  // ---- the shipped brand guard still catches what it must ----
+  const guard = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'brand-check.test.mjs')], { cwd: ROOT, encoding: 'utf8' });
+  if (guard.status !== 0) {
+    process.stderr.write(guard.stdout || '');
+    process.stderr.write(guard.stderr || '');
+    problems.push(`scripts/brand-check.test.mjs failed (exit ${guard.status ?? guard.signal}); see its message above`);
   }
 
   // ---- compare every produced file with the committed one ----

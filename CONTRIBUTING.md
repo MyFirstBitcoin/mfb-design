@@ -1,8 +1,8 @@
 # Contributing to @myfirstbitcoin/design
 
 This repository is the single source of the My First Bitcoin brand as code: the design tokens,
-the build that turns them into the published package, the written brand specification, and
-the check against the Brand Book in Figma. The Brand Book in
+the build that turns them into the published package, the written brand specification, the
+brand guard that projects run, and the check against the Brand Book in Figma. The Brand Book in
 Figma is where the brand is decided; `tokens.json` mirrors it and is edited only to match it,
 under the source rule below.
 
@@ -43,13 +43,15 @@ contributions, by people and AI assistants alike.
 | `package.json` | Name, version, exports and the `files` list (published) | Yes: the version is how a release happens |
 | `src/supergraphics.canon.css` | The supergraphics canon, the origin of the published supergraphics (see below) | Yes, by pull request, with no added comment |
 | `src/brand-spec.template.md` | The prose of the brand specification | Yes |
+| `brand-check.mjs` | The brand guard projects run after their build (published) | Yes, with its test in `scripts/brand-check.test.mjs` |
 | `scripts/` | Build, spec generator and checks | Yes |
 | `README.md`, `brand.css`, `theme.css`, `tailwind.js`, `index.js`, `supergraphics.css` | Generated package files (published) | No: rebuild them |
 | `brand-spec.md` | Generated brand specification (published, so consumers and their AI tools read the rules from `node_modules`) | No: regenerate it |
 
 What consumers install is exactly the list in `package.json`'s `files`, plus `package.json`
-itself: `README.md`, `brand-spec.md`, `brand.css`, `index.js`, `supergraphics.css`,
-`tailwind.js`, `theme.css` and `tokens.json`. Nothing else in this repository reaches them.
+itself: `README.md`, `brand-spec.md`, `brand-check.mjs`, `brand.css`, `index.js`,
+`supergraphics.css`, `tailwind.js`, `theme.css` and `tokens.json`. Nothing else in this
+repository reaches them.
 `brand-spec.md` is there so that a consumer, and the AI tools working in its repository, read
 the brand rules at `node_modules/@myfirstbitcoin/design/brand-spec.md`, at the version they pin.
 
@@ -82,8 +84,10 @@ emitted. New Tailwind keys are `mfb-` prefixed, type levels or color roles
 ## Checks on every pull request
 
 - **rebuild-check** (`scripts/check.mjs`): rebuilds into a temporary directory and fails if any
-  committed output differs from a fresh build, if the build or the spec generator refuses, or if
-  `package.json` gains scripts or dependencies. It also runs on every push to `master`.
+  committed output differs from a fresh build, if the build or the spec generator refuses, if
+  `package.json` gains scripts or dependencies, or if `brand-check.mjs` misses a planted
+  violation or reports a clean line (`scripts/brand-check.test.mjs`). It also runs on every push
+  to `master`.
 - **version-check**: if the pull request changes the version in `package.json`, the new version
   must be above the newest `v*` tag and must not already be tagged. If published files change
   without a version bump, it warns: merging would release nothing.
@@ -124,6 +128,16 @@ FIGMA_TOKEN=... node scripts/verify-figma.mjs [--json] [--summary] [--status FIL
 It is not run in GitHub Actions, and no Figma token is stored in this repository. The Monday
 check runs it outside GitHub. `--status FILE` writes the full result as JSON for that job, and
 `--summary` writes a short Markdown summary (to `$GITHUB_STEP_SUMMARY` when that is set).
+
+## The brand guard
+
+`brand-check.mjs` is published, and projects run it after their build
+(`node node_modules/@myfirstbitcoin/design/brand-check.mjs`; the README says how). It needs
+Node.js and nothing else, and reads every value it compares with from the `tokens.json` next to
+it, so a token change reaches the guard without editing it. It generalises the guards that two
+of My First Bitcoin's sites already ran. When you change a rule, add a planted line for it to
+`scripts/brand-check.test.mjs` (and a clean line for anything it must not report);
+`scripts/check.mjs` runs that test.
 
 ## The supergraphics canon
 

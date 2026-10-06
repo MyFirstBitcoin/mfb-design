@@ -21,7 +21,8 @@
     "supergraphics.css",
     "tokens.json",
     "README.md",
-    "brand-spec.md"
+    "brand-spec.md",
+    "brand-check.mjs"
   ],
   "repository": {
     "type": "git",

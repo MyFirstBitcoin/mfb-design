@@ -78,7 +78,7 @@ jobs:
             fi
             echo "Version bump to $head_version: merging this pull request releases v$head_version."
           else
-            changed=$(git diff --name-only "$base" HEAD -- README.md brand-spec.md brand.css index.js supergraphics.css tailwind.js theme.css tokens.json | tr '\n' ' ')
+            changed=$(git diff --name-only "$base" HEAD -- README.md brand-spec.md brand-check.mjs brand.css index.js supergraphics.css tailwind.js theme.css tokens.json | tr '\n' ' ')
             if [ -n "$changed" ]; then
               echo "::warning::Published files change without a version bump, so merging releases nothing: $changed"
             else
@@ -130,7 +130,7 @@ jobs:
             tag_sha=$(printf '%s\n' "$tag_lines" | tail -n 1 | cut -f1)
             if [ "$tag_sha" = "$GITHUB_SHA" ] || [ "$before_version" = "$version" ]; then
               echo "v$version is already tagged: nothing to release."
-              changed=$(git diff --name-only "$BEFORE" "$GITHUB_SHA" -- README.md brand-spec.md brand.css index.js supergraphics.css tailwind.js theme.css tokens.json | tr '\n' ' ')
+              changed=$(git diff --name-only "$BEFORE" "$GITHUB_SHA" -- README.md brand-spec.md brand-check.mjs brand.css index.js supergraphics.css tailwind.js theme.css tokens.json | tr '\n' ' ')
               if [ "$tag_sha" != "$GITHUB_SHA" ] && [ -n "$changed" ]; then
                 echo "::warning::Published files changed without a version bump, so they are in no release until the next one: $changed"
               fi

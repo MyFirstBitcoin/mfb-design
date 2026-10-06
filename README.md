@@ -98,6 +98,37 @@ Where the Brand Book defines a value, the token takes it. Where the book is sile
 - **Tailwind 4 emits a theme variable only when something uses it.** To read `var(--mfb-radius-md)` or another new variable in your own CSS, import `brand.css` as well, or use the utility.
 - **index.js** exports `colorRoles`, `shapeTones`, `fontSizeFluid`, `lineHeight`, `letterSpacing`, `logo`, `spacing`, `space`, `radius`, `shadow`, `easing`, `duration`, `container`, `breakpoint`, `zIndex`, `mediaRatio`, `ui` next to the existing `colors`, `fontFamily`, `fontSize` and `fontWeight`.
 
+## Brand check
+
+`brand-check.mjs` ships in this package: a guard that a project runs after its build, with Node.js and nothing else. It reads every value from this package's `tokens.json`, so it follows the version you pin.
+
+```sh
+node node_modules/@myfirstbitcoin/design/brand-check.mjs [--src src] [--dist dist] [--allow brand-check.allow.json]
+```
+
+Run it in your build, for example `"build": "astro build && node node_modules/@myfirstbitcoin/design/brand-check.mjs"`. It exits 1 when the source (`--src`, default `src`, comments ignored) has:
+
+- a color literal (hex, `rgb()`, `rgba()`, `hsl()` and the other color functions), or a named color in a color property
+- a font family other than `var(--mfb-font-heading)`, `var(--mfb-font-body)` or `var(--mfb-font-sans)`, a family name, or the deprecated mono family
+- a skew, a rotation or an angle literal that is not a quarter turn, or a transform matrix: the 13° slant comes only from the supergraphics classes
+- a hand-rolled `clip-path` shape, or a typed `--sg-aspect`
+- `text-transform: uppercase`, the `uppercase` class or small caps
+- a gradient (the deprecated brand gradient and `.sg-photo-zone` included), or a smooth color filter (Rule 4: halftone, never duotone)
+- a Tailwind color utility outside the palette, such as `bg-teal-500` or Tailwind's own `text-purple-500`
+- a weight above 600, or opacity on a brand shape
+- a raw value that has a token: a spacing, radius, duration, easing, container width, font size or font weight literal equal to a token value (`padding: 24px`, `border-radius: 12px`, `180ms`), with the token to use instead
+
+and when the built CSS (`--dist`, default `dist`) lacks `--sg-angle-base` with the token value (import `brand.css` or `supergraphics.css`), defines a `--color-*` that is not a palette color or a color role, or sets uppercase or the mono family. `--source-only` skips the built CSS.
+
+`--allow FILE` (default `brand-check.allow.json` when it exists) lists the exceptions, each with its reason, for example a third-party mark:
+
+```json
+[{ "file": "src/assets/partner-logo.svg", "reason": "the partner's own logo colors" },
+ { "file": "src/components/Share.astro", "rule": "color-literal", "match": "1877f2", "reason": "the network's own badge color" }]
+```
+
+An entry without `rule` covers every rule in that file, and one without `match` every finding of the rule. `--warn RULE[,RULE]` reports a rule without failing, for a project that adopts the check step by step (`--warn raw-value`). `--help` lists the rule ids.
+
 ## Variables
 
 Plain CSS variables are namespaced `--mfb-*` (brand values) and `--sg-*` (geometry) to avoid collisions. `brand.css` has all of them; `supergraphics.css` repeats what its classes need.
