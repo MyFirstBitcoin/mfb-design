@@ -213,7 +213,7 @@ if (flags.json) {
   // verified; this line says how much of it actually was.
   console.log(`  Coverage: ${census.machineCheckable}/${census.total} tokens machine-checkable against Figma`);
   console.log(`    ${census.unverifiable.length} prose (stated in the brand book as English; no API returns these)`);
-  console.log(`    ${census.measured.length} measured from the brand book's vectors by a person (re-measure if those slides change)`);
+  console.log(`    ${census.measured.length} measured from the brand book's vector geometry, by hand or by an AI session through the Figma MCP, node ids in each note; no machine re-checks them (re-measure if those slides change)`);
   console.log(`    ${census.declared.length} declared downstream, which is what Figma owes: ${census.declared.join(', ') || 'none'}`);
   if (census.noProvenance.length)
     console.log(`    ${census.noProvenance.length} with NO established provenance: ${census.noProvenance.slice(0, 6).join(', ')}${census.noProvenance.length > 6 ? ' ...' : ''}`);
