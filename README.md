@@ -19,13 +19,17 @@ Make these changes in the same commit that raises your pin:
 - **Set `--sg-aspect` on parallelogram frames too.** The photo scale in `.sg-para-frame` was a fixed 1.12; it is now `1 + tan(--sg-angle-base) / --sg-aspect`, the smallest scale that covers the frame, so it depends on the frame's real shape.
 - **`supergraphics.css` sets more variables in `:root`**: the font families, sizes and weights and the halftone colors, besides the palette and the geometry. If you override any of them, do it after importing `supergraphics.css`, or import the file into a cascade layer.
 - `.sg-cover__title` reads `--mfb-size-h2`. The `--mfb-font-h2` variable it used to read was never defined by this package; set `font-size` on the title instead.
-- **Tailwind 4 projects that restrict font weights** with `--font-weight-*: initial` must put that reset in its own `@theme` block before importing `theme.css`: placed after the import, it removes the package's weights too, and no weight utility is generated.
+- **Tailwind 4 projects that restrict a theme namespace**, for example with `--font-weight-*: initial` or `--radius-*: initial`, must put that reset in its own `@theme` block before importing `theme.css`: placed after the import, it removes the package's values too, and no utility is generated for them.
 
 ```css
 @import "tailwindcss";
 @theme { --font-weight-*: initial; }
 @import "@myfirstbitcoin/design/theme.css";
 ```
+
+- **Headings and body text on light backgrounds are black.** The written spec said purple-300 headings and gray-900 text; the Brand Book draws both in black (Type Relationships, 918:2990), and the spec and the color descriptions in `tokens.json` now say so. No variable changed value: a project that colors its headings purple-300 or its text gray-900 changes it when it chooses to.
+- **A test that snapshots the `--mfb-*` variables of `brand.css` whose value is a hex** must refresh its snapshot: this release adds `--mfb-halftone-highlight`, `--mfb-halftone-highlight-full`, `--mfb-halftone-shadow`. The other new variables carry no hex; they reference the palette with `var()`.
+- **Everything else is added, not changed.** Every new Tailwind utility is `mfb-` prefixed, a type level (`leading-h1`, `tracking-h1`, `text-h1-fluid`) or a color role (`text-heading-on-light`), and none of them replaces a Tailwind default or an existing key. See "Layout, motion and color roles" below.
 
 ## Use - Tailwind 3
 
@@ -63,6 +67,36 @@ The signature My First Bitcoin shapes as ready-made classes: `sg-para` / `sg-par
 ### The highlighter
 
 Wrap the one word you emphasize in a heading: `<h2>Open Source <span class="highlighter">Education</span></h2>`. It draws the Brand Book's highlighter (Figma node 918:2874): a thin line at the baseline, drawn beneath the glyphs (not a band), under 80% of the word, centered. The line is orange-300, and white inside the orange surfaces `sg-bg-orange`, `sg-spotlight--orange`, `sg-cover--orange`, `sg-spotlight-frame--orange`, `sg-book-frame--orange` and `sg-halftone-cutout--orange-bg`. The word keeps the heading's color. On another orange surface, or on a mid grey such as gray-500, set `--sg-highlighter-color: var(--mfb-white)` on the section. On a light grey such as gray-200 (`sg-bg-gray`) keep the orange line: a white one cannot be seen there. One word per heading, never more. The span is an `inline-block`, and the line's length and thickness are computed from the span's own width: do not override its `display` or `text-align`. Its measurements are the `--sg-highlighter-*` variables (coverage, aspect, offset, shape), from the geometry tokens of the same names.
+
+## Layout, motion and color roles
+
+Where the Brand Book defines a value, the token takes it. Where the book is silent (spacing, radius, shadow, motion, widths), the value is declared from the live website, myfirstbitcoin.org, which was built following the Brand Book; each such token's `$extensions.mfb.source` names the commit, file and line. A website value that contradicts the Brand Book is never imported. `brand-spec.md` lists every value with its source.
+
+| What | brand.css | Tailwind 3 and 4 |
+|------|-----------|------------------|
+| Color roles | `--mfb-<element>-on-<surface>`: `heading-on-light`, `body-on-light`, `muted-on-light`, `link-on-light`, `link-underline-on-light`, `border-on-light`, `highlighter-on-light`, `logo-on-light`, `heading-on-dark`, `body-on-dark`, `muted-on-dark`, `link-on-dark`, `highlighter-on-dark`, `logo-on-dark`, `heading-on-orange`, `body-on-orange`, `link-on-orange`, `highlighter-on-orange`, `logo-on-orange` | `text-heading-on-light`, `decoration-link-underline-on-light`, `border-border-on-light` ... |
+| Line height per level | `--mfb-leading-<level>` | `leading-<level>`, for example `leading-h1` |
+| Letter spacing per level | `--mfb-tracking-<level>` | `tracking-<level>` |
+| Fluid sizes for web pages | `--mfb-size-<level>-fluid` (h1, h2, h3, h4, h5, h6, quote, label) | `text-<level>-fluid` |
+| Spacing scale | `--mfb-space-1`, `--mfb-space-2`, `--mfb-space-3`, `--mfb-space-4`, `--mfb-space-6`, `--mfb-space-8`, `--mfb-space-12`, `--mfb-space-16`, `--mfb-space-24`, `--mfb-space-32` | Tailwind's own `p-1` to `p-32`: the same values, so the package adds none |
+| Semantic spacing | `--mfb-space-heading-to-body`, `--mfb-space-quote-to-label`, `--mfb-space-gutter`, `--mfb-space-section`, `--mfb-space-section-tight`, `--mfb-space-header-gap`, `--mfb-space-block-end` | `py-mfb-section`, `px-mfb-gutter`, `mt-mfb-heading-to-body` ... |
+| Radius (interface elements only, never brand shapes) | `--mfb-radius-sm`, `--mfb-radius-md`, `--mfb-radius-lg`, `--mfb-radius-pill` | `rounded-mfb-sm`, `rounded-mfb-md`, `rounded-mfb-lg`; `rounded-full` for the pill |
+| Shadow | `--mfb-shadow-media`, `--mfb-shadow-media-control`, `--mfb-shadow-overlay` | `shadow-mfb-media`, `shadow-mfb-media-control`, `shadow-mfb-overlay` |
+| Easing | `--mfb-ease-out`, `--mfb-ease-in-out` | `ease-mfb-out`, `ease-mfb-in-out` |
+| Duration | `--mfb-duration-fast`, `--mfb-duration-med`, `--mfb-duration-slide`, `--mfb-duration-reveal` | `duration-mfb-fast`, `duration-mfb-med`, `duration-mfb-slide`, `duration-mfb-reveal` |
+| Container widths | `--mfb-container-page`, `--mfb-container-wide`, `--mfb-container-measure` (px) | `max-w-mfb-page`, `max-w-mfb-wide`, `max-w-mfb-measure` (rem) |
+| Logo size and clear space | `--mfb-logo-min-width`, `--mfb-logo-min-width-print`, `--mfb-logo-aspect`, `--mfb-logo-min-height`, `--mfb-logo-clearspace`, `--mfb-logo-edge-margin` | none |
+| Shape tones (a shape one step lighter than its base) | `--mfb-shape-on-purple-300`, `--mfb-shape-on-orange-300`, `--mfb-shape-on-gray-700` | none |
+| Breakpoints, for JavaScript and `matchMedia` (a variable cannot be read inside `@media`) | `--mfb-breakpoint-phone`, `--mfb-breakpoint-stack`, `--mfb-breakpoint-nav` | none: the package adds no Tailwind breakpoint |
+| Layers | `--mfb-z-header`, `--mfb-z-dropdown`, `--mfb-z-overlay` | none |
+| Media ratios | `--mfb-ratio-video`, `--mfb-ratio-photo`, `--mfb-ratio-portrait`, `--mfb-ratio-square` | none (Tailwind has `aspect-video` and `aspect-square`) |
+| Interface | `--mfb-ui-touch-target`, `--mfb-ui-link-underline-offset` | none |
+
+- **New utilities never replace Tailwind's.** Keys are `mfb-` prefixed (`rounded-mfb-md`, not `rounded-md`; `ease-mfb-out`, not `ease-out`, which is a different curve), type levels or color roles. The build refuses a key that equals a Tailwind 3 or 4 default.
+- **In 1.x, `text-h1` sets only the size.** Add `leading-h1` yourself (and `tracking-h1` where something else sets tracking). Folding line height into `text-h1` would change every existing page, so it waits for a major release.
+- **New `brand.css` variables reference the palette with `var()`** and add no hex: roles are `var(--mfb-black)` and the like, shadows `color-mix(in srgb, var(--mfb-purple-400) 25%, transparent)`. `theme.css` and `tailwind.js` carry the same colors as hex, so Tailwind's opacity modifiers work.
+- **Tailwind 4 emits a theme variable only when something uses it.** To read `var(--mfb-radius-md)` or another new variable in your own CSS, import `brand.css` as well, or use the utility.
+- **index.js** exports `colorRoles`, `shapeTones`, `fontSizeFluid`, `lineHeight`, `letterSpacing`, `logo`, `spacing`, `space`, `radius`, `shadow`, `easing`, `duration`, `container`, `breakpoint`, `zIndex`, `mediaRatio`, `ui` next to the existing `colors`, `fontFamily`, `fontSize` and `fontWeight`.
 
 ## Variables
 

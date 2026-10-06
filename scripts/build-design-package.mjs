@@ -82,6 +82,277 @@ if (geomMismatch.length) {
   process.exit(1);
 }
 
+// Geometry the canon does not read yet. These tokens record what the Brand Book draws, but the
+// canon still uses other values (a 10px pattern gap, 1.25 and 1.55 row steps), so they are NOT
+// emitted as --sg-* variables: a prelude value the canon ignores would be a package that
+// disagrees with itself. Each one is listed here with its reason, and the build refuses any
+// geometry token that is neither gated against the canon (GEOM_VARS), a halftone color, nor
+// listed here, so no new geometry reaches the package unseen.
+const GEOM_TOKEN_ONLY = {
+  'para-edge-ratio': 'the base shape; the canon sizes parallelograms by their container',
+  'pattern-row-step': 'the canon steps progressive rows by 1.25 and 1.55',
+  'pattern-row-gap': 'the canon separates pattern rows by 10px',
+  'halftone-scale': 'a setting of the tool that makes the halftone, not a CSS value',
+};
+
+// ---- GROUP MAP AND NAMING GATE ----
+// One table: each tokens.json group added after v1.3.0 -> its Tailwind 4 theme.css prefix -> its
+// Tailwind 3 theme.extend key and key prefix -> its brand.css prefix. null means "not emitted
+// there". Keys in tokens.json are bare; the prefix is added per output. The build refuses a
+// tokens.json group that is in neither this table nor ORIGINAL_GROUPS, so a group added later
+// cannot leak into a Tailwind namespace unseen.
+//
+// Naming rules (they keep every Tailwind default intact in Tailwind 3 and 4):
+//   - every new utility key starts with mfb-, except type levels (text-h1-fluid, leading-h1,
+//     tracking-h1) and color roles (text-heading-on-light), whose names no Tailwind default has;
+//   - no breakpoints, screens, bare roots (--spacing, --radius, --shadow, --container), --default-*
+//     or sub-properties of an existing key are emitted;
+//   - existing keys (colors, fontSize, fontWeight) are never changed.
+const ORIGINAL_GROUPS = ['color', 'gradient', 'geometry', 'fontFamily', 'fontWeight', 'fontSize'];
+const GROUP_MAP = {
+  //               Tailwind 4 namespace            Tailwind 3 key              key prefix  suffix      brand.css prefix
+  lineHeight:    { tw4: '--leading-',              tw3: 'lineHeight',          twKey: '',     suffix: '',       css: '--mfb-leading-' },
+  letterSpacing: { tw4: '--tracking-',             tw3: 'letterSpacing',       twKey: '',     suffix: '',       css: '--mfb-tracking-' },
+  fontSizeFluid: { tw4: '--text-',               tw3: 'fontSize',            twKey: '',     suffix: '-fluid', css: '--mfb-size-' },
+  colorRole:     { tw4: '--color-',                tw3: 'colors',              twKey: '',     suffix: '',       css: '--mfb-' },
+  shapeTone:     { tw4: null,                      tw3: null,                  twKey: '',     suffix: '',       css: '--mfb-shape-on-' },
+  logo:          { tw4: null,                      tw3: null,                  twKey: '',     suffix: '',       css: '--mfb-logo-' },
+  spaceScale:    { tw4: null,                      tw3: null,                  twKey: '',     suffix: '',       css: '--mfb-space-' },
+  space:         { tw4: '--spacing-',              tw3: 'spacing',             twKey: 'mfb-', suffix: '',       css: '--mfb-space-' },
+  radius:        { tw4: '--radius-',               tw3: 'borderRadius',        twKey: 'mfb-', suffix: '',       css: '--mfb-radius-' },
+  shadow:        { tw4: '--shadow-',               tw3: 'boxShadow',           twKey: 'mfb-', suffix: '',       css: '--mfb-shadow-' },
+  easing:        { tw4: '--ease-',                 tw3: 'transitionTimingFunction', twKey: 'mfb-', suffix: '',  css: '--mfb-ease-' },
+  duration:      { tw4: '--transition-duration-',     tw3: 'transitionDuration', twKey: 'mfb-', suffix: '',     css: '--mfb-duration-' },
+  container:     { tw4: '--container-',            tw3: 'maxWidth',            twKey: 'mfb-', suffix: '',       css: '--mfb-container-' },
+  breakpoint:    { tw4: null,                      tw3: null,                  twKey: '',     suffix: '',       css: '--mfb-breakpoint-' },
+  zIndex:        { tw4: null,                      tw3: null,                  twKey: '',     suffix: '',       css: '--mfb-z-' },
+  mediaRatio:    { tw4: null,                      tw3: null,                  twKey: '',     suffix: '',       css: '--mfb-ratio-' },
+  ui:            { tw4: null,                      tw3: null,                  twKey: '',     suffix: '',       css: '--mfb-ui-' },
+};
+// Keys of a mapped group that stay out of Tailwind, with the reason.
+const TW_SKIP = { radius: { pill: 'Tailwind already has rounded-full' } };
+
+// Tailwind defaults a new key must never equal (Tailwind 4.3.3 theme and Tailwind 3.4.19 config).
+const TW4_DEFAULTS = {
+  '--radius-': 'xs sm md lg xl 2xl 3xl 4xl',
+  '--shadow-': '2xs xs sm md lg xl 2xl inner',
+  '--ease-': 'in out in-out',
+  '--container-': '3xs 2xs xs sm md lg xl 2xl 3xl 4xl 5xl 6xl 7xl',
+  '--leading-': 'tight snug normal relaxed loose',
+  '--tracking-': 'tighter tight normal wide wider widest',
+  '--text-': 'xs sm base lg xl 2xl 3xl 4xl 5xl 6xl 7xl 8xl 9xl',
+  '--transition-duration-': '',
+  '--spacing-': '',
+  '--color-': '',
+};
+const TW3_DEFAULTS = {
+  borderRadius: 'none sm DEFAULT md lg xl 2xl 3xl full',
+  boxShadow: 'sm DEFAULT md lg xl 2xl inner none',
+  transitionDuration: 'DEFAULT 0 75 100 150 200 300 500 700 1000',
+  transitionTimingFunction: 'DEFAULT linear in out in-out',
+  lineHeight: '3 4 5 6 7 8 9 10 none tight snug normal relaxed loose',
+  letterSpacing: 'tighter tight normal wide wider widest',
+  maxWidth: '0 none xs sm md lg xl 2xl 3xl 4xl 5xl 6xl 7xl full min max fit prose',
+  fontSize: 'xs sm base lg xl 2xl 3xl 4xl 5xl 6xl 7xl 8xl 9xl',
+  spacing: 'px',
+  colors: 'inherit current transparent black white',
+};
+const STATIC_KEYWORDS = new Set('full none px auto screen min max fit prose DEFAULT inner linear inherit current transparent'.split(' '));
+const TW_COLOR_FAMILIES = ('red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple fuchsia pink ' +
+  'rose slate gray zinc neutral stone mauve olive mist taupe').split(' ');
+
+// Value helpers for the new groups. A role or a shape tone is an alias of a palette color, and a
+// shadow's color is too: the build resolves the alias and refuses one that is not in tokens.color.
+const gateProblems = [];
+const aliasOf = (v) => (typeof v === 'string' ? v.match(/^\{color\.([\w-]+)\}$/)?.[1] : undefined);
+const paletteRef = (where, v) => {
+  const name = aliasOf(v);
+  if (!name || !tokens.color[name]) {
+    gateProblems.push(`${where}: "${typeof v === 'string' ? v : JSON.stringify(v)}" is not an alias of a palette color ({color.<name>})`);
+    return null;
+  }
+  return name;
+};
+const pct = (opacity) => `${Math.round(Number(opacity) * 100)}%`;
+const shadowValue = (where, v, target) => {
+  const name = paletteRef(`${where}.color`, v?.color);
+  const o = Number(v?.opacity);
+  if (!(o > 0 && o <= 1)) gateProblems.push(`${where}.opacity: ${v?.opacity} is not between 0 and 1`);
+  if (!name) return '';
+  const color = target === 'css' ? `var(--mfb-${name})` : tokens.color[name].$value;
+  return `${v.offsetX} ${v.offsetY} ${v.blur} ${v.spread} color-mix(in srgb, ${color} ${pct(o)}, transparent)`;
+};
+const remOf = (px) => {
+  const m = String(px).match(/^(\d+(?:\.\d+)?)px$/);
+  return m ? `${Number(m[1]) / 16}rem` : null;
+};
+// The value of a token of a mapped group, for one output: 'css' (brand.css: palette by var()),
+// 'tw' (theme.css and tailwind.js: palette as a literal hex, containers in rem) or 'raw'
+// (index.js: resolved values, containers in px as in tokens.json).
+const valueFor = (group, key, tok, target) => {
+  const where = `${group}.${key}`;
+  if (group === 'colorRole' || group === 'shapeTone') {
+    const name = paletteRef(where, tok.$value);
+    if (!name) return '';
+    return target === 'css' ? `var(--mfb-${name})` : tokens.color[name].$value;
+  }
+  if (group === 'shadow') return shadowValue(where, tok.$value, target === 'css' ? 'css' : 'tw');
+  if (group === 'easing') {
+    const v = tok.$value;
+    if (!Array.isArray(v) || v.length !== 4 || v.some((n) => typeof n !== 'number')) {
+      gateProblems.push(`${where}: a cubicBezier token needs four numbers`);
+      return '';
+    }
+    return `cubic-bezier(${v.join(', ')})`;
+  }
+  if (group === 'container' && target === 'tw') {
+    const rem = remOf(tok.$value);
+    if (!rem) gateProblems.push(`${where}: "${tok.$value}" is not a px value (Tailwind 4 sorts px containers before rem ones)`);
+    return rem || '';
+  }
+  return target === 'raw' && typeof tok.$value === 'number' ? tok.$value : String(tok.$value);
+};
+
+// R1: every group is known.
+for (const group of Object.keys(tokens).filter((k) => !k.startsWith('$'))) {
+  if (!ORIGINAL_GROUPS.includes(group) && !GROUP_MAP[group]) {
+    gateProblems.push(`tokens.json group "${group}" has no entry in GROUP_MAP (scripts/build-design-package.mjs): say where it is emitted before adding it`);
+  }
+}
+for (const group of Object.keys(GROUP_MAP)) {
+  if (!tokens[group] || typeof tokens[group] !== 'object') gateProblems.push(`GROUP_MAP names "${group}", which tokens.json lacks`);
+  for (const [k, tok] of Object.entries(tokens[group] || {})) {
+    if (k.startsWith('$')) gateProblems.push(`${group}.${k}: groups are flat; no $-keys inside a group`);
+    else if (!tok || typeof tok !== 'object' || !('$value' in tok)) gateProblems.push(`${group}.${k}: not a token (no $value)`);
+  }
+}
+// Every geometry token is gated against the canon, a halftone color, or listed as token-only.
+for (const [k, tok] of Object.entries(tokens.geometry || {})) {
+  const halftoneColor = k.startsWith('halftone-') && tok.$type === 'color';
+  if (!GEOM_VARS[k] && !halftoneColor && !GEOM_TOKEN_ONLY[k]) {
+    gateProblems.push(`geometry.${k}: add it to GEOM_VARS (gated against the canon) or to GEOM_TOKEN_ONLY with the reason it is not emitted`);
+  }
+}
+for (const k of Object.keys(GEOM_TOKEN_ONLY)) {
+  if (!tokens.geometry?.[k]) gateProblems.push(`GEOM_TOKEN_ONLY names geometry.${k}, which tokens.json lacks`);
+  if (new RegExp(`--sg-${k}\\s*:`).test(sgCanon)) gateProblems.push(`the canon declares --sg-${k}: move geometry.${k} from GEOM_TOKEN_ONLY to GEOM_VARS so it is gated`);
+}
+
+// Type levels: line height, letter spacing and fluid sizes exist only for fontSize levels, and a
+// fluid size grows up to the Brand Book size and no further (the cap is the book's, the floor
+// and slope are the website's).
+const LEVELS = Object.keys(tokens.fontSize || {});
+for (const group of ['lineHeight', 'letterSpacing', 'fontSizeFluid']) {
+  for (const k of Object.keys(tokens[group] || {})) {
+    if (!LEVELS.includes(k)) gateProblems.push(`${group}.${k}: not a fontSize level (${LEVELS.join(', ')})`);
+  }
+}
+for (const [k, tok] of Object.entries(tokens.fontSizeFluid || {})) {
+  const m = String(tok.$value).match(/^clamp\(\s*([^,]+),\s*([^,]+),\s*([^,)]+)\)$/);
+  const cap = tokens.fontSize?.[k]?.$value;
+  if (!m) gateProblems.push(`fontSizeFluid.${k}: "${tok.$value}" is not clamp(min, preferred, max)`);
+  else if (m[3].trim() !== cap) gateProblems.push(`fontSizeFluid.${k}: its maximum ${m[3].trim()} is not the Brand Book size fontSize.${k} (${cap})`);
+}
+
+// Emitted names: Tailwind 4 variables, Tailwind 3 keys and brand.css variables.
+const tw4Lines = []; // [name, value]
+const tw3Extend = {}; // key -> { name: value }
+const cssLines = []; // [name, value]
+const indexExports = {}; // group -> { key: value }
+const emitGroup = (group) => {
+  const map = GROUP_MAP[group];
+  const skip = TW_SKIP[group] || {};
+  for (const [k, tok] of Object.entries(tokens[group] || {})) {
+    cssLines.push([`${map.css}${k}${map.suffix}`, valueFor(group, k, tok, 'css')]);
+    (indexExports[group] ||= {})[k] = valueFor(group, k, tok, 'raw');
+    if (skip[k]) continue;
+    if (map.tw4) tw4Lines.push([`${map.tw4}${map.twKey}${k}${map.suffix}`, valueFor(group, k, tok, 'tw')]);
+    if (map.tw3) ((tw3Extend[map.tw3] ||= {})[`${map.twKey}${k}${map.suffix}`] = valueFor(group, k, tok, 'tw'));
+  }
+};
+// One call per group, in the order they appear in the outputs.
+emitGroup('colorRole');
+emitGroup('shapeTone');
+emitGroup('fontSizeFluid');
+emitGroup('lineHeight');
+emitGroup('letterSpacing');
+emitGroup('logo');
+emitGroup('spaceScale');
+emitGroup('space');
+emitGroup('radius');
+emitGroup('shadow');
+emitGroup('easing');
+emitGroup('duration');
+emitGroup('container');
+emitGroup('breakpoint');
+emitGroup('zIndex');
+emitGroup('mediaRatio');
+emitGroup('ui');
+for (const group of Object.keys(GROUP_MAP)) {
+  if (!indexExports[group] && Object.keys(tokens[group] || {}).length) gateProblems.push(`GROUP_MAP group "${group}" is never emitted (add an emitGroup call)`);
+}
+
+// (a), (b), (c): no Tailwind default, static keyword or numeric key; (e): no bare root, breakpoint,
+// default or sub-property.
+const defaultsFor = (table, prefix) => new Set(String(table[prefix] ?? '').split(' ').filter(Boolean));
+for (const [name] of tw4Lines) {
+  const ns = Object.keys(TW4_DEFAULTS).find((p) => name.startsWith(p));
+  if (!ns) { gateProblems.push(`${name}: not in a Tailwind 4 namespace this build may emit`); continue; }
+  const key = name.slice(ns.length);
+  if (!key) gateProblems.push(`${name}: a bare Tailwind 4 root changes a default utility`);
+  if (defaultsFor(TW4_DEFAULTS, ns).has(key)) gateProblems.push(`${name}: "${key}" is a Tailwind 4 default in ${ns}*`);
+  if (STATIC_KEYWORDS.has(key) || /^\d/.test(key)) gateProblems.push(`${name}: "${key}" is a static keyword or starts with a digit`);
+  if (key.includes('--')) gateProblems.push(`${name}: a sub-property (--) changes an existing utility`);
+  if (/^--(breakpoint|default|animate)-/.test(name)) gateProblems.push(`${name}: breakpoints, defaults and animations are never emitted`);
+  if (ns === '--color-' && (!/-on-(light|dark|orange)$/.test(key) || TW_COLOR_FAMILIES.some((f) => key.startsWith(`${f}-`)) || tokens.color[key])) {
+    gateProblems.push(`${name}: a color role is named <element>-on-<light|dark|orange> and is not a palette or Tailwind color`);
+  }
+}
+for (const [twKey, entries] of Object.entries(tw3Extend)) {
+  const defaults = new Set(String(TW3_DEFAULTS[twKey] ?? '').split(' ').filter(Boolean));
+  for (const key of Object.keys(entries)) {
+    if (defaults.has(key)) gateProblems.push(`tailwind.js ${twKey}.${key}: a Tailwind 3 default`);
+    if (STATIC_KEYWORDS.has(key) || /^\d/.test(key)) gateProblems.push(`tailwind.js ${twKey}.${key}: a static keyword or starts with a digit`);
+    if (twKey === 'fontSize' && (tokens.fontSize || {})[key]) gateProblems.push(`tailwind.js fontSize.${key}: an existing key is frozen in 1.x`);
+    if (twKey === 'colors' && (tokens.color[key] || TW_COLOR_FAMILIES.includes(key))) gateProblems.push(`tailwind.js colors.${key}: an existing color key is frozen in 1.x`);
+  }
+}
+// (d) disjointness.
+const keysOf = (group) => Object.keys(tokens[group] || {});
+const overlap = (a, b) => a.filter((k) => b.includes(k));
+const textKeys = [...LEVELS, ...keysOf('fontSizeFluid').map((k) => `${k}-fluid`)];
+for (const [a, b, why] of [
+  [keysOf('colorRole'), textKeys, 'color roles and text sizes'],
+  [keysOf('colorRole'), keysOf('shadow'), 'color roles and shadows'],
+  [keysOf('shadow'), Object.keys(tokens.color), 'shadows and palette colors'],
+  [keysOf('space'), keysOf('container'), 'spacing and containers (Tailwind 4 max-w reads --spacing-* first)'],
+  [keysOf('space'), keysOf('spaceScale'), 'semantic spacing and the spacing scale (both are --mfb-space-*)'],
+]) {
+  for (const k of overlap(a, b)) gateProblems.push(`"${k}" is a key of both ${why}`);
+}
+// brand.css names are unique, including against the original variables.
+const originalCss = [
+  ...Object.keys(tokens.color).map((k) => `--mfb-${k}`),
+  ...Object.keys(tokens.fontSize || {}).map((k) => `--mfb-size-${k}`),
+  ...Object.keys(tokens.fontWeight || {}).map((k) => `--mfb-weight-${k}`),
+  ...Object.keys(tokens.fontFamily || {}).map((k) => `--mfb-font-${k}`),
+  '--mfb-font-sans', '--mfb-gradient-brand', '--mfb-gradient',
+  ...Object.keys(tokens.geometry || {}).filter((k) => k.startsWith('halftone-')).map((k) => `--mfb-${k}`),
+];
+const seenCss = new Set(originalCss);
+for (const [name, value] of cssLines) {
+  if (seenCss.has(name)) gateProblems.push(`brand.css ${name}: emitted twice`);
+  seenCss.add(name);
+  if (name === '--mfb-side') gateProblems.push('brand.css --mfb-side: a name projects define locally');
+  if (/#[0-9a-f]{3,8}\b/i.test(value)) gateProblems.push(`brand.css ${name}: a new variable references the palette with var(), never a hex (${value})`);
+}
+
+if (gateProblems.length) {
+  console.error('REFUSING TO BUILD: the new token groups break a naming or value rule.');
+  for (const p of new Set(gateProblems)) console.error(`  - ${p}`);
+  process.exit(1);
+}
+
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const written = [];
 const write = (name, content) => {
@@ -126,14 +397,17 @@ const halftone = Object.entries(tokens.geometry || {})
 const ff = (arr) => arr.map((f) => (/\s/.test(f) ? `"${f}"` : f)).join(', ');
 
 // ---- 1. tailwind.js - Tailwind 3 preset (also usable in TW4 via @config) ----
+// The new groups (GROUP_MAP) extend Tailwind's scales under their own keys; colors and fontSize
+// keep every existing key and value, and gain only the color roles and the fluid sizes.
 const preset = {
   theme: {
     extend: {
-      colors: { ...mfb, mfb }, // both conventions: bg-purple-400 and bg-mfb-purple-400
+      colors: { ...mfb, mfb, ...(tw3Extend.colors || {}) }, // both conventions: bg-purple-400 and bg-mfb-purple-400; roles at the top level
       fontFamily,
-      fontSize,
+      fontSize: { ...fontSize, ...(tw3Extend.fontSize || {}) },
       fontWeight: twFontWeight,
       ...(gradient ? { backgroundImage: { 'brand-gradient': gradient } } : {}),
+      ...Object.fromEntries(Object.entries(tw3Extend).filter(([k]) => k !== 'colors' && k !== 'fontSize')),
     },
   },
 };
@@ -151,6 +425,7 @@ for (const [name, tok] of Object.entries(tokens.color)) {
 for (const [k, v] of Object.entries(fontFamily)) theme += `  --font-${k}: ${ff(v)};\n`;
 for (const [k, tok] of Object.entries(tokens.fontSize || {})) theme += `  --text-${k}: ${tok.$value};\n`;
 for (const [k, v] of Object.entries(twFontWeight)) theme += `  --font-weight-${k}: ${v};\n`;
+for (const [name, v] of tw4Lines) theme += `  ${name}: ${v};\n`;
 theme += '}\n';
 write('theme.css', theme);
 
@@ -163,6 +438,7 @@ for (const [k, tok] of Object.entries(tokens.fontSize || {})) css += `  --mfb-si
 for (const [k, v] of Object.entries(fontWeight)) css += `  --mfb-weight-${k}: ${v};\n`;
 for (const [cssVar, v] of halftone) css += `  ${cssVar}: ${v};\n`;
 for (const [tokenName, cssVar] of Object.entries(GEOM_VARS)) css += `  ${cssVar}: ${tokens.geometry[tokenName].$value};\n`;
+for (const [name, v] of cssLines) css += `  ${name}: ${v};\n`;
 css += '}\n';
 write('brand.css', css);
 
@@ -203,6 +479,27 @@ sgPrelude += '}\n\n';
 write('supergraphics.css', sgPrelude + sgCanon);
 
 // ---- 5. index.js - programmatic access ----
+// Named exports only. colors, fontFamily, fontSize and fontWeight are unchanged; colors stays the
+// palette. Colors in colorRoles and shapeTones are resolved hex values; containers stay in px.
+const INDEX_EXPORTS = [
+  ['colorRoles', 'colorRole'],
+  ['shapeTones', 'shapeTone'],
+  ['fontSizeFluid', 'fontSizeFluid'],
+  ['lineHeight', 'lineHeight'],
+  ['letterSpacing', 'letterSpacing'],
+  ['logo', 'logo'],
+  ['spacing', 'spaceScale'],
+  ['space', 'space'],
+  ['radius', 'radius'],
+  ['shadow', 'shadow'],
+  ['easing', 'easing'],
+  ['duration', 'duration'],
+  ['container', 'container'],
+  ['breakpoint', 'breakpoint'],
+  ['zIndex', 'zIndex'],
+  ['mediaRatio', 'mediaRatio'],
+  ['ui', 'ui'],
+];
 write(
   'index.js',
   `// @myfirstbitcoin/design - programmatic access to MFB brand tokens.\n` +
@@ -211,7 +508,8 @@ write(
     `export const fontFamily = ${JSON.stringify(fontFamily, null, 2)};\n` +
     `export const fontSize = ${JSON.stringify(fontSize, null, 2)};\n` +
     `export const fontWeight = ${JSON.stringify(fontWeight, null, 2)};\n` +
-    (gradient ? `export const gradientBrand = ${JSON.stringify(gradient)};\n` : '')
+    (gradient ? `export const gradientBrand = ${JSON.stringify(gradient)};\n` : '') +
+    INDEX_EXPORTS.map(([name, group]) => `export const ${name} = ${JSON.stringify(indexExports[group] || {}, null, 2)};\n`).join('')
 );
 
 // ---- 6. package.json is hand-maintained and no longer written here. ----
@@ -252,9 +550,13 @@ const readme = [
   `- **Set ${code('--sg-aspect')} on parallelogram frames too.** The photo scale in ${code('.sg-para-frame')} was a fixed 1.12; it is now ${code('1 + tan(--sg-angle-base) / --sg-aspect')}, the smallest scale that covers the frame, so it depends on the frame's real shape.`,
   `- **${code('supergraphics.css')} sets more variables in ${code(':root')}**: the font families, sizes and weights and the halftone colors, besides the palette and the geometry. If you override any of them, do it after importing ${code('supergraphics.css')}, or import the file into a cascade layer.`,
   `- ${code('.sg-cover__title')} reads ${code('--mfb-size-h2')}. The ${code('--mfb-font-h2')} variable it used to read was never defined by this package; set ${code('font-size')} on the title instead.`,
-  `- **Tailwind 4 projects that restrict font weights** with ${code('--font-weight-*: initial')} must put that reset in its own ${code('@theme')} block before importing ${code('theme.css')}: placed after the import, it removes the package's weights too, and no weight utility is generated.`,
+  `- **Tailwind 4 projects that restrict a theme namespace**, for example with ${code('--font-weight-*: initial')} or ${code('--radius-*: initial')}, must put that reset in its own ${code('@theme')} block before importing ${code('theme.css')}: placed after the import, it removes the package's values too, and no utility is generated for them.`,
   ``,
   `${FENCE}css\n@import "tailwindcss";\n@theme { --font-weight-*: initial; }\n@import "@myfirstbitcoin/design/theme.css";\n${FENCE}`,
+  ``,
+  `- **Headings and body text on light backgrounds are black.** The written spec said purple-300 headings and gray-900 text; the Brand Book draws both in black (Type Relationships, 918:2990), and the spec and the color descriptions in ${code('tokens.json')} now say so. No variable changed value: a project that colors its headings purple-300 or its text gray-900 changes it when it chooses to.`,
+  `- **A test that snapshots the ${code('--mfb-*')} variables of ${code('brand.css')} whose value is a hex** must refresh its snapshot: this release adds ${halftoneList}. The other new variables carry no hex; they reference the palette with ${code('var()')}.`,
+  `- **Everything else is added, not changed.** Every new Tailwind utility is ${code('mfb-')} prefixed, a type level (${code('leading-h1')}, ${code('tracking-h1')}, ${code('text-h1-fluid')}) or a color role (${code('text-heading-on-light')}), and none of them replaces a Tailwind default or an existing key. See "Layout, motion and color roles" below.`,
   ``,
   `## Use - Tailwind 3`,
   ``,
@@ -294,6 +596,37 @@ const readme = [
     `On a light grey such as gray-200 (${code('sg-bg-gray')}) keep the orange line: a white one cannot be seen there. One word per heading, never more. ` +
     `The span is an ${code('inline-block')}, and the line's length and thickness are computed from the span's own width: do not override its ${code('display')} or ${code('text-align')}. ` +
     `Its measurements are the ${code('--sg-highlighter-*')} variables (coverage, aspect, offset, shape), from the geometry tokens of the same names.`,
+  ``,
+  `## Layout, motion and color roles`,
+  ``,
+  `Where the Brand Book defines a value, the token takes it. Where the book is silent (spacing, radius, shadow, motion, widths), the value is declared from the live website, myfirstbitcoin.org, which was built following the Brand Book; ` +
+    `each such token's ${code('$extensions.mfb.source')} names the commit, file and line. A website value that contradicts the Brand Book is never imported. ${code('brand-spec.md')} lists every value with its source.`,
+  ``,
+  `| What | brand.css | Tailwind 3 and 4 |`,
+  `|------|-----------|------------------|`,
+  `| Color roles | ${code('--mfb-<element>-on-<surface>')}: ${keysOf('colorRole').map((k) => code(k)).join(', ')} | ${code('text-heading-on-light')}, ${code('decoration-link-underline-on-light')}, ${code('border-border-on-light')} ... |`,
+  `| Line height per level | ${code('--mfb-leading-<level>')} | ${code('leading-<level>')}, for example ${code('leading-h1')} |`,
+  `| Letter spacing per level | ${code('--mfb-tracking-<level>')} | ${code('tracking-<level>')} |`,
+  `| Fluid sizes for web pages | ${code('--mfb-size-<level>-fluid')} (${keysOf('fontSizeFluid').join(', ')}) | ${code('text-<level>-fluid')} |`,
+  `| Spacing scale | ${keysOf('spaceScale').map((k) => code(`--mfb-space-${k}`)).join(', ')} | Tailwind's own ${code('p-1')} to ${code('p-32')}: the same values, so the package adds none |`,
+  `| Semantic spacing | ${keysOf('space').map((k) => code(`--mfb-space-${k}`)).join(', ')} | ${code('py-mfb-section')}, ${code('px-mfb-gutter')}, ${code('mt-mfb-heading-to-body')} ... |`,
+  `| Radius (interface elements only, never brand shapes) | ${keysOf('radius').map((k) => code(`--mfb-radius-${k}`)).join(', ')} | ${keysOf('radius').filter((k) => !(TW_SKIP.radius || {})[k]).map((k) => code(`rounded-mfb-${k}`)).join(', ')}; ${code('rounded-full')} for the pill |`,
+  `| Shadow | ${keysOf('shadow').map((k) => code(`--mfb-shadow-${k}`)).join(', ')} | ${keysOf('shadow').map((k) => code(`shadow-mfb-${k}`)).join(', ')} |`,
+  `| Easing | ${keysOf('easing').map((k) => code(`--mfb-ease-${k}`)).join(', ')} | ${keysOf('easing').map((k) => code(`ease-mfb-${k}`)).join(', ')} |`,
+  `| Duration | ${keysOf('duration').map((k) => code(`--mfb-duration-${k}`)).join(', ')} | ${keysOf('duration').map((k) => code(`duration-mfb-${k}`)).join(', ')} |`,
+  `| Container widths | ${keysOf('container').map((k) => code(`--mfb-container-${k}`)).join(', ')} (px) | ${keysOf('container').map((k) => code(`max-w-mfb-${k}`)).join(', ')} (rem) |`,
+  `| Logo size and clear space | ${keysOf('logo').map((k) => code(`--mfb-logo-${k}`)).join(', ')} | none |`,
+  `| Shape tones (a shape one step lighter than its base) | ${keysOf('shapeTone').map((k) => code(`--mfb-shape-on-${k}`)).join(', ')} | none |`,
+  `| Breakpoints, for JavaScript and ${code('matchMedia')} (a variable cannot be read inside ${code('@media')}) | ${keysOf('breakpoint').map((k) => code(`--mfb-breakpoint-${k}`)).join(', ')} | none: the package adds no Tailwind breakpoint |`,
+  `| Layers | ${keysOf('zIndex').map((k) => code(`--mfb-z-${k}`)).join(', ')} | none |`,
+  `| Media ratios | ${keysOf('mediaRatio').map((k) => code(`--mfb-ratio-${k}`)).join(', ')} | none (Tailwind has ${code('aspect-video')} and ${code('aspect-square')}) |`,
+  `| Interface | ${keysOf('ui').map((k) => code(`--mfb-ui-${k}`)).join(', ')} | none |`,
+  ``,
+  `- **New utilities never replace Tailwind's.** Keys are ${code('mfb-')} prefixed (${code('rounded-mfb-md')}, not ${code('rounded-md')}; ${code('ease-mfb-out')}, not ${code('ease-out')}, which is a different curve), type levels or color roles. The build refuses a key that equals a Tailwind 3 or 4 default.`,
+  `- **In 1.x, ${code('text-h1')} sets only the size.** Add ${code('leading-h1')} yourself (and ${code('tracking-h1')} where something else sets tracking). Folding line height into ${code('text-h1')} would change every existing page, so it waits for a major release.`,
+  `- **New ${code('brand.css')} variables reference the palette with ${code('var()')}** and add no hex: roles are ${code('var(--mfb-black)')} and the like, shadows ${code('color-mix(in srgb, var(--mfb-purple-400) 25%, transparent)')}. ${code('theme.css')} and ${code('tailwind.js')} carry the same colors as hex, so Tailwind's opacity modifiers work.`,
+  `- **Tailwind 4 emits a theme variable only when something uses it.** To read ${code('var(--mfb-radius-md)')} or another new variable in your own CSS, import ${code('brand.css')} as well, or use the utility.`,
+  `- **index.js** exports ${INDEX_EXPORTS.map(([name]) => code(name)).join(', ')} next to the existing ${code('colors')}, ${code('fontFamily')}, ${code('fontSize')} and ${code('fontWeight')}.`,
   ``,
   `## Variables`,
   ``,

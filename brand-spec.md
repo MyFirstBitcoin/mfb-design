@@ -28,18 +28,18 @@ the Brand Book Figma file mFIc75UUSyftaqnNUQgjLX. To regenerate: node scripts/br
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| purple-300 | #422C70 | Primary purple: brand hero color, backgrounds, headers |
+| purple-300 | #422C70 | Primary purple: the main brand color for surfaces and shapes (backgrounds, covers, parallelograms, spotlights). Takes white text. Not a heading color on light backgrounds: headings there are black (Type Relationships 918:2990) |
 | purple-400 | #2B1C58 | Accent dark purple: deep contrast, footer backgrounds |
-| purple-200 | #5E378E | Accent light purple: secondary headings, gradient endpoint |
-| orange-300 | #F7941F | Primary orange: CTAs, highlights, Bitcoin symbol color |
-| orange-400 | #EF7B00 | Accent dark orange: hover/active states, strong emphasis |
-| orange-200 | #FBB040 | Accent light orange: soft highlights, secondary accents |
-| black | #000000 | Primary black: high-contrast text, bold headlines |
+| purple-200 | #5E378E | Accent light purple: supergraphic shapes on purple-300 (one step lighter than the base, 918:3604), halftone cutout backgrounds (918:3730). Takes white text |
+| orange-300 | #F7941F | Primary orange: CTA and shape fills with black text (Color Contrast 918:2588), the highlighter line, the Bitcoin symbol, links on dark backgrounds. Never text on light backgrounds |
+| orange-400 | #EF7B00 | Accent dark orange: hover and active fills, shapes; takes black text (918:2616). Never text on light backgrounds |
+| orange-200 | #FBB040 | Accent light orange: supergraphic shapes on orange-300 (one step lighter than the base, 918:3604), soft accents on dark backgrounds. Takes black text |
+| black | #000000 | Primary black: headings and body text on light backgrounds and on orange (Type Relationships 918:2990, Color Contrast 918:2588) |
 | white | #FFFFFF | Primary white: backgrounds, text on dark surfaces |
-| gray-900 | #25252B | Neutral: near-black, body text on light backgrounds |
-| gray-800 | #4F4F5D | Neutral: secondary text, subtle headings |
+| gray-900 | #25252B | Neutral: the darkest grey, a dark surface that takes white text (918:2588). Text on light backgrounds is black, not gray-900 (918:2990) |
+| gray-800 | #4F4F5D | Neutral: a dark grey surface that takes white text (918:2588) |
 | gray-700 | #6C6C7D | Neutral: muted text, placeholders |
-| gray-600 | #88889C | Neutral: disabled text, borders |
+| gray-600 | #88889C | Neutral: borders and dividers. As text, large sizes only (3.5:1 on white); as a surface it takes white text at large sizes (918:2588) |
 | gray-500 | #ADADBE | Neutral: subtle borders, dividers |
 | gray-400 | #C0C0D0 | Neutral: light borders, inactive elements |
 | gray-300 | #D8D8E7 | Neutral: card borders, separators |

@@ -30,7 +30,7 @@ the Brand Book in words), `measured` (read off the Brand Book's vector geometry 
 rendered fill, with the node ids in the note), `declared` (not in the Brand Book: a website value
 with its site source, or a value this package recommends, with `"source": "declared"` and the
 reason in the note), or `unverified`. Color roles and shape tones are aliases of palette colors
-(`{color.black}`).
+(`{color.black}`), and the build refuses one that is not.
 
 Propose every change by pull request. The conventions in [AGENTS.md](AGENTS.md) apply to all
 contributions, by people and AI assistants alike.
@@ -69,8 +69,15 @@ node scripts/check.mjs                  # the rebuild check that GitHub Actions 
 ```
 
 Commit the source change and the regenerated files together. The build refuses to write
-anything if the canon's geometry disagrees with `tokens.json`, and the spec generator refuses if
-a token it needs is missing.
+anything if the canon's geometry disagrees with `tokens.json`, if a geometry token is neither
+gated against the canon nor listed as token-only, if a tokens.json group has no entry in its
+`GROUP_MAP` (where each group is emitted), or if a new Tailwind key would equal a Tailwind 3 or 4
+default. The spec generator refuses if a token it needs, or its source, is missing.
+
+A new token group needs an entry in `GROUP_MAP` in `scripts/build-design-package.mjs`: its
+Tailwind 4 namespace, its Tailwind 3 key and its `brand.css` prefix, or `null` where it is not
+emitted. New Tailwind keys are `mfb-` prefixed, type levels or color roles
+(`<element>-on-<surface>`), so that no release changes a utility a project already uses.
 
 ## Checks on every pull request
 
