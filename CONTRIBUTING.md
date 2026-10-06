@@ -12,11 +12,15 @@ under the source rule below.
    `262:2`) defines a value, its value is the token, cited by node (`"source": "figma:<node>"`).
 2. **Where the Brand Book is silent**, the value used on the live website, myfirstbitcoin.org,
    may become the token. The website was built following the Brand Book, so what it does where
-   the book says nothing is the best evidence there is. Such a token is declared with its exact
-   origin on the site's main branch: `"sourceKind": "declared"` and
-   `"source": "myfirstbitcoin.org@<commit>:<file>:<line>"`, with the number of uses in its note.
-   The site's source repository is private, so only people with access to it can open the cited
-   file and line; what a visitor's browser receives from the site (its CSS and pages) is public.
+   the book says nothing is the best evidence there is. Such a token is declared with its origin
+   on the site's main branch: `"sourceKind": "declared"` and
+   `"source": "myfirstbitcoin.org@<commit>, <CSS name>"`, with the number of uses in its note.
+   The CSS name is what carries the value in the CSS and pages the site serves, which are public:
+   a custom property (`myfirstbitcoin.org@6368b2a, --r-lg`), a selector and property
+   (`myfirstbitcoin.org@6368b2a, .article-prose line-height`), or a property set inline, with
+   where it is used (`box-shadow (inline, media frames)`). The site's source repository is
+   private, so no file, directory or line of it is named in this repository; the deciders named
+   under Releases keep the exact lines outside it.
 3. **Never a website value that contradicts the Brand Book**, however often the site uses it: a
    slant other than the book's angle, a highlighter other than the book's thin line, duotone
    photos, a font or a color outside the book, all-caps text, orange text on a light background.

@@ -23,7 +23,7 @@ const CHECK = path.join(ROOT, 'brand-check.mjs');
 
 // [file, content]. A line ending in "@rule" must be reported with that rule on that line.
 const PLANTED = {
-  'src/styles/global.css': `
+  'src/styles/site.css': `
 :root { --mfb-local: 1; }
 .a { color: #422C70; }                                      @color-literal
 .b { background: rgba(0, 0, 0, 0.5); }                      @color-literal
@@ -79,7 +79,7 @@ mark { background: var(--mfb-orange-300); }                 @hand-rolled-highlig
 .eyebrow { letter-spacing: 0.12em; }                        @letter-spacing
 .faint { color: color-mix(in srgb, var(--mfb-white) 85%, transparent); } @translucent-text
 `,
-  'src/components/Card.tsx': `
+  'src/ui/Card.tsx': `
 const panel: React.CSSProperties = { background: 'orange', padding: 0 }; @named-color
 const tile = { backgroundColor: 'purple', color: 'rebeccapurple' }; @named-color
 const tone = { textColor: open ? 'var(--mfb-white)' : 'var(--mfb-gray-900)' }; @text-color
@@ -144,12 +144,12 @@ export const Card = ({ open }) => (
   <rect fill="var(--mfb-orange-300)" opacity="0.5" width="10" height="10" /> @translucent-shape
 </svg>
 `,
-  'src/components/Caps.astro': `---
+  'src/ui/Caps.astro': `---
 const on = true;
 ---
 <p class:list={['uppercase', { on }]}>x</p>                  @uppercase
 `,
-  'src/components/Clean.astro': `---
+  'src/ui/Clean.astro': `---
 const href = '#feed';
 const EDGE_MASK =
   'linear-gradient(to right, transparent 0, var(--mfb-black) 56px, var(--mfb-black) calc(100% - 56px), transparent 100%)';
@@ -255,7 +255,7 @@ function color(name) { return name; }
 };
 
 // Files that must not be reported at all.
-const CLEAN = new Set(['src/components/Clean.astro', 'src/styles/legacy.scss', 'dist/_astro/tw4.css', 'dist/_astro/tw3.css']);
+const CLEAN = new Set(['src/ui/Clean.astro', 'src/styles/legacy.scss', 'dist/_astro/tw4.css', 'dist/_astro/tw3.css']);
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'brand-check-test-'));
 const failures = [];
@@ -292,34 +292,34 @@ try {
   // 2. The clean files alone pass: the clean source, and the Tailwind 3 and 4 builds.
   fs.rmSync(path.join(tmp, 'dist/_astro/drift.css'));
   fs.rmSync(path.join(tmp, 'dist/index.html'));
-  const clean = run(['--src', 'src/components/Clean.astro']);
+  const clean = run(['--src', 'src/ui/Clean.astro']);
   if (clean.status !== 0) failures.push(`clean files: exit ${clean.status}, expected 0: ${clean.stderr.trim()}`);
 
   // 3. A build without the angle is reported.
   const tw4 = path.join(tmp, 'dist/_astro/tw4.css');
   const tw4Text = fs.readFileSync(tw4, 'utf8');
   fs.writeFileSync(tw4, tw4Text.replace(/--sg-angle-base: 13deg;|@property --sg-angle-base[^}]*\}/g, ''));
-  if (!parse(run(['--src', 'src/components/Clean.astro']).stderr).some((g) => g.rule === 'built-angle' && g.line === null)) failures.push('missed: built CSS without --sg-angle-base [built-angle]');
+  if (!parse(run(['--src', 'src/ui/Clean.astro']).stderr).some((g) => g.rule === 'built-angle' && g.line === null)) failures.push('missed: built CSS without --sg-angle-base [built-angle]');
   fs.writeFileSync(tw4, tw4Text);
 
   // 4. An allowlist entry silences its findings; an unused entry is reported; a reason is required.
   fs.writeFileSync(path.join(tmp, 'brand-check.allow.json'), JSON.stringify([
-    { file: 'src/components/Card.tsx', reason: 'test: a third-party component' },
-    { file: 'src/styles/global.css', rule: 'color-literal', match: '422C70', reason: 'test' },
+    { file: 'src/ui/Card.tsx', reason: 'test: a third-party component' },
+    { file: 'src/styles/site.css', rule: 'color-literal', match: '422C70', reason: 'test' },
     { file: 'src/none.css', reason: 'test: unused' },
   ]));
   const a = run([]);
   const ga = parse(a.stderr);
-  if (ga.some((g) => g.file === 'src/components/Card.tsx')) failures.push('allowlist: a whole-file entry did not silence the file');
-  if (ga.some((g) => g.file === 'src/styles/global.css' && g.line === 3)) failures.push('allowlist: a rule and match entry did not silence its finding');
-  if (!ga.some((g) => g.file === 'src/styles/global.css' && g.line === 4)) failures.push('allowlist: a rule and match entry silenced another finding');
+  if (ga.some((g) => g.file === 'src/ui/Card.tsx')) failures.push('allowlist: a whole-file entry did not silence the file');
+  if (ga.some((g) => g.file === 'src/styles/site.css' && g.line === 3)) failures.push('allowlist: a rule and match entry did not silence its finding');
+  if (!ga.some((g) => g.file === 'src/styles/site.css' && g.line === 4)) failures.push('allowlist: a rule and match entry silenced another finding');
   if (!/allowlist entry 3 .*matched nothing/.test(a.stderr)) failures.push('allowlist: an unused entry was not reported');
   fs.writeFileSync(path.join(tmp, 'brand-check.allow.json'), JSON.stringify([{ file: 'src/x.css' }]));
   if (run([]).status !== 2) failures.push('allowlist: an entry without a reason was accepted');
   fs.rmSync(path.join(tmp, 'brand-check.allow.json'));
 
   // 5. --warn reports a rule without failing; the default warnings fail only under --error.
-  const w = run(['--src', 'src/components', '--warn', 'off-palette-utility,uppercase,font-family,weight,angle,raw-value,translucent-shape,gradient,named-color,color-filter,color-literal,hand-rolled-highlighter,clip-path']);
+  const w = run(['--src', 'src/ui', '--warn', 'off-palette-utility,uppercase,font-family,weight,angle,raw-value,translucent-shape,gradient,named-color,color-filter,color-literal,hand-rolled-highlighter,clip-path']);
   if (w.status !== 0) failures.push(`--warn: exit ${w.status}, expected 0: ${w.stderr.split('\n').filter((l) => !l.includes('warning')).join(' ')}`);
   fs.mkdirSync(path.join(tmp, 'src2'));
   fs.writeFileSync(path.join(tmp, 'src2/a.css'), '.x { padding: 24px; }\n.y { letter-spacing: 0.1em; }\n');
@@ -331,8 +331,8 @@ try {
 
   // 6. No built CSS, and --source-only.
   fs.rmSync(path.join(tmp, 'dist'), { recursive: true });
-  if (!parse(run(['--src', 'src/components/Clean.astro']).stderr).some((g) => g.rule === 'built-missing')) failures.push('missed: no built CSS [built-missing]');
-  if (run(['--src', 'src/components/Clean.astro', '--source-only']).status !== 0) failures.push('--source-only still read the build');
+  if (!parse(run(['--src', 'src/ui/Clean.astro']).stderr).some((g) => g.rule === 'built-missing')) failures.push('missed: no built CSS [built-missing]');
+  if (run(['--src', 'src/ui/Clean.astro', '--source-only']).status !== 0) failures.push('--source-only still read the build');
 } finally {
   fs.rmSync(tmp, { recursive: true, force: true });
 }

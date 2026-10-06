@@ -15,6 +15,8 @@
 //
 // It refuses to write when:
 //   - a token the prose depends on is absent (a blank where a brand value belongs);
+//   - a website source is not "myfirstbitcoin.org@<commit>, <CSS name>", or names a file, a
+//     directory or a line of the site's private source repository;
 //   - the template names a placeholder this script does not fill, or leaves one unfilled;
 //   - the result contains an em-dash, a machine path or a date stamp (the public file carries none).
 
@@ -86,10 +88,14 @@ const values = {
 };
 
 // ---- sources ----
-// Every value in the new sections is shown with where it comes from: a Brand Book node, the line
-// of the live website it was declared from (where the book is silent), or this package's
+// Every value in the new sections is shown with where it comes from: a Brand Book node, the
+// website CSS name it was declared from (where the book is silent), or this package's
 // recommendation. tokens.json carries the full note; the spec shows the short form.
-const SITE_RE = /^myfirstbitcoin\.org@([0-9a-f]{7,40}):(.+)$/;
+// A website source is "myfirstbitcoin.org@<commit>, <CSS name>", optionally followed by where an
+// inline property is used in parentheses. The site's source repository is private, so a source
+// that names a file, a directory or a line of it is refused.
+const SITE_RE = /^myfirstbitcoin\.org@([0-9a-f]{7,40}), (.+?)(?: \((.+)\))?$/;
+const PRIVATE_PATH_RE = /\/|\w\.(?:astro|tsx|jsx|ts|js|mjs|css|scss)(?![\w-])|:\d/;
 const siteCommits = new Set();
 const sourceOf = (group, name) => {
   const tok = (tokens[group] || {})[name];
@@ -99,10 +105,14 @@ const sourceOf = (group, name) => {
     return '';
   }
   if (m.source.startsWith('figma:')) return `Brand Book \`${m.source.slice(6)}\`${m.sourceKind === 'measured' ? ', measured' : ''}`;
-  const site = m.source.match(SITE_RE);
-  if (site) {
+  if (m.source.startsWith('myfirstbitcoin.org')) {
+    const site = m.source.match(SITE_RE);
+    if (!site || PRIVATE_PATH_RE.test(m.source.replace(/^myfirstbitcoin\.org@/, ''))) {
+      missing.push(`${group}.${name} (a website source as myfirstbitcoin.org@<commit>, <CSS name>, with no file or line)`);
+      return '';
+    }
     siteCommits.add(site[1]);
-    return `website \`${site[2]}\``;
+    return `website \`${site[2]}\`${site[3] ? ` (${site[3]})` : ''}`;
   }
   if (m.source === 'declared') return "this package's recommendation";
   return `\`${m.source}\``;

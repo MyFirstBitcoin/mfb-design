@@ -28,7 +28,7 @@
 //
 // The allowlist is a JSON array of exceptions, each with its reason:
 //   [{ "file": "src/assets/partner.svg", "reason": "the partner's own logo colors" },
-//    { "file": "src/components/Share.astro", "rule": "color-literal", "match": "1877f2", "reason": "..." }]
+//    { "file": "src/ui/Share.astro", "rule": "color-literal", "match": "1877f2", "reason": "..." }]
 // "file" is a path relative to the root (a path ending in "/" covers a directory); "rule" and
 // "match" (text the finding contains) narrow the entry. Unused entries are reported, not fatal.
 

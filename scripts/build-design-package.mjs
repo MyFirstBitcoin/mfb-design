@@ -649,7 +649,7 @@ const readme = [
   `## Layout, motion and color roles`,
   ``,
   `Where the Brand Book defines a value, the token takes it. Where the book is silent (spacing, radius, shadow, motion, widths), the value is declared from the live website, myfirstbitcoin.org, which was built following the Brand Book; ` +
-    `each such token's ${code('$extensions.mfb.source')} names the commit, file and line. A website value that contradicts the Brand Book is never imported. ${code('brand-spec.md')} lists every value with its source.`,
+    `each such token's ${code('$extensions.mfb.source')} names the website commit and the CSS that carries the value in what the site serves (a custom property, a selector and property, or a property set inline), for example ${code(tokens.radius.lg.$extensions.mfb.source)}. A website value that contradicts the Brand Book is never imported. ${code('brand-spec.md')} lists every value with its source.`,
   ``,
   `| What | brand.css | Tailwind 3 and 4 |`,
   `|------|-----------|------------------|`,
@@ -720,7 +720,7 @@ const readme = [
   ``,
   `${code('--allow FILE')} (default ${code('brand-check.allow.json')} when it exists) lists the exceptions, each with its reason, for example a third-party mark:`,
   ``,
-  `${FENCE}json\n[{ "file": "src/assets/partner-logo.svg", "reason": "the partner's own logo colors" },\n { "file": "src/components/Share.astro", "rule": "color-literal", "match": "1877f2", "reason": "the network's own badge color" }]\n${FENCE}`,
+  `${FENCE}json\n[{ "file": "src/assets/partner-logo.svg", "reason": "the partner's own logo colors" },\n { "file": "src/ui/Share.astro", "rule": "color-literal", "match": "1877f2", "reason": "the network's own badge color" }]\n${FENCE}`,
   ``,
   `An entry without ${code('rule')} covers every rule in that file, and one without ${code('match')} every finding of the rule. ${code('--warn RULE[,RULE]')} reports a rule without failing, for a project that adopts the check step by step (${code('--warn raw-value')}). ${code('--help')} lists the rule ids.`,
   ``,

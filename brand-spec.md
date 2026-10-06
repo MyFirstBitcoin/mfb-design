@@ -12,7 +12,7 @@ the Brand Book Figma file mFIc75UUSyftaqnNUQgjLX. To regenerate: node scripts/br
 
 **The Brand Book Figma (`mFIc75UUSyftaqnNUQgjLX`) is the single source of truth for My First Bitcoin's visual rules.** This markdown is a mirror. If anything here conflicts with the Brand Book, the Brand Book wins. Before generating any brand artifact, screenshot the relevant Brand Book rule page (for example with the Figma MCP server's `get_screenshot` tool) so you are working from the visual, not from a summary.
 
-**Where the Brand Book is silent** (spacing, radius, shadow, motion, page widths), the values below are declared from the live website, myfirstbitcoin.org, which was built following the Brand Book. Each one names the file and line it comes from, on the site's main branch at commit `6368b2a`. A website value that contradicts the Brand Book is never imported (see "Not imported from the website" in Section 1), so do not copy values from the website's code: take them from this package.
+**Where the Brand Book is silent** (spacing, radius, shadow, motion, page widths), the values below are declared from the live website, myfirstbitcoin.org, which was built following the Brand Book. Each one names the CSS that carries it in what the site serves (a custom property, a selector and property, or a property set inline), on the site's main branch at commit `6368b2a`. A website value that contradicts the Brand Book is never imported (see "Not imported from the website" in Section 1), so do not copy values from the website's code: take them from this package.
 
 **Canonical rule pages (Brand Book node IDs):**
 
@@ -59,16 +59,16 @@ Which palette color to use for each element, by background. Every role is a pale
 |------|-------|-----|--------|
 | `heading-on-light` | black (`#000000`) | Headings on white and light greys (gray-100 to gray-500). | Brand Book `918:2335`, measured |
 | `body-on-light` | black (`#000000`) | Body text on white and light greys. | Brand Book `918:2368`, measured |
-| `muted-on-light` | gray-700 (`#6C6C7D`) | Secondary text on white and gray-100 (captions, meta, descriptions), never body copy. | website `src/components/blocks/Features.tsx:103` |
+| `muted-on-light` | gray-700 (`#6C6C7D`) | Secondary text on white and gray-100 (captions, meta, descriptions), never body copy. | website `--gray-700` (inline text color) |
 | `link-on-light` | purple-300 (`#422C70`) | Link text on white and light greys, underlined. | this package's recommendation |
 | `link-underline-on-light` | orange-300 (`#F7941F`) | Underline of a link on white and gray-100 to gray-300. | this package's recommendation |
-| `border-on-light` | gray-200 (`#EAEAF4`) | Card and divider borders on white. | website `src/components/blocks/BlogCarousel.tsx:96` |
+| `border-on-light` | gray-200 (`#EAEAF4`) | Card and divider borders on white. | website `--gray-200` (inline border color) |
 | `highlighter-on-light` | orange-300 (`#F7941F`) | Highlighter line on white and gray-100 to gray-300. | Brand Book `918:2898`, measured |
 | `logo-on-light` | purple-300 (`#422C70`) | Logo on white and on greys up to gray-500. | Brand Book `918:2976`, measured |
 | `heading-on-dark` | white (`#FFFFFF`) | Headings on purples and on gray-700 to gray-900 (gray-600: headings at 24px and up only). | Brand Book `918:3829`, measured |
 | `body-on-dark` | white (`#FFFFFF`) | Body text on purples and on gray-700 to gray-900 (gray-600: large text only). | Brand Book `918:2623`, measured |
 | `muted-on-dark` | gray-400 (`#C0C0D0`) | Secondary text on purples. | this package's recommendation |
-| `link-on-dark` | orange-300 (`#F7941F`) | Link text on purple-300 and purple-400. On purple-200 and on dark greys, links are white and underlined. | website `src/styles/global.css:166` |
+| `link-on-dark` | orange-300 (`#F7941F`) | Link text on purple-300 and purple-400. On purple-200 and on dark greys, links are white and underlined. | website `--accent` (the color of every link) |
 | `highlighter-on-dark` | orange-300 (`#F7941F`) | Highlighter line on purples. | Brand Book `918:2883`, measured |
 | `logo-on-dark` | white (`#FFFFFF`) | Logo on purples and on photos. | Brand Book `918:2974`, measured |
 | `heading-on-orange` | black (`#000000`) | Headings on orange-200, orange-300 and orange-400. | Brand Book `918:4183`, measured |
@@ -121,18 +121,18 @@ In CSS: `var(--mfb-<role>)`, for example `var(--mfb-heading-on-light)`. In Tailw
 
 | Level | Size | Line height | Letter spacing | On web pages (fluid) |
 |-------|------|-------------|----------------|----------------------|
-| h1 | 70px | 1 | 0em | `clamp(44px, 6vw, 70px)` (website `src/styles/global.css:66`) |
-| h2 | 58px | 1 | 0em | `clamp(36px, 5vw, 58px)` (website `src/styles/global.css:67`) |
-| h3 | 48px | 1 | 0em | `clamp(30px, 4vw, 48px)` (website `src/styles/global.css:68`) |
-| h4 | 40px | 1 | 0em | `clamp(26px, 3.2vw, 40px)` (website `src/styles/global.css:69`) |
-| h5 | 36px | 1.1 | 0em | `clamp(22px, 2.6vw, 36px)` (website `src/styles/global.css:70`) |
-| h6 | 32px | 1.1 | 0em | `clamp(20px, 2.2vw, 32px)` (website `src/styles/global.css:71`) |
+| h1 | 70px | 1 | 0em | `clamp(44px, 6vw, 70px)` (website `--fs-h1`) |
+| h2 | 58px | 1 | 0em | `clamp(36px, 5vw, 58px)` (website `--fs-h2`) |
+| h3 | 48px | 1 | 0em | `clamp(30px, 4vw, 48px)` (website `--fs-h3`) |
+| h4 | 40px | 1 | 0em | `clamp(26px, 3.2vw, 40px)` (website `--fs-h4`) |
+| h5 | 36px | 1.1 | 0em | `clamp(22px, 2.6vw, 36px)` (website `--fs-h5`) |
+| h6 | 32px | 1.1 | 0em | `clamp(20px, 2.2vw, 32px)` (website `--fs-h6`) |
 | body | 18px | 1.2 | 0em | fixed, 18px |
-| label | 22px | 1.2 | 0em | `clamp(16px, 1.6vw, 22px)` (website `src/styles/global.css:73`) |
-| quote | 40px | 1 | 0em | `clamp(22px, 2.8vw, 40px)` (website `src/styles/global.css:72`) |
+| label | 22px | 1.2 | 0em | `clamp(16px, 1.6vw, 22px)` (website `--fs-label`) |
+| quote | 40px | 1 | 0em | `clamp(22px, 2.8vw, 40px)` (website `--fs-quote`) |
 
 - **Line height and letter spacing** are the Brand Book's (type specimen `918:2323`; no brand text style has tracking). Line height is a multiple of the size: `line-height: var(--mfb-leading-h1)`, or `text-h1 leading-h1` in Tailwind (in 1.x, `text-h1` sets only the size). Body text never goes to line height 1 (Type Misuse `918:2841`).
-- **Body line height, short and long.** The Brand Book's body line height is for body copy paired with a heading: its type specimen states 1.2, and Type Relationships (`918:2990`) draws body copy under a heading at 1.22; the token keeps the stated number. The book shows no long reading text. For articles and other long running prose, `--mfb-leading-body-long` (`leading-body-long`) is 1.7, a value declared from the website's article text (website `src/pages/news/[...slug].astro:312`), not a Brand Book value. It is flagged for review: use it only for long reading text, never for headings or for body copy next to a heading.
+- **Body line height, short and long.** The Brand Book's body line height is for body copy paired with a heading: its type specimen states 1.2, and Type Relationships (`918:2990`) draws body copy under a heading at 1.22; the token keeps the stated number. The book shows no long reading text. For articles and other long running prose, `--mfb-leading-body-long` (`leading-body-long`) is 1.7, a value declared from the website's article text (website `.article-prose line-height`), not a Brand Book value. It is flagged for review: use it only for long reading text, never for headings or for body copy next to a heading.
 - **Weights:** Medium (500) for H1 to H6 and quotes; Regular (400) for body text and labels; SemiBold (600) only for emphasis inside a line. Body text is never Medium or bold (`918:2841`).
 - **Fluid sizes** are for web pages: each grows with the viewport up to the Brand Book size and never past it. The cap is the Brand Book's; the floor and the slope are the website's. Body text stays at its fixed size, so below about 1125px wide the fluid label is smaller than body text (16px against 18px at a phone's width), the reverse of the Brand Book's order; where a label sits next to body text on small screens, use the fixed label size. A fluid body size is not decided yet.
 - **Space after a heading:** 40px between any heading and the body text under it, at the 18px body size (Brand Book `918:2990`, measured). **Between a quote and its label:** 48px (Brand Book `918:3005`, measured).
@@ -154,20 +154,20 @@ The values in the next sections are in `brand.css` as `--mfb-<family>-<name>` (f
 
 Where the Brand Book is silent, these come from the website (Section 0).
 
-**Spacing scale:** 1: 4px, 2: 8px, 3: 12px, 4: 16px, 6: 24px, 8: 32px, 12: 48px, 16: 64px, 24: 96px, 32: 128px (website `src/styles/global.css:78` to `src/styles/global.css:87`). Each step N is `--mfb-space-N`, the same value as Tailwind's own `p-N`, `m-N` and `gap-N`, so use Tailwind's utilities and the package adds none. Stay on the scale: no 6px, 10px, 14px, 18px, 20px or 28px.
+**Spacing scale:** 1: 4px, 2: 8px, 3: 12px, 4: 16px, 6: 24px, 8: 32px, 12: 48px, 16: 64px, 24: 96px, 32: 128px (website `--s-1` to `--s-10`). Each step N is `--mfb-space-N`, the same value as Tailwind's own `p-N`, `m-N` and `gap-N`, so use Tailwind's utilities and the package adds none. Stay on the scale: no 6px, 10px, 14px, 18px, 20px or 28px.
 
 | Variable | Value | Use | Source |
 |----------|-------|-----|--------|
 | `--mfb-space-heading-to-body` | `40px` | Space between a heading and the body text that follows it, for any heading level (at the 18px body size). | Brand Book `918:2990`, measured |
 | `--mfb-space-quote-to-label` | `48px` | Space between a quote and its label (the attribution). | Brand Book `918:3005`, measured |
-| `--mfb-space-gutter` | `clamp(20px, 4vw, 64px)` | Horizontal page gutter inside the page container. | website `src/styles/global.css:97` |
-| `--mfb-space-section` | `clamp(64px, 9vw, 128px)` | Vertical padding of a page section (top and bottom). | website `src/styles/global.css:281` |
-| `--mfb-space-section-tight` | `clamp(48px, 6vw, 96px)` | Vertical padding of a compact page section. | website `src/styles/global.css:282` |
-| `--mfb-space-header-gap` | `clamp(32px, 4vw, 56px)` | Space between a section's header (title and intro) and its content. | website `src/components/blocks/EventsCalendar.tsx:91` |
-| `--mfb-space-block-end` | `clamp(32px, 4vw, 48px)` | Space before a section's closing call to action. | website `src/components/blocks/BlogCarousel.tsx:297` |
-| `--mfb-container-page` | `1280px` | Maximum width of the page container, gutter included (content is 1152px wide at the largest gutter). | website `src/styles/global.css:96` |
-| `--mfb-container-wide` | `1440px` | Maximum width of full-width frames such as the header, the footer and wide blocks. | website `src/components/blocks/BlockWrapper.tsx:18` |
-| `--mfb-container-measure` | `720px` | Maximum width of running text and of a centered section header. | website `src/styles/global.css:131` |
+| `--mfb-space-gutter` | `clamp(20px, 4vw, 64px)` | Horizontal page gutter inside the page container. | website `--container-px` |
+| `--mfb-space-section` | `clamp(64px, 9vw, 128px)` | Vertical padding of a page section (top and bottom). | website `.section padding` |
+| `--mfb-space-section-tight` | `clamp(48px, 6vw, 96px)` | Vertical padding of a compact page section. | website `.section--tight padding` |
+| `--mfb-space-header-gap` | `clamp(32px, 4vw, 56px)` | Space between a section's header (title and intro) and its content. | website `margin-bottom` (inline, section headers) |
+| `--mfb-space-block-end` | `clamp(32px, 4vw, 48px)` | Space before a section's closing call to action. | website `margin-top` (inline, section calls to action) |
+| `--mfb-container-page` | `1280px` | Maximum width of the page container, gutter included (content is 1152px wide at the largest gutter). | website `--container` |
+| `--mfb-container-wide` | `1440px` | Maximum width of full-width frames such as the header, the footer and wide blocks. | website `max-width` (inline, wide frames) |
+| `--mfb-container-measure` | `720px` | Maximum width of running text and of a centered section header. | website `article width` |
 
 ### Radius and shadow
 
@@ -175,13 +175,13 @@ Radius is for interface elements (cards, buttons, inputs, images). **Brand shape
 
 | Variable | Value | Use | Source |
 |----------|-------|-----|--------|
-| `--mfb-radius-sm` | `4px` | Small radius: focus rings, small tags. | website `src/styles/global.css:90` |
-| `--mfb-radius-md` | `8px` | Medium radius: inputs, small media, menus. | website `src/styles/global.css:91` |
-| `--mfb-radius-lg` | `12px` | Large radius: cards and media frames. | website `src/styles/global.css:92` |
-| `--mfb-radius-pill` | `999px` | Pill radius: buttons and chips. In Tailwind, use rounded-full. | website `src/styles/global.css:93` |
-| `--mfb-shadow-media` | `0px 20px 60px -20px`, purple-400 at 25% | Shadow under images and video on light backgrounds. None on dark backgrounds. | website `src/components/blocks/Features.tsx:114` |
-| `--mfb-shadow-media-control` | `0px 12px 32px -8px`, black at 40% | Shadow of a control that sits on an image or video, such as a play button. | website `src/components/blocks/Hero.tsx:551` |
-| `--mfb-shadow-overlay` | `0px 40px 80px -20px`, black at 50% | Shadow of a modal or lightbox above the page. | website `src/styles/global.css:1134` |
+| `--mfb-radius-sm` | `4px` | Small radius: focus rings, small tags. | website `--r-sm` |
+| `--mfb-radius-md` | `8px` | Medium radius: inputs, small media, menus. | website `--r-md` |
+| `--mfb-radius-lg` | `12px` | Large radius: cards and media frames. | website `--r-lg` |
+| `--mfb-radius-pill` | `999px` | Pill radius: buttons and chips. In Tailwind, use rounded-full. | website `--r-pill` |
+| `--mfb-shadow-media` | `0px 20px 60px -20px`, purple-400 at 25% | Shadow under images and video on light backgrounds. None on dark backgrounds. | website `box-shadow` (inline, media frames) |
+| `--mfb-shadow-media-control` | `0px 12px 32px -8px`, black at 40% | Shadow of a control that sits on an image or video, such as a play button. | website `box-shadow` (inline, video play buttons) |
+| `--mfb-shadow-overlay` | `0px 40px 80px -20px`, black at 50% | Shadow of a modal or lightbox above the page. | website `.mfb-overlay__dialog box-shadow` |
 
 Shadows are tinted with palette colors only, and none is used on dark backgrounds.
 
@@ -189,12 +189,12 @@ Shadows are tinted with palette colors only, and none is used on dark background
 
 | Variable | Value | Use | Source |
 |----------|-------|-----|--------|
-| `--mfb-ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | Easing for hovers, presses, color changes and reveals. | website `src/styles/global.css:100` |
-| `--mfb-ease-in-out` | `cubic-bezier(0.65, 0, 0.35, 1)` | Easing for carousel slides. | website `src/styles/global.css:101` |
-| `--mfb-duration-fast` | `180ms` | Hover, press and color transitions. | website `src/styles/global.css:102` |
-| `--mfb-duration-med` | `320ms` | Small state changes, such as a carousel pager dot growing. | website `src/styles/global.css:103` |
-| `--mfb-duration-slide` | `520ms` | A carousel track sliding to the next item (with easing.in-out). | website `src/components/blocks/VideoCarousel.tsx:197` |
-| `--mfb-duration-reveal` | `700ms` | Scroll reveal: an element fades in and rises 24px into place (with easing.out). None under reduced motion. | website `src/styles/global.css:533` |
+| `--mfb-ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | Easing for hovers, presses, color changes and reveals. | website `--ease-out` |
+| `--mfb-ease-in-out` | `cubic-bezier(0.65, 0, 0.35, 1)` | Easing for carousel slides. | website `--ease-in-out` |
+| `--mfb-duration-fast` | `180ms` | Hover, press and color transitions. | website `--dur-fast` |
+| `--mfb-duration-med` | `320ms` | Small state changes, such as a carousel pager dot growing. | website `--dur-med` |
+| `--mfb-duration-slide` | `520ms` | A carousel track sliding to the next item (with easing.in-out). | website `transition` (inline, carousel tracks) |
+| `--mfb-duration-reveal` | `700ms` | Scroll reveal: an element fades in and rises 24px into place (with easing.out). None under reduced motion. | website `.reveal transition` |
 
 Under `prefers-reduced-motion: reduce`, nothing moves: reveals show at once, marquees and carousels stop, and transitions are instant. Moving text pauses on hover. Never animate the highlighter ("Do not alter its appearance", `918:2874`).
 
@@ -204,15 +204,15 @@ Under `prefers-reduced-motion: reduce`, nothing moves: reveals show at once, mar
 
 | Variable | Value | Use | Source |
 |----------|-------|-----|--------|
-| `--mfb-z-header` | `100` | Sticky page header. | website `src/components/Header.astro:381` |
-| `--mfb-z-dropdown` | `200` | Navigation dropdowns, above the header. | website `src/components/Header.astro:486` |
-| `--mfb-z-overlay` | `1000` | Modals, lightboxes and the mobile menu, above everything. | website `src/styles/global.css:1115` |
-| `--mfb-ratio-video` | `16 / 9` | Video and wide media. | website `src/components/VideoTile.astro:50` |
-| `--mfb-ratio-photo` | `4 / 3` | Landscape photos. | website `src/components/blocks/ImageGallery.tsx:168` |
-| `--mfb-ratio-portrait` | `4 / 5` | Portrait photos of people. | website `src/components/blocks/EducatorCarousel.tsx:107` |
-| `--mfb-ratio-square` | `1 / 1` | Square images and avatars. | website `src/components/blocks/SupporterStories.tsx:84` |
-| `--mfb-ui-touch-target` | `44px` | Smallest width and height of an icon button or any other tap target. | website `src/components/blocks/VideoCarousel.tsx:409` |
-| `--mfb-ui-link-underline-offset` | `3px` | Distance between a link and its underline. | website `src/pages/news/[...slug].astro:342` |
+| `--mfb-z-header` | `100` | Sticky page header. | website `.mfb-header z-index` |
+| `--mfb-z-dropdown` | `200` | Navigation dropdowns, above the header. | website `.mfb-dropdown z-index` |
+| `--mfb-z-overlay` | `1000` | Modals, lightboxes and the mobile menu, above everything. | website `.mfb-overlay z-index` |
+| `--mfb-ratio-video` | `16 / 9` | Video and wide media. | website `.video-tile aspect-ratio` |
+| `--mfb-ratio-photo` | `4 / 3` | Landscape photos. | website `aspect-ratio` (inline, gallery images) |
+| `--mfb-ratio-portrait` | `4 / 5` | Portrait photos of people. | website `aspect-ratio` (inline, educator photos) |
+| `--mfb-ratio-square` | `1 / 1` | Square images and avatars. | website `aspect-ratio` (inline, supporter photos) |
+| `--mfb-ui-touch-target` | `44px` | Smallest width and height of an icon button or any other tap target. | website `width and height` (inline, icon buttons) |
+| `--mfb-ui-link-underline-offset` | `3px` | Distance between a link and its underline. | website `.article-prose a text-underline-offset` |
 
 ### Not imported from the website
 

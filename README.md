@@ -79,7 +79,7 @@ Wrap the one word you emphasize in a heading: `<h2>Open Source <span class="high
 
 ## Layout, motion and color roles
 
-Where the Brand Book defines a value, the token takes it. Where the book is silent (spacing, radius, shadow, motion, widths), the value is declared from the live website, myfirstbitcoin.org, which was built following the Brand Book; each such token's `$extensions.mfb.source` names the commit, file and line. A website value that contradicts the Brand Book is never imported. `brand-spec.md` lists every value with its source.
+Where the Brand Book defines a value, the token takes it. Where the book is silent (spacing, radius, shadow, motion, widths), the value is declared from the live website, myfirstbitcoin.org, which was built following the Brand Book; each such token's `$extensions.mfb.source` names the website commit and the CSS that carries the value in what the site serves (a custom property, a selector and property, or a property set inline), for example `myfirstbitcoin.org@6368b2a, --r-lg`. A website value that contradicts the Brand Book is never imported. `brand-spec.md` lists every value with its source.
 
 | What | brand.css | Tailwind 3 and 4 |
 |------|-----------|------------------|
@@ -149,7 +149,7 @@ Five rules only warn, because the right answer depends on what the check cannot 
 
 ```json
 [{ "file": "src/assets/partner-logo.svg", "reason": "the partner's own logo colors" },
- { "file": "src/components/Share.astro", "rule": "color-literal", "match": "1877f2", "reason": "the network's own badge color" }]
+ { "file": "src/ui/Share.astro", "rule": "color-literal", "match": "1877f2", "reason": "the network's own badge color" }]
 ```
 
 An entry without `rule` covers every rule in that file, and one without `match` every finding of the rule. `--warn RULE[,RULE]` reports a rule without failing, for a project that adopts the check step by step (`--warn raw-value`). `--help` lists the rule ids.

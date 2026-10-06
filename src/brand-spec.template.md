@@ -12,7 +12,7 @@ the Brand Book Figma file {{FIGMA_FILE}}. To regenerate: node scripts/brand-spec
 
 **The Brand Book Figma (`{{FIGMA_FILE}}`) is the single source of truth for My First Bitcoin's visual rules.** This markdown is a mirror. If anything here conflicts with the Brand Book, the Brand Book wins. Before generating any brand artifact, screenshot the relevant Brand Book rule page (for example with the Figma MCP server's `get_screenshot` tool) so you are working from the visual, not from a summary.
 
-**Where the Brand Book is silent** (spacing, radius, shadow, motion, page widths), the values below are declared from the live website, myfirstbitcoin.org, which was built following the Brand Book. Each one names the file and line it comes from, on the site's main branch at commit `{{SITE_COMMIT}}`. A website value that contradicts the Brand Book is never imported (see "Not imported from the website" in Section 1), so do not copy values from the website's code: take them from this package.
+**Where the Brand Book is silent** (spacing, radius, shadow, motion, page widths), the values below are declared from the live website, myfirstbitcoin.org, which was built following the Brand Book. Each one names the CSS that carries it in what the site serves (a custom property, a selector and property, or a property set inline), on the site's main branch at commit `{{SITE_COMMIT}}`. A website value that contradicts the Brand Book is never imported (see "Not imported from the website" in Section 1), so do not copy values from the website's code: take them from this package.
 
 **Canonical rule pages (Brand Book node IDs):**
 
