@@ -112,23 +112,34 @@ Where the Brand Book defines a value, the token takes it. Where the book is sile
 `brand-check.mjs` ships in this package: a guard that a project runs after its build, with Node.js and nothing else. It reads every value from this package's `tokens.json`, so it follows the version you pin.
 
 ```sh
-node node_modules/@myfirstbitcoin/design/brand-check.mjs [--src src] [--dist dist] [--allow brand-check.allow.json]
+node node_modules/@myfirstbitcoin/design/brand-check.mjs [options]
 ```
 
-Run it in your build, for example `"build": "astro build && node node_modules/@myfirstbitcoin/design/brand-check.mjs"`. To find its path from a script, resolve `@myfirstbitcoin/design/brand-check.mjs` (it is in the package's `exports`). It exits 1 when the source (`--src`, default `src`, comments ignored) has:
+| Option | What it does |
+|--------|--------------|
+| `--src DIR` | Source to read, repeatable or comma-separated (default `src`). Comments are ignored. |
+| `--dist DIR` | Build output whose CSS (style sheets, `<style>` blocks and the `--sg-angle-*` in style attributes of built HTML) is read, repeatable (default `dist`). |
+| `--source-only` | Skip the build output. |
+| `--allow FILE` | The allowlist (default `brand-check.allow.json` when it exists), below. |
+| `--warn RULE[,RULE]` | Report these rules without failing. |
+| `--error RULE[,RULE]` | Fail on rules that only warn by default (`raw-spacing`, `text-color`, `typed-caps`). |
+| `--root DIR` | The project root the paths above are relative to (default: the current directory). |
+| `--help` | List the rule ids, with what each reports. |
 
-- a color literal (hex, `rgb()`, `rgba()`, `hsl()` and the other color functions), or a named color in a color property, a style, an SVG color attribute or an arbitrary utility (`bg-[teal]`)
+It exits 0 when nothing fails (warnings are printed), 1 when something fails and 2 when it cannot run (an unknown option or rule, a missing `--src`, an allowlist that is not valid). Run it in your build, for example `"build": "astro build && node node_modules/@myfirstbitcoin/design/brand-check.mjs"`. To find its path from a script, resolve `@myfirstbitcoin/design/brand-check.mjs` (it is in the package's `exports`). It fails when the source has:
+
+- a color literal (hex from `#RGB` to `#RRGGBBAA`, also inside an arbitrary utility such as `shadow-[0_0_0_3px_#f7931a80]`, `rgb()`, `hsl()` and the other color functions), or a named color in a color property, a custom property, a style object (`style={{ ... }}`, or an object named like a style or typed `CSSProperties`), a canvas `fillStyle`, an SVG color attribute or an arbitrary utility (`bg-[teal]`)
 - a font family other than `var(--mfb-font-heading)`, `var(--mfb-font-body)` or `var(--mfb-font-sans)` (in Tailwind 4, `var(--font-sans)` too), a family name, or the deprecated mono family. Inside `@font-face`, which describes a face rather than using one, family names and weights are allowed
-- a skew, a rotation or an angle literal that is not a quarter turn (in CSS or in an SVG `transform` attribute), a transform matrix that rotates or skews, or slant geometry computed from `--sg-angle-*`: the 13° slant comes only from the supergraphics classes
-- a hand-rolled `clip-path` shape, or a hand-rolled highlighter (a `linear-gradient(transparent 80%, ...)` band, or an orange pseudo-element sized in `em`)
+- a skew, a rotation or an angle literal that is not a quarter turn (in CSS, a style object, an animation prop such as `rotate: -15`, a Tailwind class such as `rotate-3` or `rotate-x-12`, or an SVG `transform`, `patternTransform` or `gradientTransform` attribute), a transform matrix that rotates or skews, or slant geometry computed from `--sg-angle-*`: the 13° slant comes only from the supergraphics classes
+- a hand-rolled `clip-path` shape, or a hand-rolled highlighter: a `linear-gradient(transparent 80%, ...)` band, an orange pseudo-element drawn as a marker (sized in `em` or `%`, put behind the text with a negative `z-index`, or named like a highlight or a mark), an orange inset `box-shadow` under the text, or orange `after:` or `before:` utilities
 - a redefinition of a variable the package defines (`--mfb-*`, or the `--sg-*` geometry such as `--sg-angle-base`); pages set only `--sg-aspect` and `--sg-highlighter-color`, which must be a palette variable
 - `text-transform: uppercase`, the `uppercase` class, small caps or small-cap font features
 - a gradient (the deprecated brand gradient and `.sg-photo-zone` included), a smooth color filter or a blend mode (Rule 4: halftone, never duotone)
 - a Tailwind color utility outside the palette, such as `bg-teal-500` or Tailwind's own `text-purple-500`
-- a weight above 600, or opacity on a brand shape (a class, `opacity-[.85]` or an inline style)
+- a weight above 600, or a translucent brand shape: opacity on a supergraphics shape or the highlighter (a class, `opacity-[.85]` or an inline style), or an orange or purple fill that is not solid (`opacity` or `fill-opacity` beside it, an alpha modifier such as `bg-orange-200/10`, or `color-mix()` with `transparent`). Opacity 0 (hidden) and states such as `hover:opacity-90` are left alone
 - a raw value that has a token: a radius, duration, easing, container width, font size, font weight, shadow or semantic spacing literal equal to a token value (`border-radius: 12px`, `180ms`, `clamp(64px, 9vw, 128px)`), with the token to use instead
 
-and when the built CSS (`--dist`, default `dist`) lacks `--sg-angle-base` with the token value (import `brand.css` or `supergraphics.css`) or sets either angle to another value, defines a `--color-*` that is not a palette color or a color role, or sets uppercase or the mono family outside a utility class definition (Tailwind emits a definition such as `.uppercase` when it sees the word in a comment; the source check already reports the class where it is used). `--source-only` skips the built CSS.
+and when the built CSS lacks `--sg-angle-base` with the token value (import `brand.css` or `supergraphics.css`), or any declaration of `--sg-angle-base` or `--sg-angle-alt` has another value (a rule, a nested rule, an `@property` `initial-value`, or a style attribute in built HTML); defines a `--color-*` that is not a palette color or a color role; sets uppercase or small caps; or gives a `font-family` the mono or serif family. A utility class definition is not a use: Tailwind 3 emits `.uppercase` or `.font-mono` when its content scanner sees the word anywhere, a comment included, and the source check reports the class where a page uses it. Nor is a variable definition or the base style of `code`, `kbd`, `samp` and `pre`: Tailwind 4's base styles always set `--default-mono-font-family: var(--font-mono)`, and `theme.css` ships `--font-mono` for the deprecated mono family.
 
 Three rules only warn, because the right answer depends on what the check cannot see: `raw-spacing` (a px or rem spacing literal on the scale, such as `padding: 24px`: Tailwind's own steps are the same values), `text-color` (orange text, which is right only on purple-300 and purple-400, and a purple heading) and `typed-caps` (two or more words typed in capitals). `--error RULE[,RULE]` makes them fail.
 

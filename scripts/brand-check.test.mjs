@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 // Tests brand-check.mjs (the guard this package ships) against a project tree with planted
-// violations, a clean tree, an allowlist, --warn and --error. scripts/check.mjs runs it.
+// violations, clean controls, an allowlist, --warn and --error. scripts/check.mjs runs it.
 //
 // Usage: node scripts/brand-check.test.mjs
 //
-// Every planted line carries one violation and names the rule it must trigger; every clean line
-// must trigger nothing. A rule that warns by default (raw-spacing, text-color, typed-caps) is
-// reported as a warning on its line. The tree is written to a temporary directory and removed
+// Every planted line carries one violation and names the rule it must trigger, in the source and
+// in the built CSS alike; every line of a clean file must trigger nothing. The clean files include
+// what a correct Tailwind 3 and Tailwind 4 build emits on its own (utility definitions for words
+// the content scanner saw in a comment, the base styles of code elements, theme.css's --font-mono),
+// which must not be reported. A rule that warns by default (raw-spacing, text-color, typed-caps)
+// is reported as a warning on its line. The tree is written to a temporary directory and removed
 // afterwards.
 
 import fs from 'fs';
@@ -54,9 +57,20 @@ const PLANTED = {
 .room { padding-left: calc(tan(var(--sg-angle-base)) * var(--sg-base-h) / 2); } @angle
 .link { color: var(--mfb-orange-300); }                     @text-color
 h2 { color: var(--mfb-purple-300); }                        @text-color
+.ring { box-shadow:
+  0 0 0 3px #F7931A80,                                      @color-literal
+  0 1px 2px var(--mfb-black); }
+:root { --surface: white; }                                 @named-color
+.hl2::after { content: ""; position: absolute; bottom: 0; height: 40%; z-index: -1; background: var(--mfb-orange-300); } @hand-rolled-highlighter
+.under { box-shadow: inset 0 -0.35em 0 var(--mfb-orange-300); } @hand-rolled-highlighter
+.tag { background: var(--mfb-purple-300); opacity: .8; }    @translucent-shape
+.chip { background: color-mix(in srgb, var(--mfb-orange-300) 40%, transparent); } @translucent-shape
+.tilt { transform: skewY(-3deg); }                          @angle
 `,
   'src/components/Card.tsx': `
-export const Card = () => (
+const panel: React.CSSProperties = { background: 'orange', padding: 0 }; @named-color
+const tile = { backgroundColor: 'purple', color: 'rebeccapurple' }; @named-color
+export const Card = ({ open }) => (
   <div className="bg-teal-500 p-6">x</div>                  @off-palette-utility
   <div className="text-purple-500">x</div>                  @off-palette-utility
   <h2 className="uppercase text-h2">x</h2>                  @uppercase
@@ -81,14 +95,41 @@ export const Card = () => (
   <div className="mix-blend-multiply">x</div>               @color-filter
   <svg><g transform="rotate(-15.5 60 32)" /></svg>          @angle
   <h3>UPCOMING EVENTS</h3>                                  @typed-caps
+  <svg><pattern patternTransform="rotate(30)" /></svg>      @angle
+  <svg><g transform="skewX(-10)" /></svg>                   @angle
+  <div style={{ fontFamily: "Georgia" }}>x</div>            @font-family
+  <div style={{ background: "linear-gradient(var(--mfb-orange-300), var(--mfb-purple-300))" }}>x</div> @gradient
+  <div style={{ background: 'var(--mfb-orange-300)', opacity: 0.6 }}>x</div> @translucent-shape
+  <div className="bg-orange-300 opacity-60">x</div>         @translucent-shape
+  <div className="bg-purple-300/80">x</div>                 @translucent-shape
+  <svg><rect fill="var(--mfb-purple-300)" fillOpacity={0.5} /></svg> @translucent-shape
+  <div style={{ transform: 'rotate(-4.5deg)' }}>x</div>     @angle
+  <div style={{ transform: open ? 'skewY(-3deg)' : 'none' }}>x</div> @angle
+  <motion.div animate={{ rotate: -15 }}>x</motion.div>      @angle
+  <div className="rotate-x-12">x</div>                      @angle
+  <div className="shadow-[0_0_0_3px_#F7931A80]">x</div>     @color-literal
+  <div style={{ color: '#F7931ACC' }}>x</div>               @color-literal
+  <span className="after:absolute after:h-[0.3em] after:bg-orange-300">x</span> @hand-rolled-highlighter
 );
+`,
+  'src/assets/tilted.svg': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 64">
+  <g transform="rotate(-15.5 60 32)"><path d="M0 0h10v10z" /></g> @angle
+  <g transform="skewX(-10)"><path d="M0 0h10v10z" /></g>   @angle
+  <linearGradient id="g" gradientTransform="rotate(15)" />  @angle
+  <rect fill="orange" width="10" height="10" />             @named-color
+  <rect fill="#F7931ACC" width="10" height="10" />          @color-literal
+  <rect fill="var(--mfb-orange-300)" opacity="0.5" width="10" height="10" /> @translucent-shape
+</svg>
 `,
   'src/components/Clean.astro': `---
 const href = '#feed';
 const EDGE_MASK =
   'linear-gradient(to right, transparent 0, var(--mfb-black) 56px, var(--mfb-black) calc(100% - 56px), transparent 100%)';
 const block = { backgroundColor: 'purple', surface: 'white', country: 'Georgia' };
+const spin = { rotate: 180, skewX: 0 };
 ---
+<button class="bg-orange-300 text-black hover:opacity-90 disabled:opacity-50">Join</button>
+<svg><rect fill="var(--mfb-orange-300)" opacity="1" /></svg>
 <a href="#feed" class="text-heading-on-light decoration-link-underline-on-light underline">Read</a>
 <h2 class="text-h2-fluid leading-h2 font-medium text-black">Open Source Education</h2>
 <div class="bg-purple-300 text-white p-6 gap-4 rounded-mfb-lg shadow-mfb-media max-w-mfb-page"></div>
@@ -107,15 +148,67 @@ const block = { backgroundColor: 'purple', surface: 'white', country: 'Georgia' 
   @font-face { font-family: 'IBM Plex Sans'; font-weight: 500; src: url(/fonts/plex.woff2); }
   /* a comment may say #ff0000, uppercase and 10deg */
   #feed { margin: 0 auto; padding: 0; }
+  a:hover,
+  #top { color: var(--mfb-black); }
+  .nav a.active::after { content: ""; height: 3px; background: var(--mfb-orange-300); }
+  .menu { background: var(--mfb-purple-400); opacity: 0; }
 </style>
 `,
-  // Built CSS: one off-palette color, one uppercase rule, one mono use and one angle override,
-  // next to what a Tailwind build emits on its own (utility definitions its content scanner saw in
-  // a comment, and Tailwind 4's --default-mono-font-family), which is not reported.
-  'dist/_astro/index.css': ':root{--mfb-purple-400:#2B1C58;--sg-angle-base:13deg;--default-mono-font-family:var(--font-mono)}.x{color:var(--color-purple-300)}' +
-    ':root{--color-purple-300:#422c70;--color-heading-on-light:#000;--color-teal-500:oklch(70% .1 180)}.y{text-transform:uppercase}.code{font-family:var(--font-mono)}' +
-    '.uppercase{text-transform:uppercase}.font-mono{font-family:var(--font-mono)}@media (min-width:48rem){.md\\:uppercase{text-transform:uppercase}}.extra{--sg-angle-base:calc(var(--sg-angle-alt) / 2.4)}',
+  // Built CSS that drifts: every declaration of either angle is checked, wherever it sits.
+  'dist/_astro/drift.css': `
+.page { --sg-angle-base: 10deg; }                          @built-angle
+@property --sg-angle-alt { syntax: "<angle>"; inherits: true; initial-value: 20deg; } @built-angle
+.extra{--sg-angle-base:calc(var(--sg-angle-alt) / 2.4)}    @built-angle
+:root { --color-purple-300: #422c70; --color-teal-500: oklch(70% .1 180); } @built-color
+.y { text-transform: uppercase; }                          @built-uppercase
+.btn { @media (width >= 48rem) { font-variant-caps: all-small-caps; } } @built-uppercase
+.code { font-family: var(--font-mono); }                   @built-font
+.quote { font: italic 1rem/1.2 Georgia, serif; }           @built-font
+`,
+  'dist/index.html': `<!doctype html>
+<html><head><style>.z{--sg-angle-alt:30deg}</style></head> @built-angle
+<body><div class="sg-para" style="--sg-angle-base: 10deg"></div></body></html> @built-angle
+`,
+  // Clean controls: what a correct Tailwind 4 build emits (theme.css's --font-mono, the base
+  // styles' --default-mono-font-family, utility definitions, nested variants) ...
+  'dist/_astro/tw4.css': `@layer theme {
+  :root, :host {
+    --font-sans: "IBM Plex Sans", Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", monospace;
+    --color-purple-300: #422C70;
+    --color-heading-on-light: #000;
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+  }
+}
+@layer base {
+  html, :host { font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif); }
+  code, kbd, samp, pre {
+    font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    font-feature-settings: var(--default-mono-font-feature-settings, normal);
+  }
+}
+@layer utilities {
+  .font-mono { font-family: var(--font-mono); }
+  .uppercase { text-transform: uppercase; }
+  .uppercase\\! { text-transform: uppercase !important; }
+  .md\\:uppercase { @media (width >= 48rem) { text-transform: uppercase; } }
+  .group-hover\\:uppercase { &:is(:where(.group):hover *) { @media (hover: hover) { text-transform: uppercase; } } }
+}
+:root { --mfb-font-mono: "IBM Plex Mono", monospace; --sg-angle-base: 13deg; --sg-angle-alt: 24deg; }
+@property --sg-angle-base { syntax: "<angle>"; inherits: true; initial-value: 13deg; }
+`,
+  // ... and a minified Tailwind 3 build, where the word "uppercase" in a comment is enough for
+  // the scanner to emit .uppercase and its variants, and the preset's mono reaches code elements.
+  'dist/_astro/tw3.css': '@font-face{font-family:"IBM Plex Mono";font-weight:400;src:url(data:font/woff2;base64,d09GMgAB) format("woff2")}' +
+    'code,kbd,samp,pre{font-family:"IBM Plex Mono",monospace;font-feature-settings:normal;font-size:1em}' +
+    '.\\!uppercase{text-transform:uppercase!important}.uppercase{text-transform:uppercase}.font-mono{font-family:"IBM Plex Mono",monospace}' +
+    '@media (min-width:768px){.md\\:uppercase{text-transform:uppercase}}.\\[\\&\\>\\*\\]\\:uppercase>*{text-transform:uppercase}' +
+    '.group:hover .group-hover\\:uppercase{text-transform:uppercase}\n',
 };
+
+// Files that must not be reported at all.
+const CLEAN = new Set(['src/components/Clean.astro', 'dist/_astro/tw4.css', 'dist/_astro/tw3.css']);
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'brand-check-test-'));
 const failures = [];
@@ -137,32 +230,30 @@ try {
     fs.writeFileSync(path.join(tmp, file), clean.join('\n'));
   }
 
-  // 1. Every planted violation is reported on its line, and nothing in the clean file is.
+  // 1. Every planted violation is reported on its line, and nothing in a clean file is.
   const r = run([]);
   const got = parse(r.stderr + r.stdout);
   if (r.status !== 1) failures.push(`planted tree: exit ${r.status}, expected 1`);
   for (const e of expected) {
     if (!got.some((g) => g.file === e.file && g.line === e.line && g.rule === e.rule)) failures.push(`missed: ${e.file}:${e.line} [${e.rule}]`);
   }
-  for (const g of got.filter((g) => g.file === 'src/components/Clean.astro')) failures.push(`false positive: ${g.file}:${g.line} [${g.rule}]`);
-  for (const g of got.filter((g) => g.line !== null && g.file !== 'src/components/Clean.astro')) {
-    if (!expected.some((e) => e.file === g.file && e.line === g.line)) failures.push(`unexpected: ${g.file}:${g.line} [${g.rule}]`);
-  }
-  // Built CSS: exactly one finding per planted rule; utility definitions and Tailwind's own
-  // --default-mono-font-family are not reported.
-  for (const rule of ['built-color', 'built-uppercase', 'built-font', 'built-angle']) {
-    const n = got.filter((g) => g.rule === rule).length;
-    if (n !== 1) failures.push(`built CSS: [${rule}] reported ${n} times, expected once`);
+  for (const g of got) {
+    if (CLEAN.has(g.file)) failures.push(`false positive: ${g.file}:${g.line} [${g.rule}]`);
+    else if (g.line === null || !expected.some((e) => e.file === g.file && e.line === g.line)) failures.push(`unexpected: ${g.file}:${g.line} [${g.rule}]`);
   }
 
-  // 2. A missing angle is reported.
-  fs.writeFileSync(path.join(tmp, 'dist/_astro/index.css'), ':root{--sg-angle-base:10deg}');
-  if (!parse(run(['--src', 'src/components/Clean.astro']).stderr).some((g) => g.rule === 'built-angle')) failures.push('missed: built CSS with a 10deg angle [built-angle]');
-  fs.writeFileSync(path.join(tmp, 'dist/_astro/index.css'), ':root{--sg-angle-base:13deg}');
-
-  // 3. The clean file alone passes.
+  // 2. The clean files alone pass: the clean source, and the Tailwind 3 and 4 builds.
+  fs.rmSync(path.join(tmp, 'dist/_astro/drift.css'));
+  fs.rmSync(path.join(tmp, 'dist/index.html'));
   const clean = run(['--src', 'src/components/Clean.astro']);
-  if (clean.status !== 0) failures.push(`clean file: exit ${clean.status}, expected 0: ${clean.stderr.trim()}`);
+  if (clean.status !== 0) failures.push(`clean files: exit ${clean.status}, expected 0: ${clean.stderr.trim()}`);
+
+  // 3. A build without the angle is reported.
+  const tw4 = path.join(tmp, 'dist/_astro/tw4.css');
+  const tw4Text = fs.readFileSync(tw4, 'utf8');
+  fs.writeFileSync(tw4, tw4Text.replace(/--sg-angle-base: 13deg;|@property --sg-angle-base[^}]*\}/g, ''));
+  if (!parse(run(['--src', 'src/components/Clean.astro']).stderr).some((g) => g.rule === 'built-angle' && g.line === null)) failures.push('missed: built CSS without --sg-angle-base [built-angle]');
+  fs.writeFileSync(tw4, tw4Text);
 
   // 4. An allowlist entry silences its findings; an unused entry is reported; a reason is required.
   fs.writeFileSync(path.join(tmp, 'brand-check.allow.json'), JSON.stringify([
@@ -181,7 +272,7 @@ try {
   fs.rmSync(path.join(tmp, 'brand-check.allow.json'));
 
   // 5. --warn reports a rule without failing; the default warnings fail only under --error.
-  const w = run(['--src', 'src/components', '--warn', 'off-palette-utility,uppercase,font-family,weight,angle,raw-value,translucent-shape,gradient,named-color,color-filter']);
+  const w = run(['--src', 'src/components', '--warn', 'off-palette-utility,uppercase,font-family,weight,angle,raw-value,translucent-shape,gradient,named-color,color-filter,color-literal,hand-rolled-highlighter']);
   if (w.status !== 0) failures.push(`--warn: exit ${w.status}, expected 0: ${w.stderr.split('\n').filter((l) => !l.includes('warning')).join(' ')}`);
   fs.mkdirSync(path.join(tmp, 'src2'));
   fs.writeFileSync(path.join(tmp, 'src2/a.css'), '.x { padding: 24px; }\n');
@@ -202,4 +293,4 @@ if (failures.length) {
   for (const f of failures) console.error(`  - ${f}`);
   process.exit(1);
 }
-console.log(`brand-check test: OK (${Object.keys(PLANTED).length} planted files, every rule, the allowlist, --warn, --error, --source-only)`);
+console.log(`brand-check test: OK (${Object.keys(PLANTED).length} files, ${CLEAN.size} of them clean controls, every rule, the allowlist, --warn, --error, --source-only)`);

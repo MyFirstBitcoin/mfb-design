@@ -41,28 +41,28 @@ const tokens = JSON.parse(readFileSync(join(HERE, 'tokens.json'), 'utf8'));
 // text sits on, or they flag a value that is right more often than not.
 const DEFAULT_WARN = new Set(['raw-spacing', 'text-color', 'typed-caps']);
 const RULES = {
-  'color-literal': 'a hex color or a color function (rgb, rgba, hsl, hwb, lab, lch, oklab, oklch, color)',
-  'named-color': 'a named CSS color (white, teal...) in a color property, a style, an SVG color attribute or an arbitrary utility (bg-[teal])',
+  'color-literal': 'a hex color (#RGB to #RRGGBBAA, also inside an arbitrary utility) or a color function (rgb, rgba, hsl, hwb, lab, lch, oklab, oklch, color)',
+  'named-color': 'a named CSS color (white, teal...) in a color property, a custom property, a style object, a canvas fillStyle, an SVG color attribute or an arbitrary utility (bg-[teal])',
   'off-palette-utility': 'a Tailwind color utility outside the palette and the color roles (bg-teal-500, text-purple-500)',
   gradient: 'a gradient (the Brand Book has none; an alpha-only mask is allowed)',
   'deprecated-gradient': 'the deprecated brand gradient (--mfb-gradient-brand, --mfb-gradient, .sg-bg-gradient, bg-brand-gradient) or .sg-photo-zone',
   'color-filter': 'a smooth color filter (grayscale, sepia, hue-rotate, saturate) or a blend mode: photos are halftone, never duotone',
   'font-family': 'a font family other than var(--mfb-font-heading|body|sans) (or var(--font-sans|heading|body) from theme.css), a family name, or the mono or serif family',
-  uppercase: 'text-transform: uppercase, the uppercase class, small caps or small-cap font features',
+  uppercase: 'text-transform: uppercase (textTransform in a style object), the uppercase class, small caps or small-cap font features',
   weight: 'a font weight above 600',
-  angle: 'a skew, a rotation or an angle literal that is not a quarter turn, a rotating transform matrix, or slant geometry computed from --sg-angle-*: the slant comes from the supergraphics classes',
+  angle: 'a skew, a rotation or an angle literal that is not a quarter turn (in CSS, a style object, an animation prop such as rotate: -15, a Tailwind class, or an SVG transform, patternTransform or gradientTransform attribute), a rotating transform matrix, or slant geometry computed from --sg-angle-*: the slant comes from the supergraphics classes',
   'clip-path': 'a hand-rolled clip-path shape (shapes come from the supergraphics classes)',
-  'translucent-shape': 'opacity or a translucent fill on a brand shape (sg-* or the highlighter), or a highlighter color that is not a palette variable',
-  'hand-rolled-highlighter': 'a local highlighter band or bar (a gradient band, or an orange pseudo-element sized in em): the package\'s .highlighter draws the Brand Book line',
+  'translucent-shape': 'opacity or a translucent fill on a brand shape (sg-* or the highlighter) or on an orange or purple fill (opacity, fill-opacity, an alpha modifier such as bg-orange-300/50, or color-mix with transparent), or a highlighter color that is not a palette variable',
+  'hand-rolled-highlighter': 'a local highlighter: a gradient band, an orange pseudo-element drawn as a marker (sized in em or %, behind the text, or named like a highlight), an inset orange box-shadow sized in em, or after:/before: orange utilities. The package\'s .highlighter draws the Brand Book line',
   'token-override': 'a redefinition of a variable the package defines (--mfb-*, the --sg-* geometry); pages set only --sg-aspect and --sg-highlighter-color',
   'raw-value': 'a radius, duration, easing, container, font size, font weight, shadow or semantic spacing literal equal to a token value',
   'raw-spacing': 'a px or rem spacing literal on the spacing scale (warns by default)',
   'text-color': 'orange text, or a purple heading: the background decides (Color Contrast, 918:2588); use a color role (warns by default)',
   'typed-caps': 'two or more words typed in capitals in markup text (warns by default)',
-  'built-angle': 'the built CSS lacks --sg-angle-base with the token value, or sets --sg-angle-base or --sg-angle-alt to another value',
+  'built-angle': 'the built CSS has no --sg-angle-base with the token value, or any declaration of --sg-angle-base or --sg-angle-alt (a rule, an @property initial-value, or a style attribute in built HTML) has another value',
   'built-color': 'the built CSS defines a --color-* that is not a palette color or a color role, or not its value',
-  'built-uppercase': 'the built CSS sets uppercase or small caps outside a utility class definition',
-  'built-font': 'the built CSS uses the mono or serif family outside a utility class definition',
+  'built-uppercase': 'the built CSS sets uppercase or small caps outside a utility class definition (a utility such as .uppercase is reported where the source uses it)',
+  'built-font': 'a font-family declaration in the built CSS uses the mono or serif family, outside a utility class definition and the base styles of code, kbd, samp and pre',
   'built-missing': 'no built CSS was found (build first, or pass --source-only)',
 };
 
@@ -198,6 +198,23 @@ for (const [k, t] of entries('shadow')) {
   }
 }
 
+// Orange and purple are the brand's fills, and a fill in either is solid. A palette variable or
+// utility of either family, or its hex value, names such a fill.
+const familyHex = (fams) => Object.entries(palette).filter(([k]) => fams.includes(k.replace(/-\d+$/, ''))).map(([, t]) => String(t.$value).replace(/^#/, '').toLowerCase());
+const BRAND_FILL = new RegExp(`var\\(\\s*--(?:mfb-|color-(?:mfb-)?)?(?:orange|purple)-\\d+\\s*\\)|#(?:${familyHex(['orange', 'purple']).join('|')})(?:ff)?(?![0-9a-f])`, 'i');
+/** Whether a value draws in orange: a palette orange, an accent or highlighter variable, the word, or an orange hex. */
+const isOrange = (v) => {
+  if (/--(?:mfb-|color-(?:mfb-)?)?(?:orange-\d+|accent[\w-]*|highlighter[\w-]*)|(?<![\w-])(?:dark)?orange(?![\w-])/i.test(v)) return true;
+  return [...v.matchAll(/#([0-9a-f]{6}|[0-9a-f]{3})(?:[0-9a-f]{2}|[0-9a-f])?(?![0-9a-f])/gi)].some((m) => {
+    const h = m[1].length === 3 ? [...m[1]].map((c) => c + c).join('') : m[1];
+    const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    if (max - min < 0.35 || max !== r) return false;
+    const hue = (60 * (g - b)) / (max - min);
+    return hue >= 15 && hue <= 45;
+  });
+};
+
 const TW_COLOR_FAMILIES = new Set(('red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple fuchsia pink ' +
   'rose slate gray zinc neutral stone mauve olive mist taupe black white').split(' '));
 const NAMED_COLORS = new Set(('aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue blueviolet brown ' +
@@ -307,8 +324,33 @@ const inRanges = (i, ranges) => ranges.some(([a, b]) => i >= a && i < b);
 const styleBlocks = (t) => rangesOf(/<style\b[^>]*>([\s\S]*?)<\/style>/g, t);
 /** @font-face blocks: their font-family and font-weight describe a face, they do not use one. */
 const fontFaces = (t) => rangesOf(/@font-face\s*\{[^}]*\}/g, t);
-/** Inline styles in markup and style objects in script code. */
-const inlineStyles = (t) => rangesOf(/\bstyle\s*=\s*(?:"[^"]*"|'[^']*'|\{\{[\s\S]*?\}\}|\{`[^`]*`\})|\bstyle\s*:\s*\{[^{}]*\}/g, t);
+/** The index just past the brace that closes the one at t[open], skipping strings; -1 if none. */
+function closeBrace(t, open) {
+  let depth = 0;
+  for (let i = open; i < t.length; i++) {
+    const c = t[i];
+    if (c === '"' || c === "'" || c === '`') {
+      let j = i + 1;
+      while (j < t.length && t[j] !== c && t[j] !== '\n') j += t[j] === '\\' ? 2 : 1;
+      i = j;
+    } else if (c === '{') depth++;
+    else if (c === '}' && --depth === 0) return i + 1;
+  }
+  return -1;
+}
+/**
+ * Inline styles in markup, and style objects in script code: a style={...} or style: {...}
+ * value, and an object assigned to a name containing "style" or typed CSSProperties.
+ */
+function inlineStyles(t) {
+  const out = rangesOf(/\bstyle\s*=\s*(?:"[^"]*"|'[^']*')/g, t);
+  for (const m of t.matchAll(/\bstyle\s*[=:]\s*\{|\b(?:const|let|var)\s+([\w$]+)\s*(?::\s*([^=\n]+?))?\s*=\s*\{/g)) {
+    if (m[1] !== undefined && !/style/i.test(m[1]) && !/CSSProperties/.test(m[2] ?? '')) continue;
+    const end = closeBrace(t, m.index + m[0].length - 1);
+    if (end !== -1) out.push([m.index, end]);
+  }
+  return out;
+}
 /** A quoted family name counts only where a font family is being set. */
 const FAMILY_CONTEXT = /(?:font-?family|fontFamily|\bfont|--[\w-]*font[\w-]*|\b(?:sans|serif|mono|display|heading|body|family))["']?\s*[:=]\s*[[{(]?\s*(?:(?:["'][^"'\n]*["']|[\w-]+)\s*,\s*)*$/i;
 
@@ -384,7 +426,8 @@ function classLists(t, ext) {
 const COLOR_UTIL = '(?:bg|text|border(?:-[trblxyse])?|ring|ring-offset|outline|decoration|fill|stroke|shadow|inset-shadow|drop-shadow|from|via|to|placeholder|accent|caret|divide)';
 function checkClasses(file, t, ext) {
   for (const [index, list] of classLists(t, ext)) {
-    const toks = list.split(/\s+/).filter(Boolean).map((x) => x.replace(/^!/, '').replace(/^(?:[\w-]+:)+/, ''));
+    const raw = list.split(/\s+/).filter(Boolean).map((x) => x.replace(/^!|!$/g, ''));
+    const toks = raw.map((x) => x.replace(/^(?:[\w-]+:)+/, ''));
     const tagStart = t.lastIndexOf('<', index);
     const onHeading = tagStart !== -1 && /^<h[1-6]\b[^<>]*$/.test(t.slice(tagStart, index));
     for (const c of toks) {
@@ -401,7 +444,7 @@ function checkClasses(file, t, ext) {
       const arbWeight = c.match(/^font-\[(\d+)\]$/);
       if (/^font-(?:bold|extrabold|black)$/.test(c) || (arbWeight && Number(arbWeight[1]) > 600)) report(file, index, 'weight', 'weight above 600 (the brand uses 400, 500 and 600)', c);
       if (/^-?skew-[xy]?-?/.test(c) && !/^-?skew-[xy]?-?0$/.test(c)) report(file, index, 'angle', 'skew utility (the slant comes from the supergraphics classes)', c);
-      const rot = c.match(/^-?rotate-(\d+)$/);
+      const rot = c.match(/^-?rotate(?:-[xyz])?-(\d+)$/);
       if (rot && Number(rot[1]) % 90) report(file, index, 'angle', 'rotation that is not a quarter turn', c);
       if (/^(?:bg-gradient-|bg-linear-|bg-radial-|bg-conic-)/.test(c) || c === 'bg-brand-gradient') report(file, index, c === 'bg-brand-gradient' ? 'deprecated-gradient' : 'gradient', 'gradient utility (solid palette fills only)', c);
       if (/^(?:grayscale|sepia|hue-rotate-\d+|saturate-\d+)$/.test(c)) report(file, index, 'color-filter', 'smooth color filter (photos are halftone, never duotone)', c);
@@ -428,6 +471,16 @@ function checkClasses(file, t, ext) {
     const shape = toks.some((c) => /^(?:sg-(?:para|spotlight|book|halftone|cover|bg)[\w-]*|highlighter)$/.test(c));
     const see = toks.find((c) => /^opacity-(?:\d+|\[[^\]]+\])$/.test(c) || /^(?:bg|fill)-[\w-]+\/(?:\d+|\[[^\]]+\])$/.test(c));
     if (shape && see) report(file, index, 'translucent-shape', 'translucent brand shape (solid palette fills only)', see);
+    // An orange or purple fill is solid: no alpha modifier, and no opacity on the same element
+    // (a state such as hover:opacity-90 or disabled:opacity-50 is left alone).
+    const brandFill = /^(?:bg|fill)-(?:mfb-)?(?:orange|purple)-\d+/;
+    const alpha = raw.find((c) => !c.includes(':') && brandFill.test(c) && /\/(?:\d+|\[[^\]]+\])$/.test(c) && !/\/100$/.test(c));
+    const dim = raw.find((c) => /^opacity-(?:\d+|\[[^\]]+\])$/.test(c) && !/^opacity-(?:0|100|\[(?:0|1|100%)\])$/.test(c));
+    if (!shape && (alpha || (dim && raw.some((c) => !c.includes(':') && brandFill.test(c)))))
+      report(file, index, 'translucent-shape', 'translucent orange or purple fill (the brand fills are solid)', alpha || dim);
+    // A highlighter drawn with pseudo-element utilities: an orange after: or before: fill.
+    const pseudoFill = raw.find((c) => /^(?:[\w-]+:)*(?:after|before):(?:[\w-]+:)*(?:bg|border-b)-(?:mfb-)?(?:orange-\d+|\[[^\]]*\])/.test(c) && isOrange(c.replace(/^.*:(?=(?:bg|border-b)-)/, '').replace(/^(?:bg|border-b)-(?:mfb-)?/, '--')));
+    if (pseudoFill) report(file, index, 'hand-rolled-highlighter', 'local highlighter drawn with after: or before: utilities: use the package\'s .highlighter', pseudoFill);
   }
 }
 
@@ -449,21 +502,34 @@ function checkSource(abs) {
   };
 
   // Colors
-  each(/(?<![\w&#/.-])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})(?![\w-])/g, t, (m) => {
+  // A hex may follow an underscore, as inside an arbitrary utility (shadow-[0_0_0_3px_#f7931a80]).
+  each(/(?<![A-Za-z0-9&#/.-])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})(?![A-Za-z0-9-])/g, t, (m) => {
     const before = t.slice(t.lastIndexOf('\n', m.index) + 1, m.index);
     if (/(?:\b(?:href|to|id|for|xlink:href)=\{?["'`]?[^"'`\s]*|\b(?:href|url|link|anchor|hash|[a-z]+Url|[a-z]+Href)\s*[:=]\s*["'`][^"'`\s]*|url\(\s*["']?|querySelector(?:All)?\(\s*["'`][^"'`]*|getElementById\(\s*["'`])$/i.test(before)) return;
-    if (/^\s*[{,.:[>+~]/.test(t.slice(m.index + m[0].length, m.index + m[0].length + 3)) && !/:\s*[^;{}]*$/.test(before)) return; // an id selector
+    // An id selector is followed by more selector and then "{"; a value, even one continued on
+    // the next line (box-shadow: ...\n  0 0 0 3px #f7931a80,), ends at ";" or "}".
+    const after = t.slice(m.index + m[0].length);
+    const stop = after.search(/[{;}]/);
+    if (/^\s*[{,.:[>+~]/.test(after.slice(0, 3)) && stop !== -1 && after[stop] === '{') return;
     report(file, m.index, 'color-literal', 'hex color (use var(--mfb-*) or a palette utility)', m[0]);
   });
   each(/(?<![\w.-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\s*\(/gi, t, (m) =>
     report(file, m.index, 'color-literal', 'color function (use var(--mfb-*); a translucent shadow mixes a palette color with color-mix())', t.slice(m.index, m.index + 40)));
-  each(new RegExp(`(?<![\\w-])(${COLOR_PROP})\\s*:\\s*([^;}\\n]*)`, 'gi'), t, (m) => {
-    const value = m[2].replace(/[!=]==?\s*(["'`])[^"'`]*\1|(["'`])[^"'`]*\2\s*[!=]==?/g, ' ').toLowerCase().replace(/var\(--[\w-]+/g, ' ');
+  // The value is read ahead without consuming it, so a second property on the same line (in a
+  // style object, { background: 'orange', color: 'rebeccapurple' }) is read on its own.
+  each(new RegExp(`(?<![\\w-])(${COLOR_PROP})["']?\\s*:\\s*(?=([^;}\\n]*))`, 'gi'), t, (m) => {
+    const raw = ctx.script(m.index) ? m[2].split(/,\s*["']?[\w$-]+["']?\s*:/)[0] : m[2];
+    const value = raw.replace(/[!=]==?\s*(["'`])[^"'`]*\1|(["'`])[^"'`]*\2\s*[!=]==?/g, ' ').toLowerCase().replace(/var\(--[\w-]+/g, ' ');
     const word = (value.match(/[a-z]+/g) ?? []).find((w) => NAMED_COLORS.has(w));
     if (!word) return;
     // In script code a palette word outside a style is usually data, such as a CMS surface name.
     if (ctx.script(m.index) && PALETTE_WORDS.has(word) && !inRanges(m.index, ctx.styles)) return;
-    report(file, m.index, 'named-color', `named color "${word}" (use var(--mfb-${word === 'white' || word === 'black' ? word : '<palette>'}))`, m[0]);
+    report(file, m.index, 'named-color', `named color "${word}" (use var(--mfb-${word === 'white' || word === 'black' ? word : '<palette>'}))`, m[0] + raw);
+  });
+  // A custom property, or a canvas fill or stroke, set to a named color.
+  each(/(?<![\w-])(--[\w-]+)["']?\s*:\s*["'`]?\s*([a-zA-Z]+)\s*["'`]?\s*(?=[;},\n]|!important)|\b(?:fill|stroke)Style\s*=\s*["'`]([a-zA-Z]+)["'`]/g, t, (m) => {
+    const word = (m[2] ?? m[3]).toLowerCase();
+    if (NAMED_COLORS.has(word)) report(file, m.index, 'named-color', `named color "${word}" (use var(--mfb-${word === 'white' || word === 'black' ? word : '<palette>'}))`, m[0]);
   });
   each(/(?<![\w-])(fill|stroke|stop-color|flood-color|lighting-color|color|bgcolor)=(?:"([^"]*)"|'([^']*)'|\{\s*["'`]([^"'`]*)["'`]\s*\})/gi, t, (m) => {
     const v = (m[2] ?? m[3] ?? m[4]).trim();
@@ -491,10 +557,19 @@ function checkSource(abs) {
     }
     report(file, m.index, 'gradient', 'gradient (the Brand Book uses solid palette fills only)', text.split('\n')[0]);
   });
+  // An orange pseudo-element drawn as a marker: sized in em or %, put behind the text, or named
+  // like a highlight. An orange bar of a few px (an active tab, say) is not one.
   each(/([^{}]*::?(?:after|before)[^{}]*)\{([^{}]*)\}/g, t, (m) => {
-    if (/(?<![\w-])height\s*:\s*[\d.]+em\b/.test(m[2]) && /background(?:-color)?\s*:\s*[^;]*(?:--(?:mfb-)?orange|--(?:mfb-)?accent|highlighter)/.test(m[2])) {
-      report(file, m.index + m[0].indexOf('{'), 'hand-rolled-highlighter', 'local highlighter bar (an orange pseudo-element sized in em): use the package\'s .highlighter', m[1].trim());
+    const fill = m[2].match(/(?<![\w-])(?:background(?:-color)?|border-bottom(?:-color)?)\s*:\s*([^;]*)/);
+    if (!fill || !isOrange(fill[1])) return;
+    const sel = m[1].split('\n').slice(-3).join(' ');
+    if (/(?<![\w-])height\s*:\s*(?:[\d.]+(?:em|%)|calc\([^;]*em\b)/.test(m[2]) || /z-index\s*:\s*-\d/.test(m[2]) || /highlight|marker|(?<![\w-])(?:hl|mark)(?![\w-])/i.test(sel)) {
+      report(file, m.index + m[0].indexOf('{'), 'hand-rolled-highlighter', 'local highlighter (an orange pseudo-element drawn as a marker): use the package\'s .highlighter', sel.trim());
     }
+  });
+  each(/(?<![\w-])(?:box-shadow|boxShadow)["']?\s*:\s*["'`]?\s*inset\s+0\s+(-?[\d.]+)(em|px|rem)\s+0\s+([^;\n"'`]*)/g, t, (m) => {
+    if ((m[2] === 'em' || px(m[1] + m[2]) >= 6) && isOrange(m[3]))
+      report(file, m.index, 'hand-rolled-highlighter', 'local highlighter (an orange inset shadow under the text): use the package\'s .highlighter', m[0]);
   });
   each(/--mfb-gradient(?:-brand)?(?![\w-])|(?<![\w-])sg-bg-gradient(?![\w-])|(?<![\w-])sg-photo-zone(?![\w-])/g, t, (m) =>
     report(file, m.index, 'deprecated-gradient', 'deprecated brand gradient or smooth gradient class (use a solid palette fill)', m[0]));
@@ -516,10 +591,17 @@ function checkSource(abs) {
     report(file, m.index, 'angle', 'rotation by the brand angle (use a supergraphics shape)', m[0]));
   each(/(?<![\w-])(?:tan|sin|cos|atan2?)\(\s*(?:calc\(\s*)?(?:-1\s*\*\s*)?var\(--sg-angle-[\w-]+\)/g, t, (m) =>
     report(file, m.index, 'angle', 'slant geometry computed in the page from --sg-angle-* (the supergraphics classes compute it; a local inset doubles theirs)', m[0]));
-  each(/(?<![\w-])transform\s*=\s*\{?\s*["'`]([^"'`]*)["'`]/g, t, (m) => {
+  each(/(?<![\w-])(?:transform|patternTransform|gradientTransform)\s*=\s*\{?\s*["'`]([^"'`]*)["'`]/g, t, (m) => {
     for (const r of m[1].matchAll(/rotate\(\s*(-?\d*\.?\d+)/g)) {
       if (Math.abs(Number(r[1]) % 90) > 1e-9) report(file, m.index, 'angle', 'rotation in an SVG transform that is not a quarter turn (the logo and the shapes are never tilted by hand)', r[0]);
     }
+  });
+  // A unitless rotation or skew in script code: an animation or style prop (rotate: -15).
+  each(/(?<![\w-])(rotate[XYZ]?|skew[XY]?)["']?\s*:\s*(-?\d*\.?\d+|\[[^\]\n]*\])(?=\s*[,}\n])/g, t, (m) => {
+    if (!ctx.script(m.index)) return;
+    const turns = (m[2].match(/-?\d*\.?\d+/g) ?? []).map(Number);
+    if (turns.some((n) => (m[1].startsWith('skew') ? n !== 0 : Math.abs(n % 90) > 1e-9)))
+      report(file, m.index, 'angle', 'rotation or skew in a script prop that is not a quarter turn (the slant comes from the supergraphics classes)', m[0]);
   });
   each(/(?<![\w-])(matrix(?:3d)?)\s*\(([^)]*)\)/g, t, (m) => {
     const n = m[2].split(/[\s,]+/).filter(Boolean).map(Number);
@@ -573,6 +655,24 @@ function checkSource(abs) {
     const op = m[0].match(/\bstyle\s*=[^>]*?\bopacity["']?\s*:\s*["'`]?\s*(\d*\.?\d+)/);
     if (op && Number(op[1]) < 1) report(file, m.index, 'translucent-shape', 'translucent brand shape (solid palette fills only)', `opacity: ${op[1]}`);
   });
+  // An orange or purple fill is solid: no opacity or fill-opacity beside it (0 hides, it does not
+  // tint), and no color-mix with transparent.
+  const OPACITY = /(?<![\w-])(opacity|fill-?opacity|fillOpacity)["']?\s*[:=]\s*\{?\s*["'`]?\s*(\d*\.?\d+)(%?)/gi;
+  const FILLS_BRAND = new RegExp(`(?<![\\w-])(?:background(?:-?color)?|fill)["']?\\s*[:=]\\s*\\{?\\s*["'\`]?(?:(?!,\\s*["']?[\\w-]+["']?\\s*:)[^;\\n])*?(?:${BRAND_FILL.source})`, 'i');
+  const translucentFill = (text, offset) => {
+    if (!FILLS_BRAND.test(text)) return;
+    for (const o of text.matchAll(OPACITY)) {
+      const v = Number(o[2]) / (o[3] ? 100 : 1);
+      if (v > 0 && v < 1) report(file, offset + o.index, 'translucent-shape', 'translucent orange or purple fill (the brand fills are solid)', `${o[1]}: ${o[2]}${o[3]}`);
+    }
+  };
+  each(/([^{}]*)\{([^{}]*)\}/g, t, (m) => {
+    if (CSS_EXT.has(ext) || inRanges(m.index + m[1].length, blocks)) translucentFill(m[2], m.index + m[1].length + 1);
+  });
+  for (const [a, b] of ctx.styles) translucentFill(t.slice(a, b), a);
+  each(/<[a-zA-Z][\w.:-]*\s[^<>]*>/g, t, (m) => translucentFill(m[0], m.index));
+  each(new RegExp(`(?<![\\w-])(?:background(?:-?color)?|fill)["']?\\s*:\\s*["'\`]?\\s*color-mix\\([^;\\n]*?(?:${BRAND_FILL.source})[^;\\n]*?transparent`, 'gi'), t, (m) =>
+    report(file, m.index, 'translucent-shape', 'translucent orange or purple fill (the brand fills are solid)', m[0]));
   each(/--sg-highlighter-color["']?\s*:\s*/g, t, (m) => {
     const v = (readValue(t, m.index + m[0].length, ctx.script(m.index)) ?? '').trim();
     const name = v.match(/^var\(--mfb-([\w-]+)\)$/)?.[1];
@@ -583,47 +683,108 @@ function checkSource(abs) {
   rawValues(file, t, ctx);
 }
 
-// A utility class definition that Tailwind emits because its content scanner saw the word (in a
-// comment, say). The source check already reports the class where it is used.
-const BUILT_UTILITY = /^(?:uppercase|small-caps|font-mono|font-serif)$/;
-const isUtilityRule = (sel) => sel.trim() !== '' && sel.split(',').every((part) => {
-  const last = part.trim().split(/[\s>+~]+/).pop() || '';
-  const m = last.match(/^\.((?:[\w-]+\\:)*)([\w-]+)((?::{1,2}[\w-]+(?:\([^)]*\))?)*)$/);
-  return !!m && BUILT_UTILITY.test(m[2]);
-});
-/** The selector of the rule that index i is in (its selector, or its declaration block). */
-const selectorAt = (css, i) => {
-  const nextOpen = css.indexOf('{', i);
-  const nextClose = css.indexOf('}', i);
-  const end = nextOpen !== -1 && (nextClose === -1 || nextOpen < nextClose) ? nextOpen : css.lastIndexOf('{', i);
-  if (end < 0) return '';
-  const start = Math.max(css.lastIndexOf('}', end - 1), css.lastIndexOf('{', end - 1), css.lastIndexOf(';', end - 1)) + 1;
-  return css.slice(start, end);
+// ---- built CSS ----
+/** Split a selector list at its top-level commas. */
+const splitTop = (sel) => {
+  const out = [];
+  let depth = 0, cur = '';
+  for (const c of sel) {
+    if (c === '(' || c === '[') depth++;
+    else if (c === ')' || c === ']') depth--;
+    if (c === ',' && depth === 0) { out.push(cur); cur = ''; } else cur += c;
+  }
+  return [...out, cur].map((x) => x.trim()).filter(Boolean);
 };
+/**
+ * Every declaration of a style sheet, with the selectors and at-rules it sits in (CSS nesting
+ * included), its property, its value and its index. Comments and strings are skipped, and a ";"
+ * inside parentheses (a data: URL) does not end a declaration.
+ */
+function declarations(css) {
+  const out = [];
+  const stack = [];
+  const clean = (x) => x.replace(/\/\*[\s\S]*?\*\//g, ' ').trim();
+  let start = 0, depth = 0;
+  const flush = (end) => {
+    const text = css.slice(start, end);
+    const m = clean(text).match(/^(--[\w-]+|-?[a-zA-Z][\w-]*)\s*:([\s\S]*)$/);
+    if (m) out.push({ prop: m[1], value: m[2].trim(), index: start + Math.max(0, text.search(/\S/)), rules: stack.slice() });
+  };
+  for (let i = 0; i < css.length; i++) {
+    const c = css[i];
+    if (c === '/' && css[i + 1] === '*') {
+      const e = css.indexOf('*/', i + 2);
+      i = e === -1 ? css.length : e + 1;
+    } else if (c === '"' || c === "'") {
+      let j = i + 1;
+      while (j < css.length && css[j] !== c) j += css[j] === '\\' ? 2 : 1;
+      i = j;
+    } else if (c === '(') depth++;
+    else if (c === ')') depth = Math.max(0, depth - 1);
+    else if (depth === 0 && c === '{') { stack.push(clean(css.slice(start, i))); start = i + 1; }
+    else if (depth === 0 && c === ';') { flush(i); start = i + 1; }
+    else if (depth === 0 && c === '}') { flush(i); stack.pop(); start = i + 1; }
+  }
+  flush(css.length); // a style attribute's last declaration has no ";"
+  return out;
+}
+/** The utility each class of a selector names, without its variants: .md\:hover\:uppercase -> uppercase. */
+const utilitiesOf = (sel) => [...sel.matchAll(/\.((?:\\.|[\w-])+)/g)].map((m) => {
+  const name = m[1].replace(/\\(.)/g, '$1');
+  let depth = 0, cut = 0;
+  for (let i = 0; i < name.length; i++) {
+    if (name[i] === '[' || name[i] === '(') depth++;
+    else if (name[i] === ']' || name[i] === ')') depth--;
+    else if (name[i] === ':' && depth === 0) cut = i + 1;
+  }
+  return name.slice(cut).replace(/^!|!$/g, '');
+});
+// A utility class definition is not a use: Tailwind 3 emits .uppercase or .font-mono when its
+// content scanner sees the word anywhere (a comment, a string), and Tailwind 4 when theme.css
+// gives it the font. Whether a page uses the class is checked in the source, where it is written.
+const BUILT_UTILITY = /^(?:uppercase|font-mono|font-serif)$/;
+const inUtility = (rules) => rules.some((r) => !r.startsWith('@') && splitTop(r).every((part) => utilitiesOf(part).some((u) => BUILT_UTILITY.test(u))));
+// Tailwind's base styles set code, kbd, samp and pre in the mono family (Tailwind 4 through
+// --default-mono-font-family, which theme.css's --font-mono feeds); that is code, not text.
+const inCodeBase = (rules) => rules.some((r) => !r.startsWith('@') && splitTop(r).every((part) => {
+  const last = part.replace(/:(?:where|is)\(/g, '').split(/[\s>+~]+/).filter(Boolean).pop() ?? '';
+  return /^(?:code|kbd|samp|pre|tt)(?![\w-])/.test(last);
+}));
+const MONO_SERIF = /var\(\s*--(?:mfb-|tw-|default-)?(?:font-)?(?:mono|serif)|(?<![\w-])(?:ui-)?(?:monospace|serif)(?![\w-])|IBM Plex Mono|Courier|Georgia|Times New Roman/i;
 
 function checkBuilt() {
   const files = distAbs.flatMap((d) => walk(d, [], new Set(['.css', '.html'])));
-  const chunks = [];
+  const chunks = []; // [file, css, offset in the file, the file's text]
+  const inline = []; // style attributes of built HTML
   for (const abs of files) {
     const text = readFileSync(abs, 'utf8');
-    if (abs.endsWith('.css')) chunks.push([rel(abs), text]);
-    else for (const m of text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)) chunks.push([rel(abs), m[1]]);
+    if (abs.endsWith('.css')) chunks.push([rel(abs), text, 0, text]);
+    else {
+      for (const m of text.matchAll(/(<style\b[^>]*>)([\s\S]*?)<\/style>/g)) chunks.push([rel(abs), m[2], m.index + m[1].length, text]);
+      for (const m of text.matchAll(/\sstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) if (/--sg-angle/.test(m[0])) inline.push([rel(abs), m[1] ?? m[2], m.index, text]);
+    }
   }
   if (!chunks.length) {
     findings.push({ file: opt.dist.join(', '), line: null, rule: 'built-missing', why: 'no built CSS found (build first, or pass --source-only)', match: opt.dist.join(', ') });
     return;
   }
-  // Geometry: the base angle is there, and nothing sets either angle to another value.
+  const lineIn = (text, i) => text.slice(0, i).split('\n').length;
+  const add = (file, text, i, rule, why, match) => findings.push({ file, line: lineIn(text, i), rule, why, match: String(match).replace(/\s+/g, ' ').trim().slice(0, 100) });
+
+  // Geometry: the base angle is there, and every declaration of either angle has the token value
+  // (a rule, a nested rule, an @property initial-value, or a style attribute in built HTML).
   let angleFound = false;
-  for (const [file, css] of chunks) {
-    for (const m of css.matchAll(/--sg-angle-(base|alt)\s*:\s*([^;}]+)/g)) {
-      const want = m[1] === 'base' ? ANGLE : ANGLE_ALT;
-      if (m[2].trim().toLowerCase() === String(want).toLowerCase()) { if (m[1] === 'base') angleFound = true; continue; }
-      findings.push({ file, line: null, rule: 'built-angle', why: `--sg-angle-${m[1]} is set to ${m[2].trim()}, the token is ${want}`, match: `--sg-angle-${m[1]}: ${m[2].trim()}` });
-    }
-  }
-  if (!angleFound) {
-    findings.push({ file: opt.dist.join(', '), line: null, rule: 'built-angle', why: `--sg-angle-base is missing or is not ${ANGLE} (import @myfirstbitcoin/design/brand.css or supergraphics.css)`, match: '--sg-angle-base' });
+  const angle = (file, text, offset, d) => {
+    const prop = d.prop.startsWith('--sg-angle-') ? d.prop : d.prop === 'initial-value' && d.rules.at(-1)?.match(/^@property\s+(--sg-angle-[\w-]+)/)?.[1];
+    const which = prop && prop.match(/^--sg-angle-(base|alt)$/)?.[1];
+    if (!which) return;
+    const want = which === 'base' ? ANGLE : ANGLE_ALT;
+    const v = d.value.replace(/\s*!important$/i, '').trim();
+    if (v.toLowerCase() === String(want).toLowerCase()) { if (which === 'base') angleFound = true; return; }
+    add(file, text, offset + d.index, 'built-angle', `${prop} is set to ${d.value}, the token is ${want}`, `${d.prop}: ${d.value}`);
+  };
+  for (const [file, value, at, text] of inline) {
+    for (const d of declarations(value)) angle(file, text, at, { ...d, index: 0 });
   }
   const hex = (v) => {
     let h = v.trim().toLowerCase().replace(/^#/, '');
@@ -636,30 +797,30 @@ function checkBuilt() {
     if (roles[name]) return [resolveAlias(roles[name].$value), `var(--mfb-${name})`];
     return null;
   };
-  for (const [file, css] of chunks) {
-    const snip = (i, len) => css.slice(Math.max(0, i - 30), i + len + 20);
-    for (const m of css.matchAll(/--color-([\w-]+)\s*:\s*([^;}]+)/g)) {
-      const want = expected(m[1]);
-      const v = m[2].trim();
-      if (!want) findings.push({ file, line: null, rule: 'built-color', why: `--color-${m[1]} is not a palette color or a color role`, match: `--color-${m[1]}: ${v}` });
-      else if (v !== want[1] && !(/^#[0-9a-f]{3,8}$/i.test(v) && hex(v) === hex(want[0])))
-        findings.push({ file, line: null, rule: 'built-color', why: `--color-${m[1]} is ${v}, the token is ${want[0]}`, match: `--color-${m[1]}: ${v}` });
-    }
-    for (const [re, rule, why] of [
-      [/text-transform\s*:\s*uppercase/gi, 'built-uppercase', 'text-transform: uppercase'],
-      [/font-variant(?:-caps)?\s*:[^;}]*small-caps/gi, 'built-uppercase', 'small caps'],
-      [/font-feature-settings\s*:[^;}]*["'](?:smcp|c2sc)["']/gi, 'built-uppercase', 'small-cap font features'],
-      [/\.uppercase(?![\w-])/g, 'built-uppercase', 'the uppercase class'],
-      [/\.font-(?:mono|serif)(?![\w-])/g, 'built-font', 'a font-mono or font-serif class'],
-      [/var\(\s*--(?:mfb-)?font-(?:mono|serif)\s*[,)]/g, 'built-font', 'a use of the mono or serif family'],
-    ]) {
-      for (const m of css.matchAll(re)) {
-        if (isUtilityRule(selectorAt(css, m.index))) continue;
-        // Tailwind 4's base styles set code, kbd, samp and pre in this variable; it is not a use.
-        if (/--default-mono-font-family\s*:\s*$/.test(css.slice(Math.max(0, m.index - 40), m.index))) continue;
-        findings.push({ file, line: null, rule, why, match: snip(m.index, m[0].length) });
+  for (const [file, css, offset, text] of chunks) {
+    for (const d of declarations(css)) {
+      const at = offset + d.index;
+      angle(file, text, offset, d);
+      const color = d.prop.match(/^--color-([\w-]+)$/);
+      if (color) {
+        const want = expected(color[1]);
+        if (!want) add(file, text, at, 'built-color', `--color-${color[1]} is not a palette color or a color role`, `${d.prop}: ${d.value}`);
+        else if (d.value !== want[1] && !(/^#[0-9a-f]{3,8}$/i.test(d.value) && hex(d.value) === hex(want[0])))
+          add(file, text, at, 'built-color', `--color-${color[1]} is ${d.value}, the token is ${want[0]}`, `${d.prop}: ${d.value}`);
+        continue;
       }
+      if (d.rules.some((r) => /^@font-face\b/.test(r))) continue;
+      const p = d.prop.toLowerCase();
+      const caps = (p === 'text-transform' && /(?<![\w-])uppercase(?![\w-])/i.test(d.value) && 'text-transform: uppercase') ||
+        ((p === 'font-variant' || p === 'font-variant-caps' || p === 'font') && /small-caps|petite-caps|unicase|titling-caps/i.test(d.value) && 'small caps') ||
+        (p === 'font-feature-settings' && /["'](?:smcp|c2sc|pcap|c2pc)["']/i.test(d.value) && 'small-cap font features');
+      if (caps && !inUtility(d.rules)) add(file, text, at, 'built-uppercase', caps, `${d.rules.at(-1) ?? ''}{${d.prop}:${d.value}}`);
+      if ((p === 'font-family' || p === 'font') && MONO_SERIF.test(d.value) && !inUtility(d.rules) && !inCodeBase(d.rules))
+        add(file, text, at, 'built-font', 'a font-family in the mono or serif family', `${d.rules.at(-1) ?? ''}{${d.prop}:${d.value}}`);
     }
+  }
+  if (!angleFound) {
+    findings.push({ file: opt.dist.join(', '), line: null, rule: 'built-angle', why: `--sg-angle-base is missing or is not ${ANGLE} (import @myfirstbitcoin/design/brand.css or supergraphics.css)`, match: '--sg-angle-base' });
   }
 }
 
