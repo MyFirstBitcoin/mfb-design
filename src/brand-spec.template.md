@@ -49,6 +49,18 @@ In CSS: `var(--mfb-<role>)`, for example `var(--mfb-heading-on-light)`. In Tailw
 
 {{SHAPE_TONE_ITEMS}}
 
+### Dark theme
+
+For an interface that offers a dark mode, such as the My First Bitcoin App. The Brand Book has no dark theme and the website has only dark sections, so these colors are **derived**: each is a palette color, no color is added, and the brand deciders chose them. They follow the color roles on dark (white text, gray-400 for muted text, orange-300 for links) on a brand purple surface.
+
+| Variable | Color | Use | Why, and contrast |
+|----------|-------|-----|-------------------|
+{{DARK_THEME_ROWS}}
+
+**The primary button on dark is purple-200 with a white label and a 1px `--mfb-dark-primary-edge` outline.** Purple-200 alone is 1.7:1 on the surface; the outline sets it apart (8.3:1) without a new color. A light page keeps its primary as before.
+
+In CSS: `var(--mfb-dark-surface)`. In Tailwind: `bg-mfb-dark-surface`, `text-mfb-dark-text-muted`, `border-mfb-dark-primary-edge`. The website's dark sections keep using the color roles.
+
 ### Gradients
 
 {{GRADIENT_ITEMS}}

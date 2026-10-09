@@ -85,6 +85,29 @@ In CSS: `var(--mfb-<role>)`, for example `var(--mfb-heading-on-light)`. In Tailw
 - On orange-300: orange-200 (Brand Book `918:3614`, measured)
 - On gray-700: gray-600 (Brand Book `918:3616`, measured)
 
+### Dark theme
+
+For an interface that offers a dark mode, such as the My First Bitcoin App. The Brand Book has no dark theme and the website has only dark sections, so these colors are **derived**: each is a palette color, no color is added, and the brand deciders chose them. They follow the color roles on dark (white text, gray-400 for muted text, orange-300 for links) on a brand purple surface.
+
+| Variable | Color | Use | Why, and contrast |
+|----------|-------|-----|-------------------|
+| `--mfb-dark-surface` | purple-400 (`#2B1C58`) | Page background of a dark theme. | Chosen by the brand deciders named in CONTRIBUTING. Brand purple, like the website's dark sections and footer. White 14.9:1, gray-400 8.3:1, orange-300 6.5:1 on it. |
+| `--mfb-dark-surface-raised` | purple-300 (`#422C70`) | Cards, sheets and menus on the dark surface. | One step lighter than the surface, as the Brand Book steps shapes on a base (918:3604). White 11.5:1, gray-400 6.4:1, orange-300 5.0:1 on it. |
+| `--mfb-dark-text` | white (`#FFFFFF`) | Headings and body text on the dark surfaces. | The same color as colorRole.body-on-dark and heading-on-dark (measured). 14.9:1 on surface, 11.5:1 on surface-raised. |
+| `--mfb-dark-text-muted` | gray-400 (`#C0C0D0`) | Secondary text on the dark surfaces (captions, meta), never body copy. | Chosen by the brand deciders named in CONTRIBUTING. The same color as colorRole.muted-on-dark, a real palette color rather than white at 72%. 8.3:1 on surface, 6.4:1 on surface-raised. |
+| `--mfb-dark-line` | gray-600 (`#88889C`) | Hairlines and dividers on the dark surfaces. | A mid grey, like border-on-light on the light side. 4.3:1 on surface, 3.3:1 on surface-raised: above 3:1 on both. |
+| `--mfb-dark-link` | orange-300 (`#F7941F`) | Link text on the dark surfaces, underlined. | Chosen by the brand deciders named in CONTRIBUTING. The same color as colorRole.link-on-dark, as on the website. No brand purple is readable as text on purple-400 (purple-200 is 1.7:1), and no new color is added. 6.5:1 on surface, 5.0:1 on surface-raised. |
+| `--mfb-dark-accent` | orange-300 (`#F7941F`) | Accent fills and small emphasis (badges, the Bitcoin glyph, highlights) on the dark surfaces. | The supporting accent of the Brand Book, unchanged. Text on it is on-accent. |
+| `--mfb-dark-on-accent` | black (`#000000`) | Text on an accent fill. | The same color as colorRole.body-on-orange (measured): dark text on every orange. 9.2:1 on orange-300. |
+| `--mfb-dark-focus` | orange-300 (`#F7941F`) | Focus rings on the dark surfaces. | The link color, so focus reads as interactive. 6.5:1 on surface, 5.0:1 on surface-raised: above 3:1 for a focus indicator. |
+| `--mfb-dark-primary` | purple-200 (`#5E378E`) | Primary button fill on the dark surfaces, always with primary-edge. | The light-theme primary family, one step lighter than surface-raised. Alone it barely stands apart: 1.7:1 on surface and 1.3:1 on surface-raised, so it is never used without primary-edge. |
+| `--mfb-dark-on-primary` | white (`#FFFFFF`) | Label of a primary button. | White on purple-200 is 8.7:1. |
+| `--mfb-dark-primary-edge` | gray-400 (`#C0C0D0`) | A thin outline (1px) around a primary button on the dark surfaces. | The deciders asked for the primary button to stand apart on purple-400 inside the palette. A thin outline, rather than a lighter fill: no brand purple is lighter than purple-200, and a white fill would make the button the same color as the text. The outline is 8.3:1 on surface, 6.4:1 on surface-raised and 4.9:1 against the fill: above 3:1 everywhere (WCAG 1.4.11). |
+
+**The primary button on dark is purple-200 with a white label and a 1px `--mfb-dark-primary-edge` outline.** Purple-200 alone is 1.7:1 on the surface; the outline sets it apart (8.3:1) without a new color. A light page keeps its primary as before.
+
+In CSS: `var(--mfb-dark-surface)`. In Tailwind: `bg-mfb-dark-surface`, `text-mfb-dark-text-muted`, `border-mfb-dark-primary-edge`. The website's dark sections keep using the color roles.
+
 ### Gradients
 
 - **brand** (`linear-gradient(135deg, #2B1C58 0%, #5E378E 100%)`): Brand gradient (purple-400 → purple-200). **Deprecated:** this gradient appears nowhere in the canonical Figma file. It only exists in the Variables collection we bootstrapped ourselves. Kept for compatibility; phase out.

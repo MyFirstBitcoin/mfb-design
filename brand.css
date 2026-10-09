@@ -68,6 +68,18 @@
   --mfb-shape-on-purple-300: var(--mfb-purple-200);
   --mfb-shape-on-orange-300: var(--mfb-orange-200);
   --mfb-shape-on-gray-700: var(--mfb-gray-600);
+  --mfb-dark-surface: var(--mfb-purple-400);
+  --mfb-dark-surface-raised: var(--mfb-purple-300);
+  --mfb-dark-text: var(--mfb-white);
+  --mfb-dark-text-muted: var(--mfb-gray-400);
+  --mfb-dark-line: var(--mfb-gray-600);
+  --mfb-dark-link: var(--mfb-orange-300);
+  --mfb-dark-accent: var(--mfb-orange-300);
+  --mfb-dark-on-accent: var(--mfb-black);
+  --mfb-dark-focus: var(--mfb-orange-300);
+  --mfb-dark-primary: var(--mfb-purple-200);
+  --mfb-dark-on-primary: var(--mfb-white);
+  --mfb-dark-primary-edge: var(--mfb-gray-400);
   --mfb-size-h1-fluid: clamp(44px, 6vw, 70px);
   --mfb-size-h2-fluid: clamp(36px, 5vw, 58px);
   --mfb-size-h3-fluid: clamp(30px, 4vw, 48px);

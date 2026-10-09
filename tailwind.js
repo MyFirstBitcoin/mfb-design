@@ -70,7 +70,19 @@ export default {
         "body-on-orange": "#000000",
         "link-on-orange": "#000000",
         "highlighter-on-orange": "#FFFFFF",
-        "logo-on-orange": "#000000"
+        "logo-on-orange": "#000000",
+        "mfb-dark-surface": "#2B1C58",
+        "mfb-dark-surface-raised": "#422C70",
+        "mfb-dark-text": "#FFFFFF",
+        "mfb-dark-text-muted": "#C0C0D0",
+        "mfb-dark-line": "#88889C",
+        "mfb-dark-link": "#F7941F",
+        "mfb-dark-accent": "#F7941F",
+        "mfb-dark-on-accent": "#000000",
+        "mfb-dark-focus": "#F7941F",
+        "mfb-dark-primary": "#5E378E",
+        "mfb-dark-on-primary": "#FFFFFF",
+        "mfb-dark-primary-edge": "#C0C0D0"
       },
       "fontFamily": {
         "heading": [

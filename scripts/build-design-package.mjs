@@ -117,6 +117,7 @@ const GROUP_MAP = {
   fontSizeFluid: { tw4: '--text-',               tw3: 'fontSize',            twKey: '',     suffix: '-fluid', css: '--mfb-size-' },
   colorRole:     { tw4: '--color-',                tw3: 'colors',              twKey: '',     suffix: '',       css: '--mfb-' },
   shapeTone:     { tw4: null,                      tw3: null,                  twKey: '',     suffix: '',       css: '--mfb-shape-on-' },
+  darkTheme:     { tw4: '--color-',                tw3: 'colors',              twKey: 'mfb-dark-', suffix: '',  css: '--mfb-dark-' },
   logo:          { tw4: null,                      tw3: null,                  twKey: '',     suffix: '',       css: '--mfb-logo-' },
   spaceScale:    { tw4: null,                      tw3: null,                  twKey: '',     suffix: '',       css: '--mfb-space-' },
   space:         { tw4: '--spacing-',              tw3: 'spacing',             twKey: 'mfb-', suffix: '',       css: '--mfb-space-' },
@@ -161,7 +162,7 @@ const STATIC_KEYWORDS = new Set('full none px auto screen min max fit prose DEFA
 const TW_COLOR_FAMILIES = ('red orange amber yellow lime green emerald teal cyan sky blue indigo violet purple fuchsia pink ' +
   'rose slate gray zinc neutral stone mauve olive mist taupe').split(' ');
 
-// Value helpers for the new groups. A role or a shape tone is an alias of a palette color, and a
+// Value helpers for the new groups. A role, a shape tone or a dark theme color is an alias of a palette color, and a
 // shadow's color is too: the build resolves the alias and refuses one that is not in tokens.color.
 const gateProblems = [];
 const aliasOf = (v) => (typeof v === 'string' ? v.match(/^\{color\.([\w-]+)\}$/)?.[1] : undefined);
@@ -191,7 +192,7 @@ const remOf = (px) => {
 // (index.js: resolved values, containers in px as in tokens.json).
 const valueFor = (group, key, tok, target) => {
   const where = `${group}.${key}`;
-  if (group === 'colorRole' || group === 'shapeTone') {
+  if (group === 'colorRole' || group === 'shapeTone' || group === 'darkTheme') {
     const name = paletteRef(where, tok.$value);
     if (!name) return '';
     return target === 'css' ? `var(--mfb-${name})` : tokens.color[name].$value;
@@ -285,6 +286,7 @@ const emitGroup = (group) => {
 // One call per group, in the order they appear in the outputs.
 emitGroup('colorRole');
 emitGroup('shapeTone');
+emitGroup('darkTheme');
 emitGroup('fontSizeFluid');
 emitGroup('lineHeight');
 emitGroup('letterSpacing');
@@ -315,8 +317,10 @@ for (const [name] of tw4Lines) {
   if (STATIC_KEYWORDS.has(key) || /^\d/.test(key)) gateProblems.push(`${name}: "${key}" is a static keyword or starts with a digit`);
   if (key.includes('--')) gateProblems.push(`${name}: a sub-property (--) changes an existing utility`);
   if (/^--(breakpoint|default|animate)-/.test(name)) gateProblems.push(`${name}: breakpoints, defaults and animations are never emitted`);
-  if (ns === '--color-' && (!/-on-(light|dark|orange)$/.test(key) || TW_COLOR_FAMILIES.some((f) => key.startsWith(`${f}-`)) || tokens.color[key])) {
-    gateProblems.push(`${name}: a color role is named <element>-on-<light|dark|orange> and is not a palette or Tailwind color`);
+  // A dark theme color is mfb-dark-<use>: prefixed, so it can never equal a Tailwind or palette color.
+  const darkKey = key.startsWith('mfb-dark-') && tokens.darkTheme?.[key.slice('mfb-dark-'.length)];
+  if (ns === '--color-' && !darkKey && (!/-on-(light|dark|orange)$/.test(key) || TW_COLOR_FAMILIES.some((f) => key.startsWith(`${f}-`)) || tokens.color[key])) {
+    gateProblems.push(`${name}: a color role is named <element>-on-<light|dark|orange>, a dark theme color mfb-dark-<use>, and neither is a palette or Tailwind color`);
   }
 }
 for (const [twKey, entries] of Object.entries(tw3Extend)) {
@@ -521,10 +525,11 @@ write('supergraphics.css', sgPrelude + sgCanon);
 
 // ---- 5. index.js - programmatic access ----
 // Named exports only. colors, fontFamily, fontSize and fontWeight are unchanged; colors stays the
-// palette. Colors in colorRoles and shapeTones are resolved hex values; containers stay in px.
+// palette. Colors in colorRoles, shapeTones and darkTheme are resolved hex values; containers stay in px.
 const INDEX_EXPORTS = [
   ['colorRoles', 'colorRole'],
   ['shapeTones', 'shapeTone'],
+  ['darkTheme', 'darkTheme'],
   ['fontSizeFluid', 'fontSizeFluid'],
   ['lineHeight', 'lineHeight'],
   ['letterSpacing', 'letterSpacing'],
@@ -654,6 +659,7 @@ const readme = [
   `| What | brand.css | Tailwind 3 and 4 |`,
   `|------|-----------|------------------|`,
   `| Color roles | ${code('--mfb-<element>-on-<surface>')}: ${keysOf('colorRole').map((k) => code(k)).join(', ')} | ${code('text-heading-on-light')}, ${code('decoration-link-underline-on-light')}, ${code('border-border-on-light')} ... |`,
+  `| Dark theme (derived from the palette, for an interface with a dark mode) | ${keysOf('darkTheme').map((k) => code(`--mfb-dark-${k}`)).join(', ')} | ${code('bg-mfb-dark-surface')}, ${code('text-mfb-dark-text-muted')}, ${code('border-mfb-dark-primary-edge')} ... |`,
   `| Line height per level | ${code('--mfb-leading-<level>')}, and ${code('--mfb-leading-body-long')} for long reading (declared from the website, under review) | ${code('leading-<level>')}, for example ${code('leading-h1')}; ${code('leading-body-long')} |`,
   `| Letter spacing per level | ${code('--mfb-tracking-<level>')} | ${code('tracking-<level>')} |`,
   `| Fluid sizes for web pages | ${code('--mfb-size-<level>-fluid')} (${keysOf('fontSizeFluid').join(', ')}) | ${code('text-<level>-fluid')} |`,
