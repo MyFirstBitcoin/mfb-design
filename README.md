@@ -5,7 +5,7 @@ The My First Bitcoin brand as code: a Tailwind preset, CSS variables, the superg
 ## Install (git dependency)
 
 ```json
-"dependencies": { "@myfirstbitcoin/design": "github:MyFirstBitcoin/mfb-design#v1.4.0" }
+"dependencies": { "@myfirstbitcoin/design": "github:MyFirstBitcoin/mfb-design#v1.5.0" }
 ```
 
 Pin a tag. A new release reaches your project only when you raise the pin (and refresh the lockfile).
@@ -84,6 +84,7 @@ Where the Brand Book defines a value, the token takes it. Where the book is sile
 | What | brand.css | Tailwind 3 and 4 |
 |------|-----------|------------------|
 | Color roles | `--mfb-<element>-on-<surface>`: `heading-on-light`, `body-on-light`, `muted-on-light`, `link-on-light`, `link-underline-on-light`, `border-on-light`, `highlighter-on-light`, `logo-on-light`, `heading-on-dark`, `body-on-dark`, `muted-on-dark`, `link-on-dark`, `highlighter-on-dark`, `logo-on-dark`, `heading-on-orange`, `body-on-orange`, `link-on-orange`, `highlighter-on-orange`, `logo-on-orange` | `text-heading-on-light`, `decoration-link-underline-on-light`, `border-border-on-light` ... |
+| Dark theme (derived from the palette, for an interface with a dark mode) | `--mfb-dark-surface`, `--mfb-dark-surface-raised`, `--mfb-dark-text`, `--mfb-dark-text-muted`, `--mfb-dark-line`, `--mfb-dark-link`, `--mfb-dark-accent`, `--mfb-dark-on-accent`, `--mfb-dark-focus`, `--mfb-dark-primary`, `--mfb-dark-on-primary`, `--mfb-dark-primary-edge` | `bg-mfb-dark-surface`, `text-mfb-dark-text-muted`, `border-mfb-dark-primary-edge` ... |
 | Line height per level | `--mfb-leading-<level>`, and `--mfb-leading-body-long` for long reading (declared from the website, under review) | `leading-<level>`, for example `leading-h1`; `leading-body-long` |
 | Letter spacing per level | `--mfb-tracking-<level>` | `tracking-<level>` |
 | Fluid sizes for web pages | `--mfb-size-<level>-fluid` (h1, h2, h3, h4, h5, h6, quote, label) | `text-<level>-fluid` |
@@ -105,7 +106,7 @@ Where the Brand Book defines a value, the token takes it. Where the book is sile
 - **New `brand.css` variables reference the palette with `var()`** and add no hex: roles are `var(--mfb-black)` and the like, shadows `color-mix(in srgb, var(--mfb-purple-400) 25%, transparent)`. `theme.css` and `tailwind.js` carry the same colors as hex, so Tailwind's opacity modifiers work.
 - **Tailwind 4 emits a theme variable only when something uses it.** To read `var(--mfb-radius-md)` or another new variable in your own CSS, import `brand.css` as well, or use the utility.
 - **Shadows in Tailwind 4: prefer the `shadow-mfb-*` utilities.** Tailwind compiles them to a hex color with alpha. A `var(--mfb-shadow-*)` from `brand.css` goes through Tailwind 4's CSS compiler, which gives it a fallback without `color-mix()` for browsers that lack it (Chrome before 111, Safari before 16.2), and that fallback draws the shadow fully opaque.
-- **index.js** exports `colorRoles`, `shapeTones`, `fontSizeFluid`, `lineHeight`, `letterSpacing`, `logo`, `spacing`, `space`, `radius`, `shadow`, `easing`, `duration`, `container`, `zIndex`, `mediaRatio`, `ui` next to the existing `colors`, `fontFamily`, `fontSize` and `fontWeight`.
+- **index.js** exports `colorRoles`, `shapeTones`, `darkTheme`, `fontSizeFluid`, `lineHeight`, `letterSpacing`, `logo`, `spacing`, `space`, `radius`, `shadow`, `easing`, `duration`, `container`, `zIndex`, `mediaRatio`, `ui` next to the existing `colors`, `fontFamily`, `fontSize` and `fontWeight`.
 
 ## Brand check
 

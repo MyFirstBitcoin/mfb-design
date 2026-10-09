@@ -89,6 +89,20 @@ export const shapeTones = {
   "orange-300": "#FBB040",
   "gray-700": "#88889C"
 };
+export const darkTheme = {
+  "surface": "#2B1C58",
+  "surface-raised": "#422C70",
+  "text": "#FFFFFF",
+  "text-muted": "#C0C0D0",
+  "line": "#88889C",
+  "link": "#F7941F",
+  "accent": "#F7941F",
+  "on-accent": "#000000",
+  "focus": "#F7941F",
+  "primary": "#5E378E",
+  "on-primary": "#FFFFFF",
+  "primary-edge": "#C0C0D0"
+};
 export const fontSizeFluid = {
   "h1": "clamp(44px, 6vw, 70px)",
   "h2": "clamp(36px, 5vw, 58px)",

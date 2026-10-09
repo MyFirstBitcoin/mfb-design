@@ -115,6 +115,7 @@ const sourceOf = (group, name) => {
     return `website \`${site[2]}\`${site[3] ? ` (${site[3]})` : ''}`;
   }
   if (m.source === 'declared') return "this package's recommendation";
+  if (m.sourceKind === 'derived') return 'derived from the palette';
   return `\`${m.source}\``;
 };
 const paletteName = (v) => (typeof v === 'string' ? v.match(/^\{color\.([\w-]+)\}$/)?.[1] : undefined);
@@ -174,6 +175,8 @@ values.BODY_LONG_SRC = sourceOf('lineHeight', 'body-long');
 
 values.COLOR_ROLE_ROWS = rows('colorRole', true, (name, tok) =>
   `| \`${name}\` | ${colorOf(`colorRole.${name}`, tok.$value)} | ${cell(tok.$description)} | ${sourceOf('colorRole', name)} |`);
+values.DARK_THEME_ROWS = rows('darkTheme', true, (name, tok) =>
+  `| \`--mfb-dark-${name}\` | ${colorOf(`darkTheme.${name}`, tok.$value)} | ${cell(tok.$description)} | ${cell(tok.$extensions?.mfb?.note)} |`);
 values.SHAPE_TONE_ITEMS = rows('shapeTone', true, (name, tok) =>
   `- On ${name}: ${colorOf(`shapeTone.${name}`, tok.$value).replace(/ \(.*\)$/, '')} (${sourceOf('shapeTone', name)})`);
 

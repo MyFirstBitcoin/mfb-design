@@ -34,8 +34,11 @@ Every token carries `$extensions.mfb.sourceKind`, defined in `$verification` at 
 the Brand Book in words), `measured` (read off the Brand Book's vector geometry or a node's
 rendered fill, with the node ids in the note), `declared` (not in the Brand Book: a website value
 with its site source, or a value this package recommends, with `"source": "declared"` and the
-reason in the note), or `unverified`. Color roles and shape tones are aliases of palette colors
-(`{color.black}`), and the build refuses one that is not.
+reason in the note), `derived` (a theme built only from palette colors, adding no color, chosen by
+the deciders, with the reason and the contrasts in the note: the dark theme), or `unverified`.
+Color roles, shape tones and the dark theme are aliases of palette colors (`{color.black}`), and
+the build refuses one that is not. The Figma check reads the palette, not the aliases, so a
+derived token adds nothing it must find in Figma.
 
 Propose every change by pull request. The conventions in [AGENTS.md](AGENTS.md) apply to all
 contributions, by people and AI assistants alike.
